@@ -53,7 +53,7 @@ function buildPrompt(article: NewsArticle, date: string): string {
 - **content**: 主要内容（300-500字，深度解读，提及具体地名如法拉盛、长岛、皇后区等增加本地化）
 - **cta**: 行动号召（1-2句话，引导互动）
 - **platform**: 适合的平台（"小红书"、"视频号"、"YouTube" 或 "通用"，4条文案至少覆盖3个不同平台）
-- **duration**: 建议时长（"30秒"、"60秒" 或 "90秒"）
+- **duration**: 固定为 "90秒"
 - **tags**: 5-7个相关话题标签
 
 请严格按照以下 JSON 格式返回（不要添加 markdown 代码块标记）：
@@ -62,7 +62,7 @@ function buildPrompt(article: NewsArticle, date: string): string {
     "style": "professional",
     "styleName": "专业分析型",
     "platform": "通用",
-    "duration": "60秒",
+    "duration": "90秒",
     "hook": "...",
     "content": "...",
     "cta": "...",
@@ -72,7 +72,7 @@ function buildPrompt(article: NewsArticle, date: string): string {
     "style": "casual",
     "styleName": "轻松聊天型",
     "platform": "小红书",
-    "duration": "60秒",
+    "duration": "90秒",
     "hook": "...",
     "content": "...",
     "cta": "...",
@@ -92,7 +92,7 @@ function buildPrompt(article: NewsArticle, date: string): string {
     "style": "mythbuster",
     "styleName": "犀利避坑/揭秘型",
     "platform": "视频号",
-    "duration": "60秒",
+    "duration": "90秒",
     "hook": "...",
     "content": "...",
     "cta": "...",
