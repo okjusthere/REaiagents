@@ -1,16 +1,9 @@
-import { AzureOpenAI } from 'openai';
+import axios from 'axios';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { retry } from '../utils/retry.js';
-import { getStyle, type StyleConfig } from '../config/styles.js';
+import { getStyle } from '../config/styles.js';
 import type { NewsArticle } from './news-agent.js';
-
-// ── Azure OpenAI Client ─────────────────────────────────────
-const client = new AzureOpenAI({
-    endpoint: config.AZURE_OPENAI_ENDPOINT,
-    apiKey: config.AZURE_OPENAI_API_KEY,
-    apiVersion: config.AZURE_OPENAI_API_VERSION,
-});
 
 // ── Build prompt from news articles ─────────────────────────
 function buildUserPrompt(articles: NewsArticle[], date: string): string {
@@ -39,6 +32,83 @@ function buildUserPrompt(articles: NewsArticle[], date: string): string {
 ${newsList}`;
 }
 
+// ── Call Azure OpenAI Responses API ─────────────────────────
+async function callAzureOpenAI(systemPrompt: string, userPrompt: string): Promise<string> {
+    // Build the endpoint URL — support both full URL and base endpoint
+    let url = config.AZURE_OPENAI_ENDPOINT;
+
+    // If the endpoint already contains the full path (e.g. /openai/responses), use it directly
+    if (!url.includes('/openai/')) {
+        // Build standard chat completions URL
+        url = `${url.replace(/\/$/, '')}/openai/deployments/${config.AZURE_OPENAI_DEPLOYMENT}/chat/completions?api-version=${config.AZURE_OPENAI_API_VERSION}`;
+    }
+
+    // Detect which API format to use based on the URL
+    const isResponsesAPI = url.includes('/openai/responses');
+
+    if (isResponsesAPI) {
+        // Azure OpenAI Responses API format
+        const response = await axios.post(
+            url,
+            {
+                model: config.AZURE_OPENAI_DEPLOYMENT,
+                input: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt },
+                ],
+                temperature: 0.8,
+                max_output_tokens: 3000,
+            },
+            {
+                headers: {
+                    'api-key': config.AZURE_OPENAI_API_KEY,
+                    'Content-Type': 'application/json',
+                },
+                timeout: 120000,
+            }
+        );
+
+        // Responses API returns output array
+        const output = response.data?.output;
+        if (!output || !Array.isArray(output)) {
+            throw new Error('Empty output from Azure OpenAI Responses API');
+        }
+        // Find the message output
+        const messageOutput = output.find((o: any) => o.type === 'message');
+        const content = messageOutput?.content?.[0]?.text;
+        if (!content) {
+            throw new Error('No text content in Azure OpenAI response');
+        }
+        return content;
+    } else {
+        // Standard Chat Completions API format
+        const response = await axios.post(
+            url,
+            {
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt },
+                ],
+                temperature: 0.8,
+                max_tokens: 3000,
+            },
+            {
+                headers: {
+                    'api-key': config.AZURE_OPENAI_API_KEY,
+                    'Content-Type': 'application/json',
+                },
+                timeout: 120000,
+            }
+        );
+
+        const content = response.data?.choices?.[0]?.message?.content;
+        if (!content) {
+            throw new Error('Empty response from Azure OpenAI');
+        }
+        return content;
+    }
+}
+
 // ── Generate script for one style ───────────────────────────
 export async function generateScript(
     articles: NewsArticle[],
@@ -56,23 +126,7 @@ export async function generateScript(
     logger.info(`✍️  Generating script in style: ${style.name}...`);
 
     const result = await retry(
-        async () => {
-            const response = await client.chat.completions.create({
-                model: config.AZURE_OPENAI_DEPLOYMENT,
-                messages: [
-                    { role: 'system', content: style.systemPrompt },
-                    { role: 'user', content: buildUserPrompt(articles, today) },
-                ],
-                temperature: 0.8,
-                max_tokens: 3000,
-            });
-
-            const content = response.choices[0]?.message?.content;
-            if (!content) {
-                throw new Error('Empty response from Azure OpenAI');
-            }
-            return content;
-        },
+        async () => callAzureOpenAI(style.systemPrompt, buildUserPrompt(articles, today)),
         { retries: 3, delayMs: 2000, label: `Script generation (${style.name})` }
     );
 
@@ -95,7 +149,6 @@ export async function generateAllScripts(
 
     logger.info(`📝 Generating ${uniqueStyles.length} script style(s)...`);
 
-    // Generate scripts sequentially to avoid rate limits
     for (const styleId of uniqueStyles) {
         const result = await generateScript(articles, styleId);
         results.set(result.styleId, {
