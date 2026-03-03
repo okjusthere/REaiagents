@@ -58,8 +58,6 @@ async function callAzureOpenAI(systemPrompt: string, userPrompt: string): Promis
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: userPrompt },
                     ],
-                    temperature: 0.8,
-                    max_output_tokens: 3000,
                 },
                 {
                     headers: {
