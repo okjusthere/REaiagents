@@ -10,9 +10,6 @@ const envSchema = z.object({
     AZURE_OPENAI_DEPLOYMENT: z.string().default('gpt-5.2-chat'),
     AZURE_OPENAI_API_VERSION: z.string().default('2025-01-01-preview'),
 
-    // Bing News Search
-    BING_NEWS_API_KEY: z.string().min(1),
-
     // Gmail SMTP
     GMAIL_USER: z.string().email(),
     GMAIL_APP_PASSWORD: z.string().min(1),
