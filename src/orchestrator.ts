@@ -1,7 +1,7 @@
 import { searchNews } from './agents/news-agent.js';
 import { generateAllScripts } from './agents/script-writer-agent.js';
 import { sendBatchEmails } from './agents/email-agent.js';
-import clients from './config/clients.js';
+import { getActiveClients } from './store/client-store.js';
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
 
@@ -13,6 +13,16 @@ export async function runPipeline(dryRun = false): Promise<void> {
     logger.info('🚀 ═══════════════════════════════════════════');
 
     try {
+        // Load active clients from JSON store
+        const clients = getActiveClients();
+
+        if (clients.length === 0) {
+            logger.warn('⚠️  No active clients found. Add clients via admin dashboard.');
+            return;
+        }
+
+        logger.info(`👥 Active clients: ${clients.length}`);
+
         // ── Step 1: Search News ──────────────────────────────
         logger.info('\n📰 Step 1/3: Searching for NY real estate news...');
         const articles = await searchNews();

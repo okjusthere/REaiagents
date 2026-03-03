@@ -1,8 +1,9 @@
 import { config } from './config/index.js';
 import { runPipeline } from './orchestrator.js';
 import { startScheduler } from './scheduler.js';
+import { startWebServer } from './web/server.js';
 import { logger } from './utils/logger.js';
-import clients from './config/clients.js';
+import { getActiveClients, getAllClients } from './store/client-store.js';
 import { getAllStyleIds } from './config/styles.js';
 
 // ── Parse CLI flags ─────────────────────────────────────────
@@ -17,11 +18,13 @@ console.log(`
 ╚══════════════════════════════════════════════════╝
 `);
 
+const allClients = getAllClients();
+
 logger.info('Configuration:');
 logger.info(`  Azure OpenAI: ${config.AZURE_OPENAI_ENDPOINT}`);
 logger.info(`  Model: ${config.AZURE_OPENAI_DEPLOYMENT}`);
 logger.info(`  Email from: ${config.GMAIL_USER}`);
-logger.info(`  Clients: ${clients.length}`);
+logger.info(`  Clients: ${allClients.length} total, ${getActiveClients().length} active`);
 logger.info(`  Styles: ${getAllStyleIds().join(', ')}`);
 logger.info(`  Schedule: ${config.CRON_SCHEDULE} (${config.CRON_TIMEZONE})`);
 logger.info(`  Dry run: ${dryRun}`);
@@ -42,8 +45,13 @@ if (immediate) {
             process.exit(1);
         });
 } else {
+    // Start web admin dashboard
+    const port = parseInt(process.env.PORT || '3000', 10);
+    startWebServer(port);
+
     // Start the cron scheduler
     startScheduler();
+
     logger.info('\n🟢 System is running. Waiting for scheduled execution...');
     logger.info('   Press Ctrl+C to stop.\n');
 }

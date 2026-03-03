@@ -11,13 +11,19 @@
     "send-now": "tsx src/index.ts --now",
     "dry-run": "tsx src/index.ts --now --dry-run"
   },
-  "keywords": ["real-estate", "ai", "newsletter", "agents"],
+  "keywords": [
+    "real-estate",
+    "ai",
+    "newsletter",
+    "agents"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@azure/openai": "^2.0.0",
     "axios": "^1.7.0",
     "dotenv": "^16.4.0",
+    "express": "^5.2.1",
     "node-cron": "^3.0.0",
     "nodemailer": "^6.9.0",
     "openai": "^4.0.0",
@@ -25,6 +31,7 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^22.0.0",
     "@types/node-cron": "^3.0.0",
     "@types/nodemailer": "^6.4.0",
