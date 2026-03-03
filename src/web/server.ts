@@ -17,8 +17,8 @@ export function startWebServer(port: number = 3000): void {
     // API routes
     app.use('/api', apiRouter);
 
-    // SPA fallback
-    app.get('*', (_req, res) => {
+    // SPA fallback — serve index.html for non-API routes
+    app.use((_req, res) => {
         res.sendFile(path.join(__dirname, '../../public/index.html'));
     });
 
