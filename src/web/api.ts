@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { getAllClients, addClient, updateClient, deleteClient } from '../store/client-store.js';
+import { getDailyOutput, listOutputDates } from '../store/output-store.js';
 import { runPipeline } from '../orchestrator.js';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
@@ -9,8 +10,7 @@ const router = Router();
 // ── GET /api/clients ────────────────────────────────────────
 router.get('/clients', (_req: Request, res: Response) => {
     try {
-        const clients = getAllClients();
-        res.json({ success: true, data: clients });
+        res.json({ success: true, data: getAllClients() });
     } catch (error) {
         res.status(500).json({ success: false, error: (error as Error).message });
     }
@@ -19,12 +19,12 @@ router.get('/clients', (_req: Request, res: Response) => {
 // ── POST /api/clients ───────────────────────────────────────
 router.post('/clients', (req: Request, res: Response) => {
     try {
-        const { name, email, style, active } = req.body;
-        if (!name || !email || !style) {
-            res.status(400).json({ success: false, error: 'name, email, style are required' });
+        const { name, email } = req.body;
+        if (!email) {
+            res.status(400).json({ success: false, error: 'email is required' });
             return;
         }
-        const client = addClient({ name, email, style, active: active !== false });
+        const client = addClient({ name, email });
         res.status(201).json({ success: true, data: client });
     } catch (error) {
         res.status(400).json({ success: false, error: (error as Error).message });
@@ -64,7 +64,6 @@ router.post('/send-now', async (_req: Request, res: Response) => {
     try {
         logger.info('🚀 Manual pipeline trigger from admin dashboard');
         res.json({ success: true, message: 'Pipeline started' });
-        // Run async, don't await in request handler
         runPipeline(config.DRY_RUN)
             .catch((err) => {
                 logger.error('💥 Pipeline failed', { error: err instanceof Error ? err.message : String(err) });
@@ -90,17 +89,27 @@ router.get('/status', (_req: Request, res: Response) => {
     });
 });
 
-// ── GET /api/styles ─────────────────────────────────────────
-router.get('/styles', (_req: Request, res: Response) => {
-    res.json({
-        success: true,
-        data: [
-            { id: 'professional', name: '专业分析型', description: '正式、数据驱动的市场分析' },
-            { id: 'casual', name: '轻松聊天型', description: '轻松对话式社交媒体风格' },
-            { id: 'investor', name: '投资顾问型', description: '投资者视角的专业分析' },
-            { id: 'mythbuster', name: '犀利避坑/揭秘型', description: '犀利直接的避坑指南' },
-        ],
-    });
+// ── GET /api/outputs ────────────────────────────────────────
+router.get('/outputs', (_req: Request, res: Response) => {
+    try {
+        res.json({ success: true, data: listOutputDates() });
+    } catch (error) {
+        res.status(500).json({ success: false, error: (error as Error).message });
+    }
+});
+
+// ── GET /api/outputs/:date ──────────────────────────────────
+router.get('/outputs/:date', (req: Request, res: Response) => {
+    try {
+        const output = getDailyOutput(req.params.date as string);
+        if (!output) {
+            res.status(404).json({ success: false, error: 'No output found for this date' });
+            return;
+        }
+        res.json({ success: true, data: output });
+    } catch (error) {
+        res.status(500).json({ success: false, error: (error as Error).message });
+    }
 });
 
 export default router;

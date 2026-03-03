@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 今日视频文案 — RE AI Agents</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #7c3aed 100%);
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header .meta {
+            color: #93c5fd;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .header .stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        .header .stat {
+            text-align: center;
+        }
+
+        .header .stat-val {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .header .stat-lbl {
+            font-size: 11px;
+            color: #93c5fd;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        /* Style Filter Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #94a3b8;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            border-color: #60a5fa;
+            color: #e2e8f0;
+        }
+
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        /* Article Section */
+        .article-section {
+            margin-bottom: 32px;
+        }
+
+        .article-header {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px 12px 0 0;
+            padding: 16px 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .article-num {
+            background: #3b82f6;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .article-info {
+            flex: 1;
+        }
+
+        .article-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f1f5f9;
+            line-height: 1.4;
+        }
+
+        .article-source {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .article-source a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        /* Script Card */
+        .script-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-top: none;
+            padding: 20px;
+        }
+
+        .script-card:last-child {
+            border-radius: 0 0 12px 12px;
+        }
+
+        .script-card.hidden {
+            display: none;
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .card-badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-professional {
+            background: #1d4ed820;
+            color: #60a5fa;
+            border: 1px solid #1d4ed840;
+        }
+
+        .badge-casual {
+            background: #a855f720;
+            color: #c084fc;
+            border: 1px solid #a855f740;
+        }
+
+        .badge-investor {
+            background: #f59e0b20;
+            color: #fbbf24;
+            border: 1px solid #f59e0b40;
+        }
+
+        .badge-mythbuster {
+            background: #ef444420;
+            color: #f87171;
+            border: 1px solid #ef444440;
+        }
+
+        .badge-platform {
+            background: #06b6d420;
+            color: #67e8f9;
+            border: 1px solid #06b6d440;
+        }
+
+        .badge-duration {
+            background: #10b98120;
+            color: #34d399;
+            border: 1px solid #10b98140;
+        }
+
+        .section-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .hook {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fbbf24;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #fbbf2408;
+            border-left: 3px solid #fbbf24;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .content-text {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .cta-text {
+            font-size: 14px;
+            color: #34d399;
+            font-weight: 500;
+            line-height: 1.5;
+            padding: 10px 12px;
+            background: #34d39908;
+            border-left: 3px solid #34d399;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 14px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .tag {
+            padding: 2px 8px;
+            background: #334155;
+            color: #94a3b8;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        /* Action Buttons */
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #94a3b8;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: #334155;
+            color: white;
+        }
+
+        .btn.copied {
+            background: #059669;
+            color: white;
+            border-color: #059669;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 200;
+            display: none;
+            background: #065f46;
+            color: #34d399;
+            border: 1px solid #34d39940;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, 20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: #64748b;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .tabs {
+                gap: 6px;
+            }
+
+            .tab {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .container {
+                padding: 16px 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🎬 房地产经纪人每日视频文案</h1>
+        <div class="meta" id="dateMeta">加载中...</div>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-val" id="articleCount">-</div>
+                <div class="stat-lbl">新闻</div>
+            </div>
+            <div class="stat">
+                <div class="stat-val" id="scriptCount">-</div>
+                <div class="stat-lbl">文案</div>
+            </div>
+            <div class="stat">
+                <div class="stat-val">4</div>
+                <div class="stat-lbl">风格</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Style filter tabs -->
+        <div class="tabs">
+            <div class="tab active" data-style="all">全部</div>
+            <div class="tab" data-style="professional">📊 专业分析型</div>
+            <div class="tab" data-style="casual">😄 轻松聊天型</div>
+            <div class="tab" data-style="investor">💰 投资顾问型</div>
+            <div class="tab" data-style="mythbuster">🔍 犀利避坑型</div>
+        </div>
+
+        <div id="content"></div>
+    </div>
+
+    <div class="toast" id="toast">✅ 已复制到剪贴板</div>
+
+    <script>
+        const API = '/api';
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 2000);
+        }
+
+        function getStyleBadgeClass(style) {
+            return `badge-${style}`;
+        }
+
+        function getStyleName(style) {
+            const map = { professional: '专业分析型', casual: '轻松聊天型', investor: '投资顾问型', mythbuster: '犀利避坑型' };
+            return map[style] || style;
+        }
+
+        function buildScriptText(article, script) {
+            return `🎬 ${article.title}\n\n🎯 开场钩子\n${script.hook}\n\n📝 主要内容\n${script.content}\n\n💬 行动号召\n${script.cta}\n\n📱 ${script.platform} ⏱️ ${script.duration}\n🏷️ ${script.tags.join(', ')}`;
+        }
+
+        function copyScript(articleIdx, scriptIdx) {
+            const data = window._data;
+            const article = data.articles[articleIdx];
+            const script = article.scripts[scriptIdx];
+            const text = buildScriptText(article, script);
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✅ 文案已复制到剪贴板');
+                const btn = document.getElementById(`copy-${articleIdx}-${scriptIdx}`);
+                if (btn) { btn.textContent = '✅ 已复制'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = '📋 复制文案'; btn.classList.remove('copied'); }, 2000); }
+            });
+        }
+
+        function shareScript(articleIdx, scriptIdx) {
+            const data = window._data;
+            const article = data.articles[articleIdx];
+            const script = article.scripts[scriptIdx];
+            const text = buildScriptText(article, script);
+
+            if (navigator.share) {
+                navigator.share({ title: article.title, text }).catch(() => { });
+            } else {
+                navigator.clipboard.writeText(text).then(() => showToast('✅ 文案已复制，可粘贴分享'));
+            }
+        }
+
+        function filterStyle(style) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.style === style));
+            document.querySelectorAll('.script-card').forEach(card => {
+                if (style === 'all') { card.classList.remove('hidden'); }
+                else { card.classList.toggle('hidden', card.dataset.style !== style); }
+            });
+        }
+
+        async function loadData() {
+            const params = new URLSearchParams(window.location.search);
+            const date = params.get('date') || new Date().toISOString().split('T')[0];
+
+            try {
+                const res = await fetch(`${API}/outputs/${date}`);
+                const result = await res.json();
+                if (!result.success || !result.data) {
+                    document.getElementById('content').innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>暂无 ${date} 的文案数据</p><p style="margin-top:8px;font-size:13px;">文案将在每日推送后生成</p></div>`;
+                    return;
+                }
+
+                const data = result.data;
+                window._data = data;
+
+                document.getElementById('dateMeta').textContent = `📅 ${date} · 为您精选的视频文案和行业新闻`;
+                document.getElementById('articleCount').textContent = data.articleCount;
+                document.getElementById('scriptCount').textContent = data.articles.reduce((s, a) => s + a.scripts.length, 0);
+                document.title = `🎬 ${date} 视频文案 — RE AI Agents`;
+
+                let html = '';
+                data.articles.forEach((article, ai) => {
+                    html += `<div class="article-section">`;
+                    html += `<div class="article-header">
+        <div class="article-num">${ai + 1}</div>
+        <div class="article-info">
+          <div class="article-title">${article.title}</div>
+          <div class="article-source">${article.source} · <a href="${article.url}" target="_blank">查看原文 ↗</a></div>
+        </div>
+      </div>`;
+
+                    article.scripts.forEach((script, si) => {
+                        html += `<div class="script-card" data-style="${script.style}">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="badge ${getStyleBadgeClass(script.style)}">${script.styleName || getStyleName(script.style)}</span>
+              <span class="badge badge-platform">📱 ${script.platform}</span>
+              <span class="badge badge-duration">⏱️ ${script.duration}</span>
+            </div>
+          </div>
+          <div class="section-label">🎯 开场钩子</div>
+          <div class="hook">${script.hook}</div>
+          <div class="section-label">📝 主要内容</div>
+          <div class="content-text">${script.content}</div>
+          <div class="section-label">💬 行动号召</div>
+          <div class="cta-text">${script.cta}</div>
+          <div class="tags">${script.tags.map(t => `<span class="tag">#${t}</span>`).join('')}</div>
+          <div class="card-actions">
+            <button class="btn" id="copy-${ai}-${si}" onclick="copyScript(${ai},${si})">📋 复制文案</button>
+            <button class="btn" onclick="shareScript(${ai},${si})">🔗 分享</button>
+          </div>
+        </div>`;
+                    });
+
+                    html += `</div>`;
+                });
+
+                document.getElementById('content').innerHTML = html;
+            } catch (e) {
+                document.getElementById('content').innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>加载失败: ${e.message}</p></div>`;
+            }
+        }
+
+        // Tab click
+        document.querySelector('.tabs').addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab')) filterStyle(e.target.dataset.style);
+        });
+
+        loadData();
+    </script>
+</body>
+
+</html>

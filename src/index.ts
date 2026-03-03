@@ -4,7 +4,6 @@ import { startScheduler } from './scheduler.js';
 import { startWebServer } from './web/server.js';
 import { logger } from './utils/logger.js';
 import { getActiveClients, getAllClients } from './store/client-store.js';
-import { getAllStyleIds } from './config/styles.js';
 
 // ── Global error handlers (prevent process crash) ───────────
 process.on('unhandledRejection', (reason) => {
@@ -24,7 +23,7 @@ const dryRun = args.includes('--dry-run') || config.DRY_RUN;
 // ── Banner ──────────────────────────────────────────────────
 console.log(`
 ╔══════════════════════════════════════════════════╗
-║    🏠  RE AI Agents — 纽约地产AI口播稿推送系统    ║
+║    🎬  RE AI Agents — 纽约地产视频文案推送系统    ║
 ╚══════════════════════════════════════════════════╝
 `);
 
@@ -35,7 +34,7 @@ logger.info(`  Azure OpenAI: ${config.AZURE_OPENAI_ENDPOINT}`);
 logger.info(`  Model: ${config.AZURE_OPENAI_DEPLOYMENT}`);
 logger.info(`  Email from: ${config.GMAIL_USER}`);
 logger.info(`  Clients: ${allClients.length} total, ${getActiveClients().length} active`);
-logger.info(`  Styles: ${getAllStyleIds().join(', ')}`);
+logger.info(`  Mode: per-article × 4 styles (专业/轻松/投资/避坑)`);
 logger.info(`  Schedule: ${config.CRON_SCHEDULE} (${config.CRON_TIMEZONE})`);
 logger.info(`  Dry run: ${dryRun}`);
 

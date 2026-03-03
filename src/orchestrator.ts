@@ -1,7 +1,8 @@
 import { searchNews } from './agents/news-agent.js';
-import { generateAllScripts } from './agents/script-writer-agent.js';
+import { generateDailyScripts } from './agents/script-writer-agent.js';
 import { sendBatchEmails } from './agents/email-agent.js';
 import { getActiveClients } from './store/client-store.js';
+import { saveDailyOutput } from './store/output-store.js';
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
 
@@ -13,59 +14,48 @@ export async function runPipeline(dryRun = false): Promise<void> {
     logger.info('🚀 ═══════════════════════════════════════════');
 
     try {
-        // Load active clients from JSON store
         const clients = getActiveClients();
-
         if (clients.length === 0) {
             logger.warn('⚠️  No active clients found. Add clients via admin dashboard.');
             return;
         }
-
         logger.info(`👥 Active clients: ${clients.length}`);
 
         // ── Step 1: Search News ──────────────────────────────
         logger.info('\n📰 Step 1/3: Searching for NY real estate news...');
         const articles = await searchNews();
-
         if (articles.length === 0) {
             logger.warn('⚠️  No news articles found. Skipping pipeline.');
             return;
         }
+        logger.info(`📰 Found ${articles.length} articles`);
 
-        logger.info(`📰 Found ${articles.length} articles:`);
-        articles.forEach((a, i) => {
-            logger.info(`   ${i + 1}. [${a.source}] ${a.title}`);
-        });
+        // ── Step 2: Generate scripts (per-article × 4 styles) ─
+        logger.info('\n✍️  Step 2/3: Generating scripts (per-article × 4 styles)...');
+        const dailyOutput = await generateDailyScripts(articles, 7);
 
-        // ── Step 2: Generate Scripts ─────────────────────────
-        logger.info('\n✍️  Step 2/3: Generating speaking scripts...');
-        const requiredStyles = [...new Set(clients.map(c => c.style))];
-        const scripts = await generateAllScripts(articles, requiredStyles);
+        // Save to volume
+        const outputDate = saveDailyOutput(dailyOutput);
+
+        // Build viewer URL
+        const baseUrl = process.env.RAILWAY_PUBLIC_DOMAIN
+            ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+            : `http://localhost:${process.env.PORT || 3000}`;
+        const viewerUrl = `${baseUrl}/view.html?date=${outputDate}`;
 
         // ── Step 3: Send Emails ──────────────────────────────
         logger.info('\n📧 Step 3/3: Sending emails to clients...');
-        const emailRecipients = clients.map(client => {
-            const scriptData = scripts.get(client.style);
-            if (!scriptData) {
-                throw new Error(`No script generated for style: ${client.style}`);
-            }
-            return {
-                name: client.name,
-                email: client.email,
-                styleName: scriptData.styleName,
-                script: scriptData.script,
-            };
-        });
-
-        const result = await sendBatchEmails(emailRecipients, articles, dryRun);
+        const result = await sendBatchEmails(clients, dailyOutput, viewerUrl, dryRun);
 
         // ── Summary ──────────────────────────────────────────
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        const totalScripts = dailyOutput.articles.reduce((s, a) => s + a.scripts.length, 0);
         logger.info('\n🎉 ═══════════════════════════════════════════');
         logger.info(`🎉 Pipeline completed in ${elapsed}s`);
-        logger.info(`🎉 Articles: ${articles.length}`);
-        logger.info(`🎉 Scripts: ${scripts.size} styles`);
+        logger.info(`🎉 Articles: ${dailyOutput.articleCount}`);
+        logger.info(`🎉 Scripts: ${totalScripts} (${dailyOutput.articleCount} × 4 styles)`);
         logger.info(`🎉 Emails: ${result.sent} sent, ${result.failed} failed`);
+        logger.info(`🎉 Viewer: ${viewerUrl}`);
         logger.info('🎉 ═══════════════════════════════════════════');
     } catch (error) {
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);

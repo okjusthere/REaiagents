@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RE AI Agents · 管理后台</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
       background: #0f172a;
@@ -13,7 +19,6 @@
       min-height: 100vh;
     }
 
-    /* Header */
     .header {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       border-bottom: 1px solid #1e293b;
@@ -21,25 +26,63 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
     }
-    .header h1 { font-size: 20px; font-weight: 700; }
-    .header h1 span { color: #60a5fa; }
-    .header-actions { display: flex; gap: 12px; align-items: center; }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .header h1 span {
+      color: #60a5fa;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
     .status-badge {
       padding: 6px 14px;
       border-radius: 20px;
       font-size: 13px;
       font-weight: 500;
     }
-    .status-badge.online { background: #065f4620; color: #34d399; border: 1px solid #34d39940; }
-    .status-badge.running { background: #f59e0b20; color: #fbbf24; border: 1px solid #fbbf2440; animation: pulse 1.5s infinite; }
 
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .status-badge.online {
+      background: #065f4620;
+      color: #34d399;
+      border: 1px solid #34d39940;
+    }
 
-    /* Container */
-    .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+    .status-badge.running {
+      background: #f59e0b20;
+      color: #fbbf24;
+      border: 1px solid #fbbf2440;
+      animation: pulse 1.5s infinite;
+    }
 
-    /* Cards */
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.6;
+      }
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
     .card {
       background: #1e293b;
       border: 1px solid #334155;
@@ -47,16 +90,28 @@
       padding: 24px;
       margin-bottom: 24px;
     }
+
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
-    .card-title { font-size: 16px; font-weight: 600; color: #f1f5f9; }
-    .card-subtitle { font-size: 13px; color: #94a3b8; margin-top: 4px; }
 
-    /* Buttons */
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
     .btn {
       padding: 8px 18px;
       border-radius: 8px;
@@ -67,20 +122,60 @@
       transition: all 0.2s;
       font-family: inherit;
     }
-    .btn:hover { transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
-    .btn-primary { background: #3b82f6; color: white; }
-    .btn-primary:hover { background: #2563eb; }
-    .btn-danger { background: #ef444420; color: #f87171; border: 1px solid #ef444440; }
-    .btn-danger:hover { background: #ef444430; }
-    .btn-success { background: #10b981; color: white; }
-    .btn-success:hover { background: #059669; }
-    .btn-ghost { background: transparent; color: #94a3b8; border: 1px solid #334155; }
-    .btn-ghost:hover { background: #334155; color: #f1f5f9; }
-    .btn-sm { padding: 5px 12px; font-size: 13px; }
 
-    /* Table */
-    .table { width: 100%; border-collapse: collapse; }
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-danger {
+      background: #ef444420;
+      color: #f87171;
+      border: 1px solid #ef444440;
+    }
+
+    .btn-danger:hover {
+      background: #ef444430;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #94a3b8;
+      border: 1px solid #334155;
+    }
+
+    .btn-ghost:hover {
+      background: #334155;
+      color: #f1f5f9;
+    }
+
+    .btn-sm {
+      padding: 5px 12px;
+      font-size: 13px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
     .table th {
       text-align: left;
       padding: 10px 12px;
@@ -90,47 +185,48 @@
       color: #64748b;
       border-bottom: 1px solid #334155;
     }
+
     .table td {
       padding: 14px 12px;
       border-bottom: 1px solid #1e293b;
       font-size: 14px;
     }
-    .table tr:hover td { background: #1e293b80; }
 
-    /* Style badges */
-    .style-badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
+    .table tr:hover td {
+      background: #1e293b80;
     }
-    .style-professional { background: #1d4ed820; color: #60a5fa; border: 1px solid #1d4ed840; }
-    .style-casual { background: #a855f720; color: #c084fc; border: 1px solid #a855f740; }
-    .style-investor { background: #f59e0b20; color: #fbbf24; border: 1px solid #f59e0b40; }
-    .style-mythbuster { background: #ef444420; color: #f87171; border: 1px solid #ef444440; }
 
     .active-dot {
       display: inline-block;
-      width: 8px; height: 8px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       margin-right: 6px;
     }
-    .active-dot.on { background: #34d399; }
-    .active-dot.off { background: #64748b; }
 
-    /* Modal */
+    .active-dot.on {
+      background: #34d399;
+    }
+
+    .active-dot.off {
+      background: #64748b;
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(4px);
       z-index: 100;
       justify-content: center;
       align-items: center;
     }
-    .modal-overlay.active { display: flex; }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
     .modal {
       background: #1e293b;
       border: 1px solid #334155;
@@ -139,10 +235,17 @@
       width: 440px;
       max-width: 90vw;
     }
-    .modal h2 { font-size: 18px; margin-bottom: 20px; color: #f1f5f9; }
 
-    /* Form */
-    .form-group { margin-bottom: 16px; }
+    .modal h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #f1f5f9;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
     .form-group label {
       display: block;
       font-size: 13px;
@@ -150,7 +253,8 @@
       margin-bottom: 6px;
       font-weight: 500;
     }
-    .form-group input, .form-group select {
+
+    .form-group input {
       width: 100%;
       padding: 10px 14px;
       background: #0f172a;
@@ -162,10 +266,18 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    .form-group input:focus, .form-group select:focus { border-color: #3b82f6; }
-    .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
-    /* Toast */
+    .form-group input:focus {
+      border-color: #3b82f6;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
     .toast {
       position: fixed;
       bottom: 24px;
@@ -177,38 +289,130 @@
       animation: slideIn 0.3s ease-out;
       display: none;
     }
-    .toast.success { background: #065f46; color: #34d399; border: 1px solid #34d39940; }
-    .toast.error { background: #7f1d1d; color: #fca5a5; border: 1px solid #ef444440; }
-    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    /* Empty state */
+    .toast.success {
+      background: #065f46;
+      color: #34d399;
+      border: 1px solid #34d39940;
+    }
+
+    .toast.error {
+      background: #7f1d1d;
+      color: #fca5a5;
+      border: 1px solid #ef444440;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
     .empty-state {
       text-align: center;
       padding: 48px 24px;
       color: #64748b;
     }
-    .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
-    .empty-state p { margin-bottom: 16px; }
 
-    /* Stats row */
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
     .stat-card {
       background: #1e293b;
       border: 1px solid #334155;
       border-radius: 10px;
       padding: 16px 20px;
     }
-    .stat-value { font-size: 28px; font-weight: 700; color: #f1f5f9; }
-    .stat-label { font-size: 12px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Quick add bar */
+    .quick-add {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .quick-add input {
+      flex: 1;
+      padding: 12px 16px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .quick-add input:focus {
+      border-color: #3b82f6;
+    }
+
+    /* Output history */
+    .output-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .output-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #0f172a;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+
+    .output-item a {
+      color: #60a5fa;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .output-item a:hover {
+      text-decoration: underline;
+    }
+
+    .output-date {
+      font-size: 14px;
+    }
   </style>
 </head>
+
 <body>
 
-  <!-- Header -->
   <div class="header">
-    <div>
-      <h1>🏠 RE AI Agents · <span>管理后台</span></h1>
-    </div>
+    <h1>🏠 RE AI Agents · <span>管理后台</span></h1>
     <div class="header-actions">
       <div id="statusBadge" class="status-badge online">● 运行中</div>
       <button class="btn btn-success" onclick="sendNow()">🚀 立即发送</button>
@@ -216,7 +420,6 @@
   </div>
 
   <div class="container">
-    <!-- Stats -->
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-value" id="totalClients">0</div>
@@ -236,62 +439,43 @@
       </div>
     </div>
 
-    <!-- Client List -->
+    <!-- Quick add -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px">⚡ 快速添加订阅</div>
+      <div class="quick-add">
+        <input type="email" id="quickEmail" placeholder="输入邮箱地址即可订阅..." onkeydown="if(event.key==='Enter')quickAdd()">
+        <button class="btn btn-primary" onclick="quickAdd()">+ 添加</button>
+      </div>
+    </div>
+
+    <!-- Client list -->
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">📋 订阅客户管理</div>
-          <div class="card-subtitle">管理邮件推送的客户列表</div>
+          <div class="card-title">📋 订阅客户</div>
+          <div class="card-subtitle">每日自动发送文案邮件（所有风格）</div>
         </div>
-        <button class="btn btn-primary" onclick="openAddModal()">+ 添加客户</button>
       </div>
       <div id="clientList"></div>
     </div>
-  </div>
 
-  <!-- Add/Edit Modal -->
-  <div class="modal-overlay" id="modal">
-    <div class="modal">
-      <h2 id="modalTitle">添加客户</h2>
-      <input type="hidden" id="editId">
-      <div class="form-group">
-        <label>姓名</label>
-        <input type="text" id="inputName" placeholder="例：张三">
+    <!-- Output history -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📂 历史文案</div>
+          <div class="card-subtitle">点击查看/分享历史文案</div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>邮箱</label>
-        <input type="email" id="inputEmail" placeholder="例：zhang@example.com">
-      </div>
-      <div class="form-group">
-        <label>口播风格</label>
-        <select id="inputStyle">
-          <option value="professional">📊 专业分析型</option>
-          <option value="casual">😄 轻松聊天型</option>
-          <option value="investor">💰 投资顾问型</option>
-          <option value="mythbuster">🔍 犀利避坑/揭秘型</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>状态</label>
-        <select id="inputActive">
-          <option value="true">✅ 启用</option>
-          <option value="false">⏸ 暂停</option>
-        </select>
-      </div>
-      <div class="form-actions">
-        <button class="btn btn-ghost" onclick="closeModal()">取消</button>
-        <button class="btn btn-primary" onclick="saveClient()">保存</button>
-      </div>
+      <div id="outputList"></div>
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
   <script>
     const API = '/api';
 
-    // ── Toast ─────────────────────────────────────────
     function showToast(msg, type = 'success') {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -300,7 +484,6 @@
       setTimeout(() => { t.style.display = 'none'; }, 3000);
     }
 
-    // ── Load Data ─────────────────────────────────────
     async function loadClients() {
       const res = await fetch(`${API}/clients`);
       const { data } = await res.json();
@@ -312,114 +495,92 @@
     async function loadStatus() {
       const res = await fetch(`${API}/status`);
       const { data } = await res.json();
-      const cron = data.schedule;
-      // Parse simple cron for display
-      const parts = cron.split(' ');
+      const parts = data.schedule.split(' ');
       document.getElementById('scheduleTime').textContent = `${parts[1]}:${parts[0].padStart(2, '0')}`;
       document.getElementById('modelName').textContent = data.model.replace('gpt-', '');
     }
 
-    // ── Render Table ──────────────────────────────────
-    const styleMap = {
-      professional: { label: '专业分析', cls: 'style-professional' },
-      casual: { label: '轻松聊天', cls: 'style-casual' },
-      investor: { label: '投资顾问', cls: 'style-investor' },
-      mythbuster: { label: '犀利避坑', cls: 'style-mythbuster' },
-    };
+    async function loadOutputs() {
+      try {
+        const res = await fetch(`${API}/outputs`);
+        const { data } = await res.json();
+        const el = document.getElementById('outputList');
+        if (!data || data.length === 0) {
+          el.innerHTML = '<div style="text-align:center;color:#64748b;padding:24px;">暂无历史文案</div>';
+          return;
+        }
+        el.innerHTML = '<div class="output-list">' + data.slice(0, 14).map(date =>
+          `<div class="output-item">
+        <span class="output-date">📅 ${date}</span>
+        <a href="/view.html?date=${date}" target="_blank">查看文案 ↗</a>
+      </div>`
+        ).join('') + '</div>';
+      } catch (e) { }
+    }
 
     function renderClients(clients) {
       const el = document.getElementById('clientList');
       if (clients.length === 0) {
-        el.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>暂无订阅客户</p><button class="btn btn-primary" onclick="openAddModal()">添加第一个客户</button></div>`;
+        el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无订阅客户，在上方输入邮箱快速添加</p></div>';
         return;
       }
-      const rows = clients.map(c => {
-        const s = styleMap[c.style] || { label: c.style, cls: '' };
-        return `<tr>
-          <td><span class="active-dot ${c.active ? 'on' : 'off'}"></span>${c.name}</td>
-          <td>${c.email}</td>
-          <td><span class="style-badge ${s.cls}">${s.label}</span></td>
-          <td>${c.active ? '启用' : '暂停'}</td>
-          <td>
-            <button class="btn btn-ghost btn-sm" onclick='openEditModal(${JSON.stringify(c)})'>编辑</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', '${c.name}')">删除</button>
-          </td>
-        </tr>`;
-      }).join('');
-      el.innerHTML = `<table class="table"><thead><tr><th>姓名</th><th>邮箱</th><th>风格</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
+      const rows = clients.map(c => `<tr>
+    <td><span class="active-dot ${c.active ? 'on' : 'off'}"></span>${c.name}</td>
+    <td>${c.email}</td>
+    <td>${c.active ? '✅ 启用' : '⏸ 暂停'}</td>
+    <td>
+      <button class="btn btn-ghost btn-sm" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '暂停' : '启用'}</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', '${c.name}')">删除</button>
+    </td>
+  </tr>`).join('');
+      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
-    // ── Modal ─────────────────────────────────────────
-    function openAddModal() {
-      document.getElementById('modalTitle').textContent = '添加客户';
-      document.getElementById('editId').value = '';
-      document.getElementById('inputName').value = '';
-      document.getElementById('inputEmail').value = '';
-      document.getElementById('inputStyle').value = 'professional';
-      document.getElementById('inputActive').value = 'true';
-      document.getElementById('modal').classList.add('active');
-    }
-
-    function openEditModal(c) {
-      document.getElementById('modalTitle').textContent = '编辑客户';
-      document.getElementById('editId').value = c.id;
-      document.getElementById('inputName').value = c.name;
-      document.getElementById('inputEmail').value = c.email;
-      document.getElementById('inputStyle').value = c.style;
-      document.getElementById('inputActive').value = String(c.active);
-      document.getElementById('modal').classList.add('active');
-    }
-
-    function closeModal() {
-      document.getElementById('modal').classList.remove('active');
-    }
-
-    // ── CRUD ──────────────────────────────────────────
-    async function saveClient() {
-      const id = document.getElementById('editId').value;
-      const body = {
-        name: document.getElementById('inputName').value.trim(),
-        email: document.getElementById('inputEmail').value.trim(),
-        style: document.getElementById('inputStyle').value,
-        active: document.getElementById('inputActive').value === 'true',
-      };
-      if (!body.name || !body.email) { showToast('请填写姓名和邮箱', 'error'); return; }
-
+    async function quickAdd() {
+      const input = document.getElementById('quickEmail');
+      const email = input.value.trim();
+      if (!email) { showToast('请输入邮箱', 'error'); return; }
       try {
-        const url = id ? `${API}/clients/${id}` : `${API}/clients`;
-        const method = id ? 'PUT' : 'POST';
-        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const res = await fetch(`${API}/clients`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
-        showToast(id ? '客户已更新' : '客户已添加');
-        closeModal();
+        showToast(`✅ ${email} 已添加`);
+        input.value = '';
+        loadClients();
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function toggleActive(id, active) {
+      try {
+        const res = await fetch(`${API}/clients/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active }) });
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        showToast(active ? '客户已启用' : '客户已暂停');
         loadClients();
       } catch (e) { showToast(e.message, 'error'); }
     }
 
     async function deleteClient(id, name) {
-      if (!confirm(`确定要删除客户 "${name}" 吗？`)) return;
+      if (!confirm(`确定删除 "${name}" 吗？`)) return;
       try {
         const res = await fetch(`${API}/clients/${id}`, { method: 'DELETE' });
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
-        showToast('客户已删除');
+        showToast('已删除');
         loadClients();
       } catch (e) { showToast(e.message, 'error'); }
     }
 
-    // ── Send Now ──────────────────────────────────────
     async function sendNow() {
-      if (!confirm('确认立即向所有活跃客户发送今日口播稿？')) return;
+      if (!confirm('确认立即向所有活跃客户发送今日文案？')) return;
       try {
         const badge = document.getElementById('statusBadge');
-        badge.textContent = '⏳ 发送中...';
+        badge.textContent = '⏳ 生成中...';
         badge.className = 'status-badge running';
         const res = await fetch(`${API}/send-now`, { method: 'POST' });
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
-        showToast('Pipeline 已启动，正在搜索新闻和生成口播稿...');
-        // Poll status
+        showToast('Pipeline 已启动，正在搜索新闻和生成文案...');
         const poll = setInterval(async () => {
           const sr = await fetch(`${API}/status`);
           const sd = await sr.json();
@@ -427,20 +588,17 @@
             clearInterval(poll);
             badge.textContent = '● 运行中';
             badge.className = 'status-badge online';
-            showToast('发送完成！');
+            showToast('✅ 文案生成并发送完成！');
+            loadOutputs();
           }
         }, 5000);
       } catch (e) { showToast(e.message, 'error'); }
     }
 
-    // ── Click outside modal to close ──────────────────
-    document.getElementById('modal').addEventListener('click', (e) => {
-      if (e.target.classList.contains('modal-overlay')) closeModal();
-    });
-
-    // ── Init ──────────────────────────────────────────
     loadClients();
     loadStatus();
+    loadOutputs();
   </script>
 </body>
+
 </html>

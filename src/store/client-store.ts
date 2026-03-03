@@ -11,12 +11,10 @@ export interface Client {
     id: string;
     name: string;
     email: string;
-    style: 'professional' | 'casual' | 'investor' | 'mythbuster';
     active: boolean;
     createdAt: string;
 }
 
-// Ensure data directory and file exist
 function ensureDataFile(): void {
     if (!fs.existsSync(DATA_DIR)) {
         fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -41,21 +39,18 @@ export function getActiveClients(): Client[] {
     return getAllClients().filter(c => c.active);
 }
 
-export function getClientById(id: string): Client | undefined {
-    return getAllClients().find(c => c.id === id);
-}
-
-export function addClient(data: Omit<Client, 'id' | 'createdAt'>): Client {
+export function addClient(data: { name?: string; email: string }): Client {
     const clients = getAllClients();
 
-    // Check duplicate email
     if (clients.some(c => c.email.toLowerCase() === data.email.toLowerCase())) {
         throw new Error(`Email already exists: ${data.email}`);
     }
 
     const newClient: Client = {
-        ...data,
         id: generateId(),
+        name: data.name || data.email.split('@')[0],
+        email: data.email,
+        active: true,
         createdAt: new Date().toISOString(),
     };
 
@@ -68,12 +63,8 @@ export function addClient(data: Omit<Client, 'id' | 'createdAt'>): Client {
 export function updateClient(id: string, data: Partial<Omit<Client, 'id' | 'createdAt'>>): Client {
     const clients = getAllClients();
     const index = clients.findIndex(c => c.id === id);
+    if (index === -1) throw new Error(`Client not found: ${id}`);
 
-    if (index === -1) {
-        throw new Error(`Client not found: ${id}`);
-    }
-
-    // Check duplicate email if email is being changed
     if (data.email && data.email.toLowerCase() !== clients[index].email.toLowerCase()) {
         if (clients.some(c => c.email.toLowerCase() === data.email!.toLowerCase())) {
             throw new Error(`Email already exists: ${data.email}`);
@@ -89,10 +80,7 @@ export function updateClient(id: string, data: Partial<Omit<Client, 'id' | 'crea
 export function deleteClient(id: string): void {
     const clients = getAllClients();
     const index = clients.findIndex(c => c.id === id);
-
-    if (index === -1) {
-        throw new Error(`Client not found: ${id}`);
-    }
+    if (index === -1) throw new Error(`Client not found: ${id}`);
 
     const removed = clients.splice(index, 1)[0];
     fs.writeFileSync(CLIENTS_FILE, JSON.stringify(clients, null, 2), 'utf-8');
