@@ -3,7 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const logDir = path.join(__dirname, '../../logs');
+// Store logs in data/ directory (persisted via Railway volume at /app/data)
+const logDir = path.join(__dirname, '../../data/logs');
 
 export const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
