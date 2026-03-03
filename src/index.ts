@@ -6,6 +6,16 @@ import { logger } from './utils/logger.js';
 import { getActiveClients, getAllClients } from './store/client-store.js';
 import { getAllStyleIds } from './config/styles.js';
 
+// ── Global error handlers (prevent process crash) ───────────
+process.on('unhandledRejection', (reason) => {
+    logger.error('Unhandled promise rejection', {
+        error: reason instanceof Error ? reason.message : String(reason),
+    });
+});
+process.on('uncaughtException', (error) => {
+    logger.error('Uncaught exception', { error: error.message, stack: error.stack });
+});
+
 // ── Parse CLI flags ─────────────────────────────────────────
 const args = process.argv.slice(2);
 const immediate = args.includes('--now');

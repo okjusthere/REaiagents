@@ -48,25 +48,31 @@ async function callAzureOpenAI(systemPrompt: string, userPrompt: string): Promis
 
     if (isResponsesAPI) {
         // Azure OpenAI Responses API format
-        const response = await axios.post(
-            url,
-            {
-                model: config.AZURE_OPENAI_DEPLOYMENT,
-                input: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt },
-                ],
-                temperature: 0.8,
-                max_output_tokens: 3000,
-            },
-            {
-                headers: {
-                    'api-key': config.AZURE_OPENAI_API_KEY,
-                    'Content-Type': 'application/json',
+        let response;
+        try {
+            response = await axios.post(
+                url,
+                {
+                    model: config.AZURE_OPENAI_DEPLOYMENT,
+                    input: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt },
+                    ],
+                    temperature: 0.8,
+                    max_output_tokens: 3000,
                 },
-                timeout: 120000,
-            }
-        );
+                {
+                    headers: {
+                        'api-key': config.AZURE_OPENAI_API_KEY,
+                        'Content-Type': 'application/json',
+                    },
+                    timeout: 120000,
+                }
+            );
+        } catch (err: any) {
+            const msg = err.response?.data?.error?.message || err.message || String(err);
+            throw new Error(`Azure OpenAI API error: ${msg}`);
+        }
 
         // Responses API returns output array
         const output = response.data?.output;

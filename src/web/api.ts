@@ -65,7 +65,11 @@ router.post('/send-now', async (_req: Request, res: Response) => {
         logger.info('🚀 Manual pipeline trigger from admin dashboard');
         res.json({ success: true, message: 'Pipeline started' });
         // Run async, don't await in request handler
-        runPipeline(config.DRY_RUN).finally(() => { isRunning = false; });
+        runPipeline(config.DRY_RUN)
+            .catch((err) => {
+                logger.error('💥 Pipeline failed', { error: err instanceof Error ? err.message : String(err) });
+            })
+            .finally(() => { isRunning = false; });
     } catch (error) {
         isRunning = false;
         res.status(500).json({ success: false, error: (error as Error).message });
