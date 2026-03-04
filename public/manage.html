@@ -249,13 +249,14 @@
 
         .prefs-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
             gap: 12px;
         }
 
         .field {
             display: grid;
             gap: 8px;
+            min-width: 0;
         }
 
         .field span {
@@ -264,6 +265,8 @@
         }
 
         .field select {
+            width: 100%;
+            min-width: 0;
             min-height: 46px;
             padding: 0 12px;
             border-radius: 14px;

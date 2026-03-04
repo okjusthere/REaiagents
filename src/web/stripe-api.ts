@@ -163,9 +163,11 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
         }
 
         const stripe = getStripe();
+        const checkoutLocale: Stripe.Checkout.SessionCreateParams.Locale = client.language === 'zh' ? 'zh' : 'en';
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card', 'alipay'],
+            payment_method_types: ['card'],
             mode: 'subscription',
+            locale: checkoutLocale,
             customer_email: client.email,
             metadata: {
                 email: client.email,
@@ -188,9 +190,6 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
                     market: client.market,
                     audienceProfile: client.audienceProfile,
                 },
-            },
-            payment_method_options: {
-                alipay: {},
             },
         });
 
