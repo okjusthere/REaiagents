@@ -477,6 +477,22 @@
     .btn-vip:hover {
       background: #d9770640;
     }
+
+    .inline-select {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-size: 12px;
+      padding: 4px 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .inline-select:focus {
+      border-color: #3b82f6;
+      outline: none;
+    }
   </style>
 </head>
 
@@ -701,10 +717,21 @@
         if (c.freeTrialUsed) return '<span class="plan-badge trial-used">🎁 已体验</span>';
         return '<span class="plan-badge free">🆓 免费</span>';
       };
+      const langLabel = (l) => l === 'zh' ? '🇨🇳 中文' : '🇺🇸 EN';
+      const markets = ['new-york', 'los-angeles', 'san-francisco', 'chicago', 'miami', 'seattle', 'boston', 'houston'];
+      const langSelect = (c) => `<select class="inline-select" onchange="updatePref('${c.id}','language',this.value)">
+        <option value="zh" ${c.language === 'zh' ? 'selected' : ''}>🇨🇳 中文</option>
+        <option value="en" ${c.language === 'en' ? 'selected' : ''}>🇺🇸 EN</option>
+      </select>`;
+      const mktSelect = (c) => `<select class="inline-select" onchange="updatePref('${c.id}','market',this.value)">
+        ${markets.map(m => `<option value="${m}" ${c.market === m ? 'selected' : ''}>${m}</option>`).join('')}
+      </select>`;
       const rows = clients.map(c => `<tr>
     <td><span class="active-dot ${c.active ? 'on' : 'off'}"></span>${c.name}</td>
     <td>${c.email}</td>
     <td>${planBadge(c)}</td>
+    <td>${langSelect(c)}</td>
+    <td>${mktSelect(c)}</td>
     <td>${c.active ? '✅' : '⏸'}</td>
     <td>
       <button class="btn btn-ghost btn-sm" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '暂停' : '启用'}</button>
@@ -712,7 +739,7 @@
       <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', '${c.name}')">删除</button>
     </td>
   </tr>`).join('');
-      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>套餐</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
+      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>套餐</th><th>语言</th><th>城市</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
     // ── Admin Actions ─────────────────────────────────────
@@ -739,6 +766,16 @@
         if (!result.success) throw new Error(result.error);
         showToast(active ? '客户已启用' : '客户已暂停');
         loadClients();
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function updatePref(id, field, value) {
+      try {
+        const res = await fetch(`${API}/clients/${id}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ [field]: value }) });
+        if (res.status === 401) { logout(); return; }
+        const result = await res.json();
+        if (!result.success) throw new Error(result.error);
+        showToast(`✅ 已更新${field === 'language' ? '语言' : '城市'}`);
       } catch (e) { showToast(e.message, 'error'); }
     }
 

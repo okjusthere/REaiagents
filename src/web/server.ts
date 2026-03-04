@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import apiRouter from './api.js';
 import stripeRouter from './stripe-api.js';
+import { getDailyOutput, listOutputDates } from '../store/output-store.js';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 
@@ -28,16 +29,29 @@ export function startWebServer(port: number = 3000): void {
     app.use(express.json());
 
     // ── Public routes (no auth required) ────────────────────
+
     // Stripe subscribe routes — public-facing
     app.use('/api', stripeRouter);
+
+    // Output viewing — public (shared via email links)
+    app.get('/api/outputs/:date', (req, res) => {
+        try {
+            const output = getDailyOutput(req.params.date);
+            if (!output) {
+                res.status(404).json({ success: false, error: 'No output found for this date' });
+                return;
+            }
+            res.json({ success: true, data: output });
+        } catch (error) {
+            res.status(500).json({ success: false, error: (error as Error).message });
+        }
+    });
 
     // ── Admin API routes (auth required) ────────────────────
     app.use('/api', requireAdmin, apiRouter);
 
-    // ── Admin page — require token via query param ──────────
-    app.get('/admin.html', (req, res) => {
-        // Admin page is always served — auth happens client-side via API calls
-        // The page itself contains the login gate
+    // ── Admin page ──────────────────────────────────────────
+    app.get('/admin.html', (_req, res) => {
         res.sendFile(path.join(__dirname, '../../public/admin.html'));
     });
 

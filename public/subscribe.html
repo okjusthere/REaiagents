@@ -873,7 +873,7 @@
                 padding: 12px 16px;
             }
 
-            .nav-links a:not(.nav-cta) {
+            .nav-links a:not(.nav-cta):not(.lang-toggle) {
                 display: none;
             }
 
@@ -894,6 +894,34 @@
                 font-size: 24px;
             }
         }
+
+        /* ── i18n Toggle ─────────────────── */
+        body.lang-zh .en {
+            display: none !important;
+        }
+
+        body.lang-en .zh {
+            display: none !important;
+        }
+
+        .lang-toggle {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            text-decoration: none !important;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .lang-toggle:hover {
+            background: #2563eb;
+            color: white;
+        }
     </style>
 </head>
 
@@ -903,21 +931,24 @@
     <nav>
         <div class="logo">📰 RE<span>script</span></div>
         <div class="nav-links">
-            <a href="#features">功能 Features</a>
-            <a href="#pricing">定价 Pricing</a>
+            <a href="#features"><span class="zh">功能</span><span class="en">Features</span></a>
+            <a href="#pricing"><span class="zh">定价</span><span class="en">Pricing</span></a>
             <a href="#faq">FAQ</a>
-            <a href="#pricing" class="nav-cta">Subscribe</a>
+            <a class="lang-toggle" onclick="toggleLang()"><span class="zh">🇺🇸 English</span><span class="en">🇨🇳
+                    中文</span></a>
+            <a href="#pricing" class="nav-cta"><span class="zh">订阅</span><span class="en">Subscribe</span></a>
         </div>
     </nav>
 
     <!-- Hero -->
     <section class="hero">
         <div class="badge"><span class="dot"></span> AI · Daily · Auto</div>
-        <h1>地产<span class="highlight">视频文案</span><br>每天自动送到你邮箱</h1>
-        <p class="subtitle">AI searches the latest real estate news, generates scripts in 4 styles, delivered to your
-            inbox every morning at 7 AM EST.<br>AI 搜索最新地产新闻，自动生成 4 种口播风格文案。打开邮件 → 复制文案 → 开拍。</p>
+        <h1><span class="zh">地产<span class="highlight">视频文案</span><br>每天自动送到你邮箱</span><span class="en">AI Real Estate
+                <span class="highlight">Video Scripts</span><br>Delivered Daily to Your Inbox</span></h1>
+        <p class="subtitle"><span class="zh">AI 搜索最新地产新闻，自动生成 4 种口播风格文案。打开邮件 → 复制文案 → 开拍。每天早上 7 点准时送达。</span><span
+                class="en">AI searches the latest real estate news and generates scripts in 4 styles. Open your email →
+                Copy the script → Start filming. Delivered every morning at 7 AM EST.</span></p>
 
-        <!-- Sign-up Card -->
         <div class="signup-card" id="signupCard">
             <div class="form-row">
                 <input type="email" id="heroEmail" placeholder="your@email.com">
@@ -928,21 +959,24 @@
                     <option value="en">🇺🇸 English Scripts</option>
                 </select>
                 <select class="pref-select" id="heroMarket">
-                    <option value="new-york">🏙️ New York / 纽约</option>
-                    <option value="los-angeles">🌴 Los Angeles / 洛杉矶</option>
-                    <option value="san-francisco">🌉 San Francisco / 旧金山</option>
-                    <option value="chicago">🏗️ Chicago / 芝加哥</option>
-                    <option value="miami">🏖️ Miami / 迈阿密</option>
-                    <option value="seattle">☕ Seattle / 西雅图</option>
-                    <option value="boston">🎓 Boston / 波士顿</option>
-                    <option value="houston">🤠 Houston / 休斯顿</option>
+                    <option value="new-york">🏙️ New York</option>
+                    <option value="los-angeles">🌴 Los Angeles</option>
+                    <option value="san-francisco">🌉 San Francisco</option>
+                    <option value="chicago">🏗️ Chicago</option>
+                    <option value="miami">🏖️ Miami</option>
+                    <option value="seattle">☕ Seattle</option>
+                    <option value="boston">🎓 Boston</option>
+                    <option value="houston">🤠 Houston</option>
                 </select>
             </div>
             <div class="btn-group">
-                <button class="btn-trial" onclick="signupTrial()">🎁 免费体验 Free Trial</button>
-                <button class="btn-subscribe" onclick="startCheckout()">💳 订阅 Subscribe — $9.99/mo</button>
+                <button class="btn-trial" onclick="signupTrial()"><span class="zh">🎁 免费体验</span><span class="en">🎁
+                        Free Trial</span></button>
+                <button class="btn-subscribe" onclick="startCheckout()"><span class="zh">💳 订阅 — $9.99/月</span><span
+                        class="en">💳 Subscribe — $9.99/mo</span></button>
             </div>
-            <div class="form-hint">Free trial = 1 full email · No credit card needed · Cancel anytime</div>
+            <div class="form-hint"><span class="zh">免费体验 = 1 封完整邮件 · 无需信用卡 · 随时取消</span><span class="en">Free trial = 1
+                    full email · No credit card needed · Cancel anytime</span></div>
             <div id="formMsg"></div>
         </div>
     </section>
@@ -951,58 +985,63 @@
     <div class="stats-bar">
         <div class="stat">
             <div class="stat-num">30+</div>
-            <div class="stat-label">Scripts / Day 每日文案</div>
+            <div class="stat-label"><span class="zh">每日文案</span><span class="en">Scripts / Day</span></div>
         </div>
         <div class="stat">
             <div class="stat-num">4</div>
-            <div class="stat-label">Styles 口播风格</div>
+            <div class="stat-label"><span class="zh">口播风格</span><span class="en">Styles</span></div>
         </div>
         <div class="stat">
             <div class="stat-num">8</div>
-            <div class="stat-label">Markets 覆盖城市</div>
+            <div class="stat-label"><span class="zh">覆盖城市</span><span class="en">Markets</span></div>
         </div>
         <div class="stat">
             <div class="stat-num">7:00</div>
-            <div class="stat-label">Daily @ EST 每日推送</div>
+            <div class="stat-label"><span class="zh">每日推送 EST</span><span class="en">Daily @ EST</span></div>
         </div>
     </div>
 
     <!-- Features -->
     <section class="features" id="features">
-        <h2 class="section-title">Why <span class="highlight">REscript</span>?</h2>
+        <h2 class="section-title"><span class="zh">为什么选择 <span class="highlight">REscript</span>？</span><span
+                class="en">Why <span class="highlight">REscript</span>?</span></h2>
         <div class="feature-grid">
             <div class="feature-card">
                 <div class="feature-icon">🔍</div>
-                <h3>Auto News Search 自动搜索新闻</h3>
-                <p>AI searches top real estate headlines for your chosen market every morning. 每天早晨自动搜索你选定城市的地产头条新闻。</p>
+                <h3><span class="zh">自动搜索新闻</span><span class="en">Auto News Search</span></h3>
+                <p><span class="zh">每天早晨自动搜索你选定城市的地产头条新闻。</span><span class="en">AI searches top real estate headlines
+                        for your chosen market every morning.</span></p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">✍️</div>
-                <h3>4 Script Styles 四种口播风格</h3>
-                <p>Professional · Casual · Investor · Myth Buster — each tailored for different platforms. 专业分析 · 轻松聊天 ·
-                    投资顾问 · 犀利揭秘。</p>
+                <h3><span class="zh">四种口播风格</span><span class="en">4 Script Styles</span></h3>
+                <p><span class="zh">专业分析 · 轻松聊天 · 投资顾问 · 犀利揭秘——每种风格针对不同平台优化。</span><span class="en">Professional ·
+                        Casual · Investor · Myth Buster — each tailored for different platforms.</span></p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🌐</div>
-                <h3>Bilingual 中英双语</h3>
-                <p>Full Chinese or English scripts — your choice at signup. 完整中文或英文文案，注册时选择。</p>
+                <h3><span class="zh">中英双语</span><span class="en">Bilingual</span></h3>
+                <p><span class="zh">完整中文或英文文案，注册时选择。</span><span class="en">Full Chinese or English scripts — your
+                        choice at signup.</span></p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">📍</div>
-                <h3>8 US Markets 八大城市</h3>
-                <p>New York, LA, SF, Chicago, Miami, Seattle, Boston, Houston — with local neighborhood mentions.
-                    覆盖全美8大地产市场，包含本地社区名。</p>
+                <h3><span class="zh">八大城市</span><span class="en">8 US Markets</span></h3>
+                <p><span class="zh">覆盖全美8大地产市场，包含本地社区名。</span><span class="en">New York, LA, SF, Chicago, Miami,
+                        Seattle, Boston, Houston — with local neighborhoods.</span></p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">📚</div>
-                <h3>7 Content Modules 七大内容模块</h3>
-                <p>Beyond news: buyer education, seller tips, investment analysis, community guides, market data,
-                    legal/tax, personal branding. 买家教育、卖家教育、投资分析、社区生活、市场数据、法律税务、个人品牌。</p>
+                <h3><span class="zh">七大内容模块</span><span class="en">7 Content Modules</span></h3>
+                <p><span class="zh">买家教育、卖家教育、投资分析、社区生活、市场数据、法律税务、个人品牌。</span><span class="en">Buyer education, seller
+                        tips, investment analysis, community guides, market data, legal/tax, personal branding.</span>
+                </p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">📋</div>
-                <h3>One-Click Copy 一键复制</h3>
-                <p>Click to copy any script, open your camera, and start filming. 点击即复制文案，打开相机就能拍。</p>
+                <h3><span class="zh">一键复制</span><span class="en">One-Click Copy</span></h3>
+                <p><span class="zh">点击即复制文案，打开相机就能拍。</span><span class="en">Click to copy any script, open your camera,
+                        and start filming.</span></p>
             </div>
         </div>
     </section>
@@ -1021,7 +1060,8 @@
 
     <!-- Real Script Sample -->
     <section class="sample">
-        <h2 class="section-title">📝 <span class="highlight">Real Sample</span> · 真实文案示例</h2>
+        <h2 class="section-title">📝 <span class="highlight">Real Sample</span> · <span class="zh">真实文案示例</span><span
+                class="en">Real Script Example</span></h2>
         <div class="sample-card">
             <div class="sample-header">
                 <h3>📰 Manhattan Q4 Median Sale Price Hits $1.2M</h3>
@@ -1049,37 +1089,41 @@
 
     <!-- Who Is This For -->
     <section class="audience">
-        <h2 class="section-title">Who Is <span class="highlight">This For</span>? 适用人群</h2>
+        <h2 class="section-title"><span class="zh"><span class="highlight">适用人群</span></span><span class="en">Who Is
+                <span class="highlight">This For</span>?</span></h2>
         <div class="audience-grid">
             <div class="audience-card">
                 <div class="audience-icon">🏠</div>
-                <h3>Real Estate Agents<br>地产经纪人</h3>
-                <p>Daily video content for social media, build your personal brand and attract more leads.
-                    每天拿到文案就能拍视频，打造个人品牌。</p>
+                <h3><span class="zh">地产经纪人</span><span class="en">Real Estate Agents</span></h3>
+                <p><span class="zh">每天拿到文案就能拍视频，打造个人品牌，吸引更多客户。</span><span class="en">Daily video content for social
+                        media, build your personal brand and attract more leads.</span></p>
             </div>
             <div class="audience-card">
                 <div class="audience-icon">📱</div>
-                <h3>小红书 / TikTok<br>Content Creators</h3>
-                <p>Ready-to-film scripts in 4 styles, optimized for short-form video platforms. 4种风格文案直接拍，专为短视频优化。</p>
+                <h3><span class="zh">小红书 / TikTok 创作者</span><span class="en">TikTok / XHS Content Creators</span></h3>
+                <p><span class="zh">4种风格文案直接拍，专为短视频平台优化。</span><span class="en">Ready-to-film scripts in 4 styles,
+                        optimized for short-form video platforms.</span></p>
             </div>
             <div class="audience-card">
                 <div class="audience-icon">🎬</div>
-                <h3>YouTube Channels<br>YouTube 频道</h3>
-                <p>Professional analysis scripts with data for long-form real estate content. 带数据的专业分析文案，适合长视频。</p>
+                <h3><span class="zh">YouTube 频道</span><span class="en">YouTube Channels</span></h3>
+                <p><span class="zh">带数据的专业分析文案，适合长视频内容。</span><span class="en">Professional analysis scripts with data
+                        for long-form real estate content.</span></p>
             </div>
             <div class="audience-card">
                 <div class="audience-icon">🏢</div>
-                <h3>Brokerages & Teams<br>经纪公司/团队</h3>
-                <p>Provide daily content for your whole team. One subscription, everyone benefits. 给全团队提供每日内容，一个订阅全员受益。
-                </p>
+                <h3><span class="zh">经纪公司 / 团队</span><span class="en">Brokerages & Teams</span></h3>
+                <p><span class="zh">给全团队提供每日内容，一个订阅全员受益。</span><span class="en">Provide daily content for your whole
+                        team. One subscription, everyone benefits.</span></p>
             </div>
         </div>
     </section>
 
     <!-- Testimonials -->
     <section class="testimonials">
-        <h2 class="section-title" style="max-width:960px;margin:0 auto 48px;">What <span class="highlight">Agents</span>
-            Say · 经纪人怎么说</h2>
+        <h2 class="section-title" style="max-width:960px;margin:0 auto 48px;"><span class="zh"><span
+                    class="highlight">经纪人</span>怎么说</span><span class="en">What <span class="highlight">Agents</span>
+                Say</span></h2>
         <div class="testimonial-grid">
             <div class="testimonial-card">
                 <div class="testimonial-stars">★★★★★</div>
@@ -1142,7 +1186,8 @@
 
     <!-- Trusted By -->
     <div class="trusted">
-        <div class="trusted-label">Covering 8 Major US Markets · 覆盖全美 8 大市场</div>
+        <div class="trusted-label"><span class="zh">覆盖全美 8 大市场</span><span class="en">Covering 8 Major US Markets</span>
+        </div>
         <div class="trusted-items">
             <span class="trusted-item">🏙️ New York</span>
             <span class="trusted-item">🌴 Los Angeles</span>
@@ -1157,75 +1202,105 @@
 
     <!-- Pricing -->
     <section class="pricing" id="pricing">
-        <h2 class="section-title"><span class="highlight">Pricing</span> 定价</h2>
+        <h2 class="section-title"><span class="highlight"><span class="zh">定价</span><span
+                    class="en">Pricing</span></span></h2>
         <div class="price-card">
-            <div class="popular">MOST POPULAR 最受欢迎</div>
+            <div class="popular"><span class="zh">最受欢迎</span><span class="en">MOST POPULAR</span></div>
             <h3>REscript Pro</h3>
-            <div class="price-amount">$9.99 <span>/month 月</span></div>
-            <p class="price-desc">Start with a 7-day free trial. 先免费用7天再决定。</p>
+            <div class="price-amount">$9.99 <span><span class="zh">/月</span><span class="en">/month</span></span></div>
+            <p class="price-desc"><span class="zh">先免费用7天再决定。</span><span class="en">Start with a 7-day free
+                    trial.</span></p>
             <ul class="price-features">
-                <li>30+ scripts daily / 每日 30+ 条文案</li>
-                <li>4 writing styles / 4 种口播风格</li>
-                <li>7 content modules / 7 大内容模块</li>
-                <li>Bilingual: Chinese & English / 中英双语</li>
-                <li>8 US markets / 8 大城市</li>
-                <li>Mobile-friendly reader / 手机适配阅读</li>
-                <li>One-click copy / 一键复制</li>
-                <li>Cancel anytime / 随时取消</li>
+                <li><span class="zh">每日 30+ 条文案</span><span class="en">30+ scripts daily</span></li>
+                <li><span class="zh">4 种口播风格</span><span class="en">4 writing styles</span></li>
+                <li><span class="zh">7 大内容模块</span><span class="en">7 content modules</span></li>
+                <li><span class="zh">中英双语</span><span class="en">Bilingual: Chinese & English</span></li>
+                <li><span class="zh">8 大城市</span><span class="en">8 US markets</span></li>
+                <li><span class="zh">手机适配阅读</span><span class="en">Mobile-friendly reader</span></li>
+                <li><span class="zh">一键复制</span><span class="en">One-click copy</span></li>
+                <li><span class="zh">随时取消</span><span class="en">Cancel anytime</span></li>
             </ul>
-            <button class="price-btn" onclick="scrollToSignup()">Start Now 立即开始 →</button>
-            <p class="price-note">Credit Card + Alipay 支付宝 · Cancel anytime 随时取消</p>
+            <button class="price-btn" onclick="scrollToSignup()"><span class="zh">立即开始 →</span><span class="en">Start
+                    Now →</span></button>
+            <p class="price-note"><span class="zh">信用卡 + 支付宝 · 随时取消</span><span class="en">Credit Card + Alipay · Cancel
+                    anytime</span></p>
         </div>
     </section>
 
     <!-- FAQ -->
     <section class="faq" id="faq">
-        <h2 class="section-title">FAQ 常见问题</h2>
+        <h2 class="section-title"><span class="zh">FAQ 常见问题</span><span class="en">FAQ</span></h2>
         <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">什么是免费体验？ What is the free trial?</button>
+            <button class="faq-q" onclick="toggleFaq(this)"><span class="zh">什么是免费体验？</span><span class="en">What is the
+                    free trial?</span></button>
             <div class="faq-a">
-                <p>You will receive one full email with 30+ scripts for free — no credit card needed. If you like it,
-                    subscribe to receive daily scripts. 您将免费收到一封包含30+条文案的完整邮件，无需信用卡。喜欢的话再订阅每日推送。</p>
+                <p><span class="zh">您将免费收到一封包含30+条文案的完整邮件，无需信用卡。喜欢的话再订阅每日推送。</span><span class="en">You will receive one
+                        full email with 30+ scripts for free — no credit card needed. If you like it, subscribe to
+                        receive daily scripts.</span></p>
             </div>
         </div>
         <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">文案包括哪些内容？ What's included?</button>
+            <button class="faq-q" onclick="toggleFaq(this)"><span class="zh">文案包括哪些内容？</span><span class="en">What's
+                    included?</span></button>
             <div class="faq-a">
-                <p>Each email includes: real estate news scripts (4 styles per article), plus scripts from 7 content
-                    modules (buyer education, seller tips, investment, community, market data, legal/tax, personal
-                    branding). 每封邮件包含：地产新闻文案（每篇4种风格）+ 7大内容模块文案。</p>
+                <p><span class="zh">每封邮件包含：地产新闻文案（每篇4种风格）+ 7大内容模块文案。</span><span class="en">Each email includes: real
+                        estate news scripts (4 styles per article), plus scripts from 7 content modules (buyer
+                        education, seller tips, investment, community, market data, legal/tax, personal
+                        branding).</span></p>
             </div>
         </div>
         <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">可以换城市或语言吗？ Can I change city or language?</button>
+            <button class="faq-q" onclick="toggleFaq(this)"><span class="zh">可以换城市或语言吗？</span><span class="en">Can I
+                    change city or language?</span></button>
             <div class="faq-a">
-                <p>Yes! Contact us to update your preferences at any time. We currently support 8 US markets and
-                    Chinese/English. 可以！随时联系我们更新偏好。目前支持全美8大城市和中英双语。</p>
+                <p><span class="zh">可以！随时联系我们更新偏好。目前支持全美8大城市和中英双语。</span><span class="en">Yes! Contact us to update your
+                        preferences at any time. We currently support 8 US markets and Chinese/English.</span></p>
             </div>
         </div>
         <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">支持哪些支付方式？ Payment methods?</button>
+            <button class="faq-q" onclick="toggleFaq(this)"><span class="zh">支持哪些支付方式？</span><span class="en">Payment
+                    methods?</span></button>
             <div class="faq-a">
-                <p>Credit/debit cards (Visa, Mastercard, Amex) and Alipay (支付宝). If Alipay fails, you can fall back to
-                    card payment. 支持信用卡和支付宝。如果支付宝失败，可以切换到信用卡。</p>
+                <p><span class="zh">支持信用卡（Visa、Mastercard、Amex）和支付宝。如果支付宝失败，可以切换到信用卡。</span><span
+                        class="en">Credit/debit cards (Visa, Mastercard, Amex) and Alipay. If Alipay fails, you can fall
+                        back to card payment.</span></p>
             </div>
         </div>
         <div class="faq-item">
-            <button class="faq-q" onclick="toggleFaq(this)">如何取消订阅？ How to cancel?</button>
+            <button class="faq-q" onclick="toggleFaq(this)"><span class="zh">如何取消订阅？</span><span class="en">How to
+                    cancel?</span></button>
             <div class="faq-a">
-                <p>Cancel anytime through your Stripe billing portal or reply to any email — no questions asked.
-                    随时通过Stripe账单页面或回复邮件取消，不问原因。</p>
+                <p><span class="zh">随时通过Stripe账单页面或回复邮件取消，不问原因。</span><span class="en">Cancel anytime through your
+                        Stripe billing portal or reply to any email — no questions asked.</span></p>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer>
-        <p>© 2026 REscript by <a href="https://kevv.ai">kevv.ai</a> ·
-            AI-powered Real Estate Video Scripts</p>
+        <p>© 2026 REscript by <a href="https://kevv.ai">kevv.ai</a> · <span class="zh">AI驱动的地产视频文案</span><span
+                class="en">AI-powered Real Estate Video Scripts</span></p>
     </footer>
 
     <script>
+        // ── i18n auto-detect + toggle ──
+        function detectLang() {
+            const saved = localStorage.getItem('re_lang');
+            if (saved) return saved;
+            const nav = navigator.language || navigator.userLanguage || 'en';
+            return nav.startsWith('zh') ? 'zh' : 'en';
+        }
+        function setLang(lang) {
+            document.body.className = document.body.className.replace(/lang-\w+/g, '').trim();
+            document.body.classList.add('lang-' + lang);
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+            localStorage.setItem('re_lang', lang);
+        }
+        function toggleLang() {
+            const current = document.body.classList.contains('lang-zh') ? 'zh' : 'en';
+            setLang(current === 'zh' ? 'en' : 'zh');
+        }
+        setLang(detectLang());
+
         // ── Style preview data ──
         const styles = [
             {
