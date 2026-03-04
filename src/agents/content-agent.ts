@@ -2,9 +2,10 @@ import axios from 'axios';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { retry } from '../utils/retry.js';
-import { contentModules, getTodayTopics, type ContentModule, type TopicItem } from '../config/topics.js';
+import { getAudienceContext, getMarketContext, getPlatformOptions, getPromptGuardrails } from '../config/content-strategy.js';
+import { getActiveContentModules, getTodayTopics, type ContentModule, type TopicItem } from '../config/topics.js';
 import { scriptsSchema, type ScriptItem, type ArticleScripts } from './script-writer-agent.js';
-import type { Language, MarketId } from '../store/client-store.js';
+import type { AudienceProfile, Language, MarketId } from '../store/client-store.js';
 
 // ── Types ────────────────────────────────────────────────────
 export interface ModuleOutput {
@@ -30,92 +31,151 @@ function getMarketName(market: MarketId, lang: Language): string {
     return MARKET_DISPLAY[market]?.[lang] || market;
 }
 
+function formatGuardrails(language: Language): string {
+    return getPromptGuardrails(language)
+        .map((item, index) => `${index + 1}. ${item}`)
+        .join('\n');
+}
+
+function defaultAudienceProfile(language: Language): AudienceProfile {
+    return language === 'zh' ? 'chinese-community' : 'general';
+}
+
 // ── Prompt ───────────────────────────────────────────────────
-function buildTopicPrompt(topic: TopicItem, module: ContentModule, date: string, language: Language, market: MarketId): string {
+function buildTopicPrompt(
+    topic: TopicItem,
+    module: ContentModule,
+    date: string,
+    language: Language,
+    market: MarketId,
+    audienceProfile: AudienceProfile,
+): string {
+    const marketContext = getMarketContext(market, language);
+    const audience = getAudienceContext(audienceProfile, language);
+    const platformOptions = getPlatformOptions(audienceProfile, language);
+    const [platformOne, platformTwo, platformThree, platformFour] = platformOptions;
     const mkt = getMarketName(market, language);
+    const guardrails = formatGuardrails(language);
 
     if (language === 'en') {
         return `Today is ${date}.
 
-You are a senior real estate content strategist specializing in the ${mkt} market. Generate 4 different style 90-second video scripts based on this topic.
+You are a senior real estate content strategist building production-ready content for North American residential real estate agents.
 
-Content Module: ${module.emoji} ${module.name}
+Agent audience: ${audience.agentProfile}
+Client audience they serve: ${audience.clientProfile}
+Voice guidance: ${audience.voiceGuide}
+
+Market context:
+- Market: ${marketContext.marketName} (${marketContext.metroLabel})
+- Neighborhood anchors: ${marketContext.neighborhoods.join(', ')}
+- Housing mix: ${marketContext.housingMix}
+- Demand drivers: ${marketContext.demandDrivers}
+- Strong agent angles: ${marketContext.agentAngles}
+
+Content module: ${module.emoji} ${module.name}
+Module role: ${module.description}
 Topic: ${topic.title}
 Angle: ${topic.angle}
 Keywords: ${topic.keywords.join(', ')}
+Recommended platform mix: ${audience.platformMix.join(', ')}
 
-IMPORTANT: Adapt all content to the ${mkt} market. Use local neighborhood names, market data, and regulations specific to ${mkt}.
+Guardrails:
+${guardrails}
 
 Generate 4 styles:
-1. **Professional Analysis (professional)** — formal, data-driven, with specific numbers and case studies
+1. **Professional Analysis (professional)** — formal, evidence-aware, and strategically useful for client education
 2. **Casual Chat (casual)** — relaxed, friendly, like talking to a friend, for social media
 3. **Investor Advisor (investor)** — investor perspective, focusing on returns, risk, and asset allocation
 4. **Myth Buster (mythbuster)** — bold, direct, exposing industry insider tips and common misconceptions
 
 Each script must include:
 - **hook**: Opening hook (1-2 sentences, create suspense or curiosity)
-- **content**: Main body (350-450 words, deep explanation, mention specific ${mkt} neighborhoods and areas)
+- **content**: Main body (260-420 words, practical and easy to film, localized to ${mkt})
 - **cta**: Call to action (1-2 sentences, drive follow/DM/comment)
-- **platform**: Best platform ("Instagram", "TikTok", "YouTube" or "General", cover at least 3 platforms)
+- **platform**: Best platform (${platformOptions.map((item) => `"${item}"`).join(', ')}, cover at least 3 platforms)
 - **duration**: Fixed "90 seconds"
 - **tags**: 5-7 hashtags
 
+Output requirements:
+- Make the scripts useful for a working real estate agent, not a generic finance influencer.
+- Use local context from ${marketContext.marketName}, but never invent unsupported numbers, laws, or neighborhood facts.
+- If the topic touches tax, legal, fair housing, or compliance issues, keep it high-level and practical.
+
 Return ONLY JSON array (no markdown code blocks):
 [
-  {"style":"professional","styleName":"Professional Analysis","platform":"General","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]},
-  {"style":"casual","styleName":"Casual Chat","platform":"TikTok","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]},
-  {"style":"investor","styleName":"Investor Advisor","platform":"YouTube","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]},
-  {"style":"mythbuster","styleName":"Myth Buster","platform":"Instagram","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]}
+  {"style":"professional","styleName":"Professional Analysis","platform":"${platformFour}","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"casual","styleName":"Casual Chat","platform":"${platformOne}","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"investor","styleName":"Investor Advisor","platform":"${platformThree}","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"mythbuster","styleName":"Myth Buster","platform":"${platformTwo}","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]}
 ]`;
     }
 
-    // Chinese prompt
     return `今天是 ${date}。
 
-你是一个${mkt}地产领域的资深内容策划师。请根据以下话题，生成 4 种不同风格的短视频口播文案（90秒）。
+你是一个为北美地产经纪人打造内容系统的资深策划师，擅长根据不同受众画像交付可直接拍摄的中文内容。
+
+经纪人画像：${audience.agentProfile}
+他们服务的客户：${audience.clientProfile}
+语气要求：${audience.voiceGuide}
+
+市场画像：
+- 市场：${marketContext.marketName}（${marketContext.metroLabel}）
+- 可提及的社区锚点：${marketContext.neighborhoods.join('、')}
+- 房源结构：${marketContext.housingMix}
+- 当前需求驱动：${marketContext.demandDrivers}
+- 值得经纪人讲的角度：${marketContext.agentAngles}
 
 内容模块：${module.emoji} ${module.name}
+模块作用：${module.description}
 话题：${topic.title}
 创作角度：${topic.angle}
 参考关键词：${topic.keywords.join(', ')}
+推荐平台组合：${audience.platformMix.join('、')}
 
-重要：将所有内容适配到${mkt}市场。使用${mkt}当地的社区名称、市场数据和法规。
+Guardrails：
+${guardrails}
 
 请生成 4 种风格的文案：
-
-1. **专业分析型 (professional)** — 正式、数据驱动，引用具体数字和案例
+1. **专业分析型 (professional)** — 正式、信息密度高，适合做专业型客户教育
 2. **轻松聊天型 (casual)** — 轻松亲切，像朋友聊天，适合社交媒体
 3. **投资顾问型 (investor)** — 投资者视角，关注收益、风险和资产配置
 4. **犀利避坑/揭秘型 (mythbuster)** — 犀利直接，揭示行业内幕和常见误区
 
 每种文案必须包含：
 - **hook**: 开场钩子（1-2句，制造悬念或好奇心）
-- **content**: 主要内容（350-450字，深度讲解，多提及${mkt}具体地名和社区）
+- **content**: 主要内容（260-420字，实操、易拍摄，并适配${mkt}）
 - **cta**: 行动号召（1-2句，引导关注/私信/评论）
-- **platform**: 适合的平台（"小红书"、"视频号"、"YouTube" 或 "通用"，4条至少覆盖3个平台）
+- **platform**: 适合的平台（${platformOptions.map((item) => `"${item}"`).join('、')}，4条至少覆盖3个平台）
 - **duration**: 固定为 "90秒"
 - **tags**: 5-7个话题标签
 
+额外要求：
+- 内容要像真正北美在地经纪人会发的内容，不要写成泛财经号。
+- 可以使用${marketContext.marketName}的本地语境，但不要编造没有依据的数字、法规和社区事实。
+- 一旦涉及税务、法律、公平住房或合规，只能做高层次提醒和决策框架。
+
 请严格返回 JSON 数组格式（不要 markdown 代码块）：
 [
-  {"style":"professional","styleName":"专业分析型","platform":"通用","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]},
-  {"style":"casual","styleName":"轻松聊天型","platform":"小红书","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]},
-  {"style":"investor","styleName":"投资顾问型","platform":"YouTube","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]},
-  {"style":"mythbuster","styleName":"犀利避坑/揭秘型","platform":"视频号","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]}
+  {"style":"professional","styleName":"专业分析型","platform":"${platformFour}","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"casual","styleName":"轻松聊天型","platform":"${platformOne}","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"investor","styleName":"投资顾问型","platform":"${platformThree}","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"mythbuster","styleName":"犀利避坑/揭秘型","platform":"${platformTwo}","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]}
 ]`;
 }
 
 // ── Call Azure OpenAI ────────────────────────────────────────
-async function callAI(prompt: string, language: Language, market: MarketId): Promise<string> {
+async function callAI(prompt: string, language: Language, market: MarketId, audienceProfile: AudienceProfile): Promise<string> {
     let url = config.AZURE_OPENAI_ENDPOINT;
     if (!url.includes('/openai/')) {
         url = `${url.replace(/\/$/, '')}/openai/deployments/${config.AZURE_OPENAI_DEPLOYMENT}/chat/completions?api-version=${config.AZURE_OPENAI_API_VERSION}`;
     }
     const isResponsesAPI = url.includes('/openai/responses');
     const mkt = getMarketName(market, language);
+    const audience = getAudienceContext(audienceProfile, language);
     const system = language === 'en'
-        ? `You are a senior real estate content strategist specializing in ${mkt}. Return ONLY valid JSON.`
-        : `你是${mkt}地产领域的资深内容策划师。请务必只返回 JSON 格式。`;
+        ? `You are a senior real estate content strategist specializing in ${mkt}. You create filming-ready scripts for ${audience.agentProfile} and must keep every claim useful, local, and grounded. Return ONLY valid JSON.`
+        : `你是${mkt}地产领域的资深内容策划师，专门为${audience.agentProfile}创作内容。你必须保持内容真实、在地、可拍摄，并只返回 JSON 格式。`;
 
     if (isResponsesAPI) {
         try {
@@ -161,6 +221,7 @@ export async function generateAllModuleContent(
     dateStr: string,
     language: Language = 'zh',
     market: MarketId = 'new-york',
+    audienceProfile: AudienceProfile = defaultAudienceProfile(language),
 ): Promise<ModuleOutput[]> {
     const today = language === 'en'
         ? new Date().toLocaleDateString('en-US', {
@@ -172,11 +233,12 @@ export async function generateAllModuleContent(
             timeZone: 'America/New_York',
         });
 
+    const activeModules = getActiveContentModules(language, market, audienceProfile);
     const results: ModuleOutput[] = [];
 
-    for (const module of contentModules) {
+    for (const module of activeModules) {
         const topics = getTodayTopics(module, dateStr);
-        logger.info(`\n${module.emoji} Module: ${module.name} — ${topics.length} topic(s) today [${language}/${market}]`);
+        logger.info(`\n${module.emoji} Module: ${module.name} — ${topics.length} topic(s) today [${language}/${market}/${audienceProfile}]`);
 
         const articles: ArticleScripts[] = [];
 
@@ -184,9 +246,9 @@ export async function generateAllModuleContent(
             logger.info(`   ✍️  Generating: ${topic.title}...`);
 
             try {
-                const prompt = buildTopicPrompt(topic, module, today, language, market);
+                const prompt = buildTopicPrompt(topic, module, today, language, market, audienceProfile);
                 const raw = await retry(
-                    async () => callAI(prompt, language, market),
+                    async () => callAI(prompt, language, market, audienceProfile),
                     { retries: 2, delayMs: 3000, label: topic.title }
                 );
                 const scripts = parseScripts(raw);
@@ -214,7 +276,7 @@ export async function generateAllModuleContent(
     }
 
     const totalScripts = results.reduce((s, m) => s + m.articles.reduce((s2, a) => s2 + a.scripts.length, 0), 0);
-    logger.info(`\n🎉 Content modules: ${totalScripts} scripts generated across ${results.length} modules [${language}/${market}]`);
+    logger.info(`\n🎉 Content modules: ${totalScripts} scripts generated across ${results.length} modules [${language}/${market}/${audienceProfile}]`);
 
     return results;
 }

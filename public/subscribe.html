@@ -867,7 +867,7 @@
                         <div class="card-label" id="cardLabel">Free sample · no credit card</div>
                         <h2 class="card-title" id="cardTitle">Send yourself a private sample delivery.</h2>
                         <p class="card-copy" id="cardCopy">
-                            Pick the market you work, choose the output language, and we’ll send a full REscript package through the same private-link flow subscribers receive.
+                            Pick your market, delivery language, and audience focus. We’ll send a full REscript package through the same private-link flow subscribers receive.
                         </p>
                         <div class="stack">
                             <input id="heroEmail" class="field" type="email" placeholder="you@brokerage.com" autocomplete="email">
@@ -887,6 +887,10 @@
                                     <option value="zh" id="langOptionZh">Chinese delivery</option>
                                 </select>
                             </div>
+                            <select id="heroAudience" class="field" aria-label="Select audience focus">
+                                <option value="general" id="audienceOptionGeneral">General North American audience</option>
+                                <option value="chinese-community" id="audienceOptionChinese">Chinese-speaking / relocation audience</option>
+                            </select>
                         </div>
                         <div class="signup-actions">
                             <button class="signup-button trial-button" onclick="signupTrial()" id="sampleButton">Send free sample</button>
@@ -1095,6 +1099,7 @@
                 emailPlaceholder: 'you@brokerage.com',
                 marketAria: 'Select market',
                 languageAria: 'Select delivery language',
+                audienceAria: 'Select audience focus',
                 marketOptions: {
                     'new-york': 'New York',
                     'los-angeles': 'Los Angeles',
@@ -1124,16 +1129,18 @@
                     noteStrip: 'Built for real estate marketing workflows, not generic AI prompting. Your morning package includes market news, evergreen content modules, copy-ready script cards, and direct subscription controls in every email.',
                     cardLabel: 'Free sample · no credit card',
                     cardTitle: 'Send yourself a private sample delivery.',
-                    cardCopy: 'Pick the market you work, choose the output language, and we’ll send a full REscript package through the same private-link flow subscribers receive.',
+                    cardCopy: 'Pick your market, delivery language, and audience focus. We’ll send a full REscript package through the same private-link flow subscribers receive.',
                     langOptionEn: 'English delivery',
                     langOptionZh: 'Chinese delivery',
+                    audienceOptionGeneral: 'General North American audience',
+                    audienceOptionChinese: 'Chinese-speaking / relocation audience',
                     sampleButton: 'Send free sample',
                     subscribeButton: 'Start paid delivery · $9.99/mo',
                     productKicker: 'Product',
                     productTitle: 'Designed like an agent’s morning brief, not a generic content generator.',
                     productCopy: 'REscript packages the content decisions that usually eat the first hour of the day: what to talk about, which angle to take, how to localize it, and how to get it into filming format quickly.',
                     feature1Title: 'Market-matched inputs',
-                    feature1Copy: 'Each run is tied to a specific US market and language preference, so the output you open is aligned to the audience you actually serve.',
+                    feature1Copy: 'Each run is tied to a specific market, delivery language, and audience profile, so the output you open matches the clients you actually serve.',
                     feature2Title: 'News + evergreen coverage',
                     feature2Copy: 'Daily news scripts are paired with recurring buyer, seller, investor, neighborhood, and brand-building modules so you are not held hostage by the news cycle.',
                     feature3Title: 'Private access by design',
@@ -1251,6 +1258,7 @@
                 emailPlaceholder: 'you@brokerage.com',
                 marketAria: '选择市场',
                 languageAria: '选择交付语言',
+                audienceAria: '选择受众画像',
                 marketOptions: {
                     'new-york': '纽约',
                     'los-angeles': '洛杉矶',
@@ -1280,16 +1288,18 @@
                     noteStrip: '这不是泛用型 AI prompt 工具，而是给地产营销工作流准备的晨报包：包含本地新闻、常青模块、可直接复制的脚本卡片，以及邮件内置的订阅管理入口。',
                     cardLabel: '免费 sample · 无需信用卡',
                     cardTitle: '先给自己发一份私有 sample。',
-                    cardCopy: '选择你服务的市场和希望收到的语言，我们会用和正式订阅相同的私有链接流程，发你一整份 REscript 内容包。',
+                    cardCopy: '选择你服务的市场、交付语言和受众画像，我们会用和正式订阅相同的私有链接流程，发你一整份 REscript 内容包。',
                     langOptionEn: '英文交付',
                     langOptionZh: '中文交付',
+                    audienceOptionGeneral: '主流北美客户受众',
+                    audienceOptionChinese: '华语 / 搬迁家庭受众',
                     sampleButton: '发送免费 sample',
                     subscribeButton: '开启付费订阅 · $9.99/月',
                     productKicker: '产品',
                     productTitle: '它更像经纪人的晨间 brief，而不是一个通用内容生成器。',
                     productCopy: 'REscript 把最耗早晨一小时的内容决策打包处理掉：今天讲什么、用什么角度、怎么本地化、怎么快速进入拍摄格式。',
                     feature1Title: '按市场和语言匹配',
-                    feature1Copy: '每次生成都绑定具体美国市场和语言偏好，所以你打开的内容，是真正对你受众有用的版本。',
+                    feature1Copy: '每次生成都绑定具体市场、交付语言和受众画像，所以你打开的内容，会更贴近你真正服务的客户。',
                     feature2Title: '新闻热点 + 常青内容并行',
                     feature2Copy: '每天的新闻脚本会和买家、卖家、投资者、社区、个人品牌等常青模块一起交付，不会被新闻周期绑架。',
                     feature3Title: '从设计上就是私有交付',
@@ -1406,6 +1416,7 @@
         let currentLang = 'en';
         let activeStyleIndex = 0;
         let deliveryTouched = false;
+        let audienceTouched = false;
 
         function escapeHtml(value) {
             return String(value)
@@ -1446,6 +1457,7 @@
             document.getElementById('heroEmail').placeholder = ui.emailPlaceholder;
             document.getElementById('heroMarket').setAttribute('aria-label', ui.marketAria);
             document.getElementById('heroLang').setAttribute('aria-label', ui.languageAria);
+            document.getElementById('heroAudience').setAttribute('aria-label', ui.audienceAria);
 
             Array.from(document.getElementById('heroMarket').options).forEach((option) => {
                 option.textContent = ui.marketOptions[option.value] || option.textContent;
@@ -1453,6 +1465,10 @@
 
             if (!deliveryTouched) {
                 document.getElementById('heroLang').value = currentLang;
+            }
+
+            if (!audienceTouched) {
+                document.getElementById('heroAudience').value = currentLang === 'zh' ? 'chinese-community' : 'general';
             }
 
             renderStyle();
@@ -1500,6 +1516,7 @@
                 email: document.getElementById('heroEmail').value.trim(),
                 language: document.getElementById('heroLang').value,
                 market: document.getElementById('heroMarket').value,
+                audienceProfile: document.getElementById('heroAudience').value,
             };
         }
 
@@ -1510,7 +1527,7 @@
         }
 
         async function signupTrial() {
-            const { email, language, market } = getFormData();
+            const { email, language, market, audienceProfile } = getFormData();
             if (!email) {
                 showMsg('error', tMessage('sampleEmailRequired'));
                 return;
@@ -1521,7 +1538,7 @@
                 const res = await fetch('/api/subscribe/sample', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, language, market }),
+                    body: JSON.stringify({ email, language, market, audienceProfile }),
                 });
                 const data = await res.json();
                 if (!data.success) {
@@ -1544,7 +1561,7 @@
         }
 
         async function startCheckout() {
-            const { email, language, market } = getFormData();
+            const { email, language, market, audienceProfile } = getFormData();
             if (!email) {
                 showMsg('error', tMessage('checkoutEmailRequired'));
                 return;
@@ -1555,7 +1572,7 @@
                 const res = await fetch('/api/subscribe/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, language, market }),
+                    body: JSON.stringify({ email, language, market, audienceProfile }),
                 });
                 const data = await res.json();
                 if (!data.success || !data.url) {
@@ -1570,6 +1587,15 @@
 
         document.getElementById('heroLang').addEventListener('change', () => {
             deliveryTouched = true;
+            if (!audienceTouched) {
+                document.getElementById('heroAudience').value = document.getElementById('heroLang').value === 'zh'
+                    ? 'chinese-community'
+                    : 'general';
+            }
+        });
+
+        document.getElementById('heroAudience').addEventListener('change', () => {
+            audienceTouched = true;
         });
 
         const savedLang = localStorage.getItem('rescript-ui-lang');

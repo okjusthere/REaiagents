@@ -241,8 +241,41 @@
             line-height: 1.8;
         }
 
+        .prefs-box {
+            margin-top: 18px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .prefs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .field span {
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+
+        .field select {
+            min-height: 46px;
+            padding: 0 12px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.94);
+            color: var(--ink);
+            font: inherit;
+        }
+
         @media (max-width: 860px) {
             .grid { grid-template-columns: 1fr; }
+            .prefs-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -262,12 +295,31 @@
         <div class="grid">
             <section class="panel">
                 <h2 id="detailsTitle">Subscription details</h2>
-                <p id="detailsCopy">We use this information to match your delivery to the market and language preferences tied to your account.</p>
+                <p id="detailsCopy">We use this information to match your delivery to the market, language, and audience profile tied to your account.</p>
                 <div class="detail-list" id="metaBox" style="display:none;">
                     <div class="detail"><span class="detail-label" id="emailLabel">Email</span><span class="detail-value" id="emailValue"></span></div>
                     <div class="detail"><span class="detail-label" id="planLabel">Plan</span><span class="detail-value" id="planValue"></span></div>
                     <div class="detail"><span class="detail-label" id="languageLabel">Delivery language</span><span class="detail-value" id="languageValue"></span></div>
                     <div class="detail"><span class="detail-label" id="marketLabel">Primary market</span><span class="detail-value" id="marketValue"></span></div>
+                    <div class="detail"><span class="detail-label" id="audienceLabel">Audience focus</span><span class="detail-value" id="audienceValue"></span></div>
+                </div>
+                <div class="prefs-box" id="prefsBox" style="display:none;">
+                    <p id="prefsCopy">Update these preferences if you want future deliveries to follow a different market, delivery language, or audience focus.</p>
+                    <div class="prefs-grid">
+                        <label class="field">
+                            <span id="prefLanguageLabel">Delivery language</span>
+                            <select id="prefLanguage"></select>
+                        </label>
+                        <label class="field">
+                            <span id="prefMarketLabel">Primary market</span>
+                            <select id="prefMarket"></select>
+                        </label>
+                        <label class="field">
+                            <span id="prefAudienceLabel">Audience focus</span>
+                            <select id="prefAudience"></select>
+                        </label>
+                    </div>
+                    <button class="secondary" id="savePrefsBtn" onclick="savePreferences()">Save preferences</button>
                 </div>
             </section>
 
@@ -298,13 +350,19 @@
                 pageTitle: 'Manage delivery without opening a support ticket.',
                 pageCopy: 'This page is tied to your private REscript access link. Use it to pause or resume daily delivery, and if you are on a paid plan, open the Stripe billing portal from the same control surface.',
                 detailsTitle: 'Subscription details',
-                detailsCopy: 'We use this information to match your delivery to the market and language preferences tied to your account.',
+                detailsCopy: 'We use this information to match your delivery to the market, language, and audience profile tied to your account.',
                 emailLabel: 'Email',
                 planLabel: 'Plan',
                 languageLabel: 'Delivery language',
                 marketLabel: 'Primary market',
+                audienceLabel: 'Audience focus',
+                prefsCopy: 'Update these preferences if you want future deliveries to follow a different market, delivery language, or audience focus.',
+                prefLanguageLabel: 'Delivery language',
+                prefMarketLabel: 'Primary market',
+                prefAudienceLabel: 'Audience focus',
                 actionsTitle: 'Actions',
                 actionsCopy: 'Use these controls to pause delivery, resume delivery, or open billing.',
+                savePrefsBtn: 'Save preferences',
                 pauseBtn: 'Pause delivery',
                 resumeBtn: 'Resume delivery',
                 billingBtn: 'Open Stripe billing',
@@ -320,10 +378,16 @@
                 pauseSuccess: 'Delivery is paused. You will stop receiving the daily brief until you resume it.',
                 resumeError: 'Unable to resume delivery.',
                 resumeSuccess: 'Delivery is active again.',
+                savePrefsError: 'Unable to update preferences.',
+                savePrefsSuccess: 'Delivery preferences updated. Future runs will follow the new market, language, and audience settings.',
                 billingError: 'Unable to open the billing portal.',
                 genericLoadError: 'Unable to load your manage page.',
                 plan: { free: 'Free', subscriber: 'Paid', vip: 'VIP' },
                 language: { en: 'English', zh: 'Chinese' },
+                audience: {
+                    general: 'General North American audience',
+                    'chinese-community': 'Chinese-speaking / relocation audience',
+                },
                 market: {
                     'new-york': 'New York',
                     'los-angeles': 'Los Angeles',
@@ -342,13 +406,19 @@
                 pageTitle: '不用发支持工单，也能直接管理交付。',
                 pageCopy: '这个页面绑定的是你的私有 REscript 访问链接。你可以在这里暂停或恢复每日投递；如果你是付费用户，也能从同一个页面进入 Stripe billing portal。',
                 detailsTitle: '订阅信息',
-                detailsCopy: '我们会使用这些信息，把你的交付内容匹配到正确的市场和语言偏好。',
+                detailsCopy: '我们会使用这些信息，把你的交付内容匹配到正确的市场、语言和受众画像。',
                 emailLabel: '邮箱',
                 planLabel: '方案',
                 languageLabel: '交付语言',
                 marketLabel: '主要市场',
+                audienceLabel: '受众画像',
+                prefsCopy: '如果你想让之后的交付跟随不同的市场、语言或受众画像，可以直接在这里修改。',
+                prefLanguageLabel: '交付语言',
+                prefMarketLabel: '主要市场',
+                prefAudienceLabel: '受众画像',
                 actionsTitle: '可执行操作',
                 actionsCopy: '你可以在这里暂停投递、恢复投递，或打开账单管理。',
+                savePrefsBtn: '保存偏好',
                 pauseBtn: '暂停投递',
                 resumeBtn: '恢复投递',
                 billingBtn: '打开 Stripe 账单页',
@@ -364,10 +434,16 @@
                 pauseSuccess: '投递已暂停。在你重新开启之前，不会再收到每日晨报。',
                 resumeError: '无法恢复投递。',
                 resumeSuccess: '投递已重新开启。',
+                savePrefsError: '无法更新偏好设置。',
+                savePrefsSuccess: '偏好已更新，之后的生成和投递会按新的市场、语言和受众画像执行。',
                 billingError: '无法打开账单管理页面。',
                 genericLoadError: '无法加载你的管理页面。',
                 plan: { free: '免费', subscriber: '付费订阅', vip: 'VIP' },
                 language: { en: '英文', zh: '中文' },
+                audience: {
+                    general: '主流北美客户受众',
+                    'chinese-community': '华语 / 搬迁家庭受众',
+                },
                 market: {
                     'new-york': '纽约',
                     'los-angeles': '洛杉矶',
@@ -385,6 +461,9 @@
         let subscriptionData = null;
         const params = new URLSearchParams(window.location.search);
         const token = params.get('token') || '';
+        const marketIds = ['new-york', 'los-angeles', 'san-francisco', 'chicago', 'miami', 'seattle', 'boston', 'houston'];
+        const audienceIds = ['general', 'chinese-community'];
+        const languageIds = ['en', 'zh'];
 
         function getUi() {
             return copy[currentLang] || copy.en;
@@ -395,6 +474,19 @@
             if (el) {
                 el.textContent = value;
             }
+        }
+
+        function renderSelectOptions() {
+            const ui = getUi();
+            document.getElementById('prefLanguage').innerHTML = languageIds
+                .map((language) => `<option value="${language}">${ui.language[language] || language}</option>`)
+                .join('');
+            document.getElementById('prefMarket').innerHTML = marketIds
+                .map((market) => `<option value="${market}">${ui.market[market] || market}</option>`)
+                .join('');
+            document.getElementById('prefAudience').innerHTML = audienceIds
+                .map((audience) => `<option value="${audience}">${ui.audience[audience] || audience}</option>`)
+                .join('');
         }
 
         function setLang(nextLang) {
@@ -413,13 +505,20 @@
             setText('planLabel', ui.planLabel);
             setText('languageLabel', ui.languageLabel);
             setText('marketLabel', ui.marketLabel);
+            setText('audienceLabel', ui.audienceLabel);
+            setText('prefsCopy', ui.prefsCopy);
+            setText('prefLanguageLabel', ui.prefLanguageLabel);
+            setText('prefMarketLabel', ui.prefMarketLabel);
+            setText('prefAudienceLabel', ui.prefAudienceLabel);
             setText('actionsTitle', ui.actionsTitle);
             setText('actionsCopy', ui.actionsCopy);
+            setText('savePrefsBtn', ui.savePrefsBtn);
             setText('pauseBtn', ui.pauseBtn);
             setText('resumeBtn', ui.resumeBtn);
             setText('billingBtn', ui.billingBtn);
             setText('homeLink', ui.homeLink);
             setText('helperCopy', ui.helperCopy);
+            renderSelectOptions();
 
             if (!subscriptionData) {
                 const badge = document.getElementById('statusBadge');
@@ -447,13 +546,22 @@
             return getUi().market[market] || market;
         }
 
+        function localizeAudience(audienceProfile) {
+            return getUi().audience[audienceProfile] || audienceProfile;
+        }
+
         function hydrateDetails(data) {
             subscriptionData = data;
             document.getElementById('metaBox').style.display = 'grid';
+            document.getElementById('prefsBox').style.display = 'grid';
             document.getElementById('emailValue').textContent = data.email;
             document.getElementById('planValue').textContent = localizePlan(data.plan);
             document.getElementById('languageValue').textContent = localizeLanguage(data.language);
             document.getElementById('marketValue').textContent = localizeMarket(data.market);
+            document.getElementById('audienceValue').textContent = localizeAudience(data.audienceProfile);
+            document.getElementById('prefLanguage').value = data.language;
+            document.getElementById('prefMarket').value = data.market;
+            document.getElementById('prefAudience').value = data.audienceProfile;
 
             const badge = document.getElementById('statusBadge');
             badge.textContent = data.active ? getUi().statusActive : getUi().statusPaused;
@@ -490,6 +598,30 @@
                 setLang(data.language);
             }
             hydrateDetails(data);
+        }
+
+        async function savePreferences() {
+            const response = await fetch('/api/subscription/preferences', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token,
+                    language: document.getElementById('prefLanguage').value,
+                    market: document.getElementById('prefMarket').value,
+                    audienceProfile: document.getElementById('prefAudience').value,
+                }),
+            });
+            const result = await response.json();
+            if (!result.success || !result.data) {
+                showMessage('error', result.error || getUi().savePrefsError);
+                return;
+            }
+
+            if (result.data.language === 'zh' || result.data.language === 'en') {
+                setLang(result.data.language);
+            }
+            hydrateDetails(result.data);
+            showMessage('success', getUi().savePrefsSuccess);
         }
 
         async function unsubscribe() {

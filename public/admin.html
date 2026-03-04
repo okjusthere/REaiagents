@@ -709,7 +709,7 @@
         }
         el.innerHTML = '<div class="output-list">' + data.slice(0, 14).map(output =>
           `<div class="output-item">
-        <span class="output-date">📅 ${escapeHtml(output.date)} · ${escapeHtml(output.language.toUpperCase())} · ${escapeHtml(output.market)}</span>
+        <span class="output-date">📅 ${escapeHtml(output.date)} · ${escapeHtml(output.language.toUpperCase())} · ${escapeHtml(output.market)} · ${escapeHtml(output.audienceProfile || 'general')}</span>
         <a href="/view.html?key=${encodeURIComponent(output.key)}&admin=1" target="_blank" rel="noopener noreferrer">查看文案 ↗</a>
       </div>`
         ).join('') + '</div>';
@@ -731,6 +731,7 @@
       };
       const langLabel = (l) => l === 'zh' ? '🇨🇳 中文' : '🇺🇸 EN';
       const markets = ['new-york', 'los-angeles', 'san-francisco', 'chicago', 'miami', 'seattle', 'boston', 'houston'];
+      const audienceLabel = (audience) => audience === 'chinese-community' ? '华语/搬迁' : '广义北美';
       const langSelect = (c) => `<select class="inline-select" onchange="updatePref('${c.id}','language',this.value)">
         <option value="zh" ${c.language === 'zh' ? 'selected' : ''}>🇨🇳 中文</option>
         <option value="en" ${c.language === 'en' ? 'selected' : ''}>🇺🇸 EN</option>
@@ -738,12 +739,17 @@
       const mktSelect = (c) => `<select class="inline-select" onchange="updatePref('${c.id}','market',this.value)">
         ${markets.map(m => `<option value="${m}" ${c.market === m ? 'selected' : ''}>${m}</option>`).join('')}
       </select>`;
+      const audienceSelect = (c) => `<select class="inline-select" onchange="updatePref('${c.id}','audienceProfile',this.value)">
+        <option value="general" ${c.audienceProfile === 'general' ? 'selected' : ''}>广义北美</option>
+        <option value="chinese-community" ${c.audienceProfile === 'chinese-community' ? 'selected' : ''}>华语/搬迁</option>
+      </select>`;
       const rows = clients.map(c => `<tr>
     <td><span class="active-dot ${c.active ? 'on' : 'off'}"></span>${escapeHtml(c.name)}</td>
     <td>${escapeHtml(c.email)}</td>
     <td>${planBadge(c)}</td>
     <td>${langSelect(c)}</td>
     <td>${mktSelect(c)}</td>
+    <td>${audienceSelect(c)}</td>
     <td>${c.active ? '✅' : '⏸'}</td>
     <td>
       <button class="btn btn-ghost btn-sm" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '暂停' : '启用'}</button>
@@ -751,7 +757,7 @@
       <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', ${JSON.stringify(c.name)})">删除</button>
     </td>
   </tr>`).join('');
-      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>套餐</th><th>语言</th><th>城市</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
+      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>套餐</th><th>语言</th><th>城市</th><th>受众</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
     // ── Admin Actions ─────────────────────────────────────
@@ -787,7 +793,8 @@
         if (res.status === 401) { logout(); return; }
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
-        showToast(`✅ 已更新${field === 'language' ? '语言' : '城市'}`);
+        const label = field === 'language' ? '语言' : field === 'market' ? '城市' : '受众';
+        showToast(`✅ 已更新${label}`);
       } catch (e) { showToast(e.message, 'error'); }
     }
 
@@ -831,9 +838,9 @@
       try {
         const clients = window._cachedClients || [];
         if (!clients.length) { showToast('无数据可导出', 'error'); return; }
-        const header = 'Name,Email,Plan,Language,Market,Active,Created';
+        const header = 'Name,Email,Plan,Language,Market,Audience,Active,Created';
         const rows = clients.map(c =>
-          [c.name, c.email, c.plan, c.language, c.market, c.active, c.createdAt].map(v => `"${v}"`).join(',')
+          [c.name, c.email, c.plan, c.language, c.market, c.audienceProfile || 'general', c.active, c.createdAt].map(v => `"${v}"`).join(',')
         );
         const csv = [header, ...rows].join('\n');
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });

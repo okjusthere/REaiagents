@@ -13,6 +13,7 @@ import {
     updateClient,
     updateClientByEmail,
     upgradeToSubscriber,
+    type AudienceProfile,
     type Client,
     type Language,
     type MarketId,
@@ -28,7 +29,8 @@ const router = Router();
 const marketIds = SUPPORTED_MARKETS.map((market) => market.id) as [string, ...string[]];
 const subscribeSchema = z.object({
     email: z.string().trim().email(),
-    language: z.enum(['zh', 'en']).default('zh'),
+    language: z.enum(['zh', 'en']).default('en'),
+    audienceProfile: z.enum(['general', 'chinese-community']).optional(),
     market: z.string().default('new-york').transform((value) => (
         marketIds.includes(value) ? value : 'new-york'
     ) as MarketId),
@@ -46,15 +48,24 @@ function getStripe(): Stripe {
     return stripeClient;
 }
 
-function upsertLead(input: { email: string; language: Language; market: MarketId }): Client {
+function resolveAudienceProfile(input: { audienceProfile?: AudienceProfile; language: Language }): AudienceProfile {
+    if (input.audienceProfile) {
+        return input.audienceProfile;
+    }
+    return input.language === 'zh' ? 'chinese-community' : 'general';
+}
+
+function upsertLead(input: { email: string; language: Language; market: MarketId; audienceProfile?: AudienceProfile }): Client {
+    const audienceProfile = resolveAudienceProfile(input);
     const existing = findByEmail(input.email);
     if (existing) {
         return updateClient(existing.id, {
             language: input.language,
             market: input.market,
+            audienceProfile,
         });
     }
-    return addClient(input);
+    return addClient({ ...input, audienceProfile });
 }
 
 function buildViewerUrl(baseUrl: string, client: Client, outputKey: string): string {
@@ -92,7 +103,7 @@ async function handleSampleRegistration(req: Request, res: Response) {
         const client = upsertLead(input);
         const baseUrl = getBaseAppUrl();
         const subscribeUrl = `${baseUrl}/subscribe.html`;
-        const latestOutputSummary = getLatestOutputForPreferences(client.language, client.market);
+        const latestOutputSummary = getLatestOutputForPreferences(client.language, client.market, client.audienceProfile);
 
         if (latestOutputSummary) {
             const latestOutput = getDailyOutput(latestOutputSummary.key);
@@ -161,6 +172,7 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
                 clientId: client.id,
                 language: client.language,
                 market: client.market,
+                audienceProfile: client.audienceProfile,
             },
             line_items: [{
                 price: config.STRIPE_PRICE_ID,
@@ -174,6 +186,7 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
                     clientId: client.id,
                     language: client.language,
                     market: client.market,
+                    audienceProfile: client.audienceProfile,
                 },
             },
             payment_method_options: {
@@ -210,7 +223,7 @@ router.get('/subscribe/session/:sessionId', async (req: Request, res: Response) 
             return;
         }
 
-        const latestOutputSummary = getLatestOutputForPreferences(client.language, client.market);
+        const latestOutputSummary = getLatestOutputForPreferences(client.language, client.market, client.audienceProfile);
         const baseUrl = getBaseAppUrl();
         const manageToken = createManageToken(client);
 
@@ -220,6 +233,7 @@ router.get('/subscribe/session/:sessionId', async (req: Request, res: Response) 
                 plan: client.plan,
                 active: client.active,
                 language: client.language,
+                audienceProfile: client.audienceProfile,
                 manageUrl: `${baseUrl}/manage.html?token=${encodeURIComponent(manageToken)}`,
                 viewUrl: latestOutputSummary ? buildViewerUrl(baseUrl, client, latestOutputSummary.key) : null,
             },
@@ -285,12 +299,15 @@ router.post('/stripe/webhook', async (req: Request, res: Response) => {
                 const subscriptionId = session.subscription as string;
                 const language = (session.metadata?.language === 'en' ? 'en' : 'zh') as Language;
                 const market = ((session.metadata?.market as MarketId) || 'new-york');
+                const audienceProfile = (session.metadata?.audienceProfile === 'chinese-community'
+                    ? 'chinese-community'
+                    : 'general') as AudienceProfile;
 
                 if (email && customerId && subscriptionId) {
                     if (!findByEmail(email)) {
-                        addClient({ email, language, market });
+                        addClient({ email, language, market, audienceProfile });
                     } else {
-                        updateClientByEmail(email, { language, market });
+                        updateClientByEmail(email, { language, market, audienceProfile });
                     }
                     upgradeToSubscriber(email, customerId, subscriptionId);
                     logger.info(`🎉 New subscriber via Stripe: ${email}`);

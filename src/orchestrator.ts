@@ -2,7 +2,7 @@ import { searchNews } from './agents/news-agent.js';
 import { generateDailyScripts } from './agents/script-writer-agent.js';
 import { generateAllModuleContent } from './agents/content-agent.js';
 import { sendBatchEmails } from './agents/email-agent.js';
-import { getSubscribers, getVipClients, getTrialClients, markTrialUsed, type Client, type Language, type MarketId } from './store/client-store.js';
+import { getSubscribers, getVipClients, getTrialClients, markTrialUsed, type AudienceProfile, type Client, type Language, type MarketId } from './store/client-store.js';
 import { saveDailyOutput } from './store/output-store.js';
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
@@ -10,6 +10,7 @@ import { logger } from './utils/logger.js';
 interface ClientGroup {
     language: Language;
     market: MarketId;
+    audienceProfile: AudienceProfile;
     clients: Client[];
 }
 
@@ -18,9 +19,14 @@ let activeRun: Promise<void> | null = null;
 function groupByPreferences(clients: Client[]): ClientGroup[] {
     const map = new Map<string, ClientGroup>();
     for (const client of clients) {
-        const key = `${client.language}|${client.market}`;
+        const key = `${client.language}|${client.market}|${client.audienceProfile}`;
         if (!map.has(key)) {
-            map.set(key, { language: client.language, market: client.market, clients: [] });
+            map.set(key, {
+                language: client.language,
+                market: client.market,
+                audienceProfile: client.audienceProfile,
+                clients: [],
+            });
         }
         map.get(key)!.clients.push(client);
     }
@@ -54,7 +60,7 @@ async function runPipelineInternal(dryRun = false): Promise<void> {
         logger.info(`👥 Recipients: ${subscribers.length} subscribers + ${vipClients.length} VIP + ${trialClients.length} trial users = ${allRecipients.length} total`);
 
         const groups = groupByPreferences(allRecipients);
-        logger.info(`📊 Preference groups: ${groups.map((group) => `${group.language}/${group.market}(${group.clients.length})`).join(', ')}`);
+        logger.info(`📊 Preference groups: ${groups.map((group) => `${group.language}/${group.market}/${group.audienceProfile}(${group.clients.length})`).join(', ')}`);
 
         const baseUrl = getBaseUrl();
         const subscribeUrl = `${baseUrl}/subscribe.html`;
@@ -63,22 +69,22 @@ async function runPipelineInternal(dryRun = false): Promise<void> {
         let totalModuleScripts = 0;
 
         for (const group of groups) {
-            const { language, market, clients } = group;
+            const { language, market, audienceProfile, clients } = group;
             const payingClients = clients.filter((client) => client.plan === 'subscriber' || client.plan === 'vip');
             const pendingTrialClients = clients.filter((client) => client.plan === 'free' && !client.freeTrialUsed);
 
-            logger.info(`\n🌐 ═══ Processing group: ${language}/${market} (${payingClients.length} subs + ${pendingTrialClients.length} trials) ═══`);
+            logger.info(`\n🌐 ═══ Processing group: ${language}/${market}/${audienceProfile} (${payingClients.length} subs + ${pendingTrialClients.length} trials) ═══`);
 
             logger.info(`📰 Searching news for ${market}...`);
             const articles = await searchNews(market);
             logger.info(`📰 Found ${articles.length} articles`);
 
-            logger.info(`✍️  Generating news scripts (${language})...`);
-            const dailyOutput = await generateDailyScripts(articles, 3, language, market);
+            logger.info(`✍️  Generating news scripts (${language}/${audienceProfile})...`);
+            const dailyOutput = await generateDailyScripts(articles, 3, language, market, audienceProfile);
 
-            logger.info(`📚 Generating content module scripts (${language}/${market})...`);
+            logger.info(`📚 Generating content module scripts (${language}/${market}/${audienceProfile})...`);
             const dateStr = new Date().toISOString().split('T')[0];
-            const modules = await generateAllModuleContent(dateStr, language, market);
+            const modules = await generateAllModuleContent(dateStr, language, market, audienceProfile);
             dailyOutput.modules = modules;
 
             const savedOutput = saveDailyOutput(dailyOutput);

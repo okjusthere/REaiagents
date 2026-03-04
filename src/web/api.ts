@@ -11,6 +11,12 @@ const router = Router();
 const clientCreateSchema = z.object({
     name: z.string().trim().min(1).max(120).optional(),
     email: z.string().trim().email(),
+    language: z.enum(['zh', 'en']).default('en'),
+    audienceProfile: z.enum(['general', 'chinese-community']).optional(),
+    market: z.string().transform((value) => {
+        const ids = SUPPORTED_MARKETS.map((market) => market.id);
+        return (ids.includes(value as typeof ids[number]) ? value : 'new-york') as typeof ids[number];
+    }).default('new-york'),
 });
 
 const clientUpdateSchema = z.object({
@@ -18,6 +24,7 @@ const clientUpdateSchema = z.object({
     email: z.string().trim().email().optional(),
     active: z.boolean().optional(),
     language: z.enum(['zh', 'en']).optional(),
+    audienceProfile: z.enum(['general', 'chinese-community']).optional(),
     market: z.string().transform((value) => {
         const ids = SUPPORTED_MARKETS.map((market) => market.id);
         return (ids.includes(value as typeof ids[number]) ? value : 'new-york') as typeof ids[number];

@@ -9,6 +9,7 @@ const CLIENTS_FILE = path.join(DATA_DIR, 'clients.json');
 
 export type Language = 'zh' | 'en';
 export type ClientPlan = 'free' | 'subscriber' | 'vip';
+export type AudienceProfile = 'general' | 'chinese-community';
 
 export const SUPPORTED_MARKETS = [
     { id: 'new-york', label: 'New York / 纽约', queries: ['New York real estate', 'NYC housing market', 'Manhattan property market'] },
@@ -32,6 +33,7 @@ export interface Client {
     updatedAt: string;
     language: Language;
     market: MarketId;
+    audienceProfile: AudienceProfile;
     plan: ClientPlan;
     freeTrialUsed: boolean;
     stripeCustomerId?: string;
@@ -43,6 +45,7 @@ type ClientUpdate = Partial<Omit<Client, 'id' | 'createdAt'>>;
 const SUPPORTED_LANGUAGE_SET = new Set<Language>(['zh', 'en']);
 const SUPPORTED_MARKET_SET = new Set<MarketId>(SUPPORTED_MARKETS.map((market) => market.id));
 const PLAN_SET = new Set<ClientPlan>(['free', 'subscriber', 'vip']);
+const AUDIENCE_SET = new Set<AudienceProfile>(['general', 'chinese-community']);
 
 function ensureDataFile(): void {
     ensureDirSync(DATA_DIR);
@@ -67,8 +70,19 @@ function normalizePlan(plan: unknown): ClientPlan {
     return PLAN_SET.has(plan as ClientPlan) ? (plan as ClientPlan) : 'free';
 }
 
+function defaultAudienceProfile(language: Language): AudienceProfile {
+    return language === 'zh' ? 'chinese-community' : 'general';
+}
+
+function normalizeAudienceProfile(audienceProfile: unknown, language: Language): AudienceProfile {
+    return AUDIENCE_SET.has(audienceProfile as AudienceProfile)
+        ? (audienceProfile as AudienceProfile)
+        : defaultAudienceProfile(language);
+}
+
 function migrateClient(input: any): Client {
     const now = new Date().toISOString();
+    const language = normalizeLanguage(input.language);
     return {
         id: String(input.id || generateId()),
         name: String(input.name || input.email || 'Client').trim(),
@@ -76,8 +90,9 @@ function migrateClient(input: any): Client {
         active: input.active ?? true,
         createdAt: input.createdAt || now,
         updatedAt: input.updatedAt || input.createdAt || now,
-        language: normalizeLanguage(input.language),
+        language,
         market: normalizeMarket(input.market),
+        audienceProfile: normalizeAudienceProfile(input.audienceProfile, language),
         plan: normalizePlan(input.plan),
         freeTrialUsed: Boolean(input.freeTrialUsed),
         stripeCustomerId: input.stripeCustomerId || undefined,
@@ -135,6 +150,9 @@ function sanitizeUpdate(current: Client, data: ClientUpdate): Client {
     if (data.market !== undefined) {
         next.market = normalizeMarket(data.market);
     }
+    if (data.audienceProfile !== undefined) {
+        next.audienceProfile = normalizeAudienceProfile(data.audienceProfile, next.language);
+    }
     if (data.plan !== undefined) {
         next.plan = normalizePlan(data.plan);
     }
@@ -175,12 +193,13 @@ export function findByStripeCustomerId(stripeCustomerId: string): Client | undef
     return readClients().find((client) => client.stripeCustomerId === stripeCustomerId);
 }
 
-export function addClient(data: { name?: string; email: string; language?: Language; market?: MarketId }): Client {
+export function addClient(data: { name?: string; email: string; language?: Language; market?: MarketId; audienceProfile?: AudienceProfile }): Client {
     const clients = readClients();
     const email = data.email.trim().toLowerCase();
     assertUniqueEmail(clients, email);
 
     const now = new Date().toISOString();
+    const language = normalizeLanguage(data.language);
     const client: Client = {
         id: generateId(),
         name: data.name?.trim() || email.split('@')[0],
@@ -188,15 +207,16 @@ export function addClient(data: { name?: string; email: string; language?: Langu
         active: true,
         createdAt: now,
         updatedAt: now,
-        language: normalizeLanguage(data.language),
+        language,
         market: normalizeMarket(data.market),
+        audienceProfile: normalizeAudienceProfile(data.audienceProfile, language),
         plan: 'free',
         freeTrialUsed: false,
     };
 
     clients.push(client);
     writeClients(clients);
-    logger.info(`➕ Client added: ${client.name} <${client.email}> [${client.language}/${client.market}]`);
+    logger.info(`➕ Client added: ${client.name} <${client.email}> [${client.language}/${client.market}/${client.audienceProfile}]`);
     return client;
 }
 
