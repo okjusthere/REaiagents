@@ -134,6 +134,18 @@
             box-shadow: 0 10px 20px rgba(32, 52, 67, 0.18);
         }
 
+        .lang-toggle {
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--ink);
+            font: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
         .hero {
             padding: 56px 0 34px;
         }
@@ -800,58 +812,61 @@
     <header class="topbar">
         <a class="brand" href="/">
             <span class="brand-mark">R</span>
-            <span>REscript · agent content desk</span>
+            <span id="brandText">REscript · agent content desk</span>
         </a>
         <nav class="nav-links">
-            <a href="#product">Product</a>
-            <a href="#workflow">Workflow</a>
-            <a href="#audience">Who it's for</a>
-            <a href="#pricing">Pricing</a>
+            <a href="#product" id="navProduct">Product</a>
+            <a href="#workflow" id="navWorkflow">Workflow</a>
+            <a href="#audience" id="navAudience">Who it's for</a>
+            <a href="#pricing" id="navPricing">Pricing</a>
         </nav>
-        <a class="nav-cta" href="#signup">Start the free brief</a>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <button class="lang-toggle" id="langToggle" onclick="toggleLang()">中文</button>
+            <a class="nav-cta" href="#signup" id="navCta">Start the free brief</a>
+        </div>
     </header>
 
     <main class="shell">
         <section class="hero">
             <div class="hero-grid">
                 <div class="hero-copy">
-                    <div class="eyebrow">Morning content system for North American agents</div>
-                    <h1>
+                    <div class="eyebrow" id="heroEyebrow">Morning content system for North American agents</div>
+                    <h1 id="heroTitle">
                         Walk into every morning with a
                         <span class="headline-accent">market-specific video desk</span>,
                         not a blank content calendar.
                     </h1>
-                    <p class="hero-subtitle">
+                    <p class="hero-subtitle" id="heroSubtitle">
                         REscript turns the day’s housing news and evergreen education topics into ready-to-film scripts for residential agents, teams, and brokerage marketing leads. Choose your market, choose your delivery language, and open a private viewer link built for fast review and filming.
                     </p>
                     <div class="hero-actions">
-                        <a class="button button-primary" href="#signup">Get the free brief</a>
-                        <a class="button button-secondary" href="#preview">See the script format</a>
+                        <a class="button button-primary" href="#signup" id="heroPrimary">Get the free brief</a>
+                        <a class="button button-secondary" href="#preview" id="heroSecondary">See the script format</a>
                     </div>
                     <div class="hero-meta">
                         <div class="metric">
                             <span class="metric-value">8</span>
-                            <span class="metric-label">US markets supported today, from New York to Seattle.</span>
+                            <span class="metric-label" id="metricOne">US markets supported today, from New York to Seattle.</span>
                         </div>
                         <div class="metric">
                             <span class="metric-value">4</span>
-                            <span class="metric-label">Script angles per topic: market analysis, casual, investor, and myth-buster.</span>
+                            <span class="metric-label" id="metricTwo">Script angles per topic: market analysis, casual, investor, and myth-buster.</span>
                         </div>
                         <div class="metric">
-                            <span class="metric-value">Private</span>
-                            <span class="metric-label">Signed viewer links per recipient. No public date-based output pages.</span>
+                            <span class="metric-value" id="metricThreeValue">Private</span>
+                            <span class="metric-label" id="metricThree">Signed viewer links per recipient. No public date-based output pages.</span>
                         </div>
                     </div>
-                    <div class="note-strip">
+                    <div class="note-strip" id="noteStrip">
                         Built for real estate marketing workflows, not generic AI prompting. Your morning package includes market news, evergreen content modules, copy-ready script cards, and direct subscription controls in every email.
                     </div>
                 </div>
 
                 <aside class="signup-card" id="signup">
                     <div class="signup-content">
-                        <div class="card-label">Free trial · no credit card</div>
-                        <h2 class="card-title">Send yourself a private sample delivery.</h2>
-                        <p class="card-copy">
+                        <div class="card-label" id="cardLabel">Free sample · no credit card</div>
+                        <h2 class="card-title" id="cardTitle">Send yourself a private sample delivery.</h2>
+                        <p class="card-copy" id="cardCopy">
                             Pick the market you work, choose the output language, and we’ll send a full REscript package through the same private-link flow subscribers receive.
                         </p>
                         <div class="stack">
@@ -868,16 +883,16 @@
                                     <option value="houston">Houston</option>
                                 </select>
                                 <select id="heroLang" class="field" aria-label="Select delivery language">
-                                    <option value="en">English delivery</option>
-                                    <option value="zh">Chinese delivery</option>
+                                    <option value="en" id="langOptionEn">English delivery</option>
+                                    <option value="zh" id="langOptionZh">Chinese delivery</option>
                                 </select>
                             </div>
                         </div>
                         <div class="signup-actions">
-                            <button class="signup-button trial-button" onclick="signupTrial()">Send free sample</button>
-                            <button class="signup-button subscribe-button" onclick="startCheckout()">Start paid delivery · $9.99/mo</button>
+                            <button class="signup-button trial-button" onclick="signupTrial()" id="sampleButton">Send free sample</button>
+                            <button class="signup-button subscribe-button" onclick="startCheckout()" id="subscribeButton">Start paid delivery · $9.99/mo</button>
                         </div>
-                        <p class="microcopy">
+                        <p class="microcopy" id="microcopy">
                             By continuing, you agree to the <a href="/privacy.html">Privacy Policy</a> and <a href="/terms.html">Terms</a>. Every email includes direct manage-subscription controls. Content should be reviewed before publication.
                         </p>
                         <div id="formMsg"></div>
@@ -889,33 +904,33 @@
         <section class="section" id="product">
             <div class="section-head">
                 <div>
-                    <div class="section-kicker">Product</div>
-                    <h2 class="section-title">Designed like an agent’s morning brief, not a generic content generator.</h2>
+                    <div class="section-kicker" id="productKicker">Product</div>
+                    <h2 class="section-title" id="productTitle">Designed like an agent’s morning brief, not a generic content generator.</h2>
                 </div>
-                <p class="section-copy">
+                <p class="section-copy" id="productCopy">
                     REscript packages the content decisions that usually eat the first hour of the day: what to talk about, which angle to take, how to localize it, and how to get it into filming format quickly.
                 </p>
             </div>
             <div class="feature-grid">
                 <article class="feature-card">
                     <div class="feature-index">01</div>
-                    <h3>Market-matched inputs</h3>
-                    <p>Each run is tied to a specific US market and language preference, so the output you open is aligned to the audience you actually serve.</p>
+                    <h3 id="feature1Title">Market-matched inputs</h3>
+                    <p id="feature1Copy">Each run is tied to a specific US market and language preference, so the output you open is aligned to the audience you actually serve.</p>
                 </article>
                 <article class="feature-card">
                     <div class="feature-index">02</div>
-                    <h3>News + evergreen coverage</h3>
-                    <p>Daily news scripts are paired with recurring buyer, seller, investor, neighborhood, and brand-building modules so you are not held hostage by the news cycle.</p>
+                    <h3 id="feature2Title">News + evergreen coverage</h3>
+                    <p id="feature2Copy">Daily news scripts are paired with recurring buyer, seller, investor, neighborhood, and brand-building modules so you are not held hostage by the news cycle.</p>
                 </article>
                 <article class="feature-card">
                     <div class="feature-index">03</div>
-                    <h3>Private access by design</h3>
-                    <p>Subscribers do not browse a public feed. They receive private viewer links and a dedicated manage-subscription page with direct billing and delivery controls.</p>
+                    <h3 id="feature3Title">Private access by design</h3>
+                    <p id="feature3Copy">Subscribers do not browse a public feed. They receive private viewer links and a dedicated manage-subscription page with direct billing and delivery controls.</p>
                 </article>
                 <article class="feature-card">
                     <div class="feature-index">04</div>
-                    <h3>Review-first workflow</h3>
-                    <p>The product is positioned as a draft engine for agents and marketing teams. It supports speed, but still expects human review before anything goes live.</p>
+                    <h3 id="feature4Title">Review-first workflow</h3>
+                    <p id="feature4Copy">The product is positioned as a draft engine for agents and marketing teams. It supports speed, but still expects human review before anything goes live.</p>
                 </article>
             </div>
         </section>
@@ -923,28 +938,28 @@
         <section class="section" id="workflow">
             <div class="section-head">
                 <div>
-                    <div class="section-kicker">Workflow</div>
-                    <h2 class="section-title">What lands in the inbox each morning.</h2>
+                    <div class="section-kicker" id="workflowKicker">Workflow</div>
+                    <h2 class="section-title" id="workflowTitle">What lands in the inbox each morning.</h2>
                 </div>
-                <p class="section-copy">
+                <p class="section-copy" id="workflowCopy">
                     REscript is intentionally simple in the handoff: receive the brief, open the private link, review the angle, copy the version you want, and record.
                 </p>
             </div>
             <div class="workflow-grid">
                 <article class="workflow-card">
-                    <div class="workflow-step">Step 1</div>
-                    <h3>Receive the brief</h3>
-                    <p>An email lands with your market, your preferred language, and a private viewer link to the day’s full content package.</p>
+                    <div class="workflow-step" id="wf1Step">Step 1</div>
+                    <h3 id="wf1Title">Receive the brief</h3>
+                    <p id="wf1Copy">An email lands with your market, your preferred language, and a private viewer link to the day’s full content package.</p>
                 </article>
                 <article class="workflow-card">
-                    <div class="workflow-step">Step 2</div>
-                    <h3>Scan by module</h3>
-                    <p>Filter by market news or evergreen module, then narrow to the script angle that best fits your brand voice and platform for the day.</p>
+                    <div class="workflow-step" id="wf2Step">Step 2</div>
+                    <h3 id="wf2Title">Scan by module</h3>
+                    <p id="wf2Copy">Filter by market news or evergreen module, then narrow to the script angle that best fits your brand voice and platform for the day.</p>
                 </article>
                 <article class="workflow-card">
-                    <div class="workflow-step">Step 3</div>
-                    <h3>Copy, review, publish</h3>
-                    <p>Use the script as a filming draft, add your own compliance review, and move into camera, editing, or scheduling without starting from zero.</p>
+                    <div class="workflow-step" id="wf3Step">Step 3</div>
+                    <h3 id="wf3Title">Copy, review, publish</h3>
+                    <p id="wf3Copy">Use the script as a filming draft, add your own compliance review, and move into camera, editing, or scheduling without starting from zero.</p>
                 </article>
             </div>
         </section>
@@ -952,34 +967,34 @@
         <section class="section" id="preview">
             <div class="section-head">
                 <div>
-                    <div class="section-kicker">Script preview</div>
-                    <h2 class="section-title">Four distinct angles so the content system does not flatten your brand.</h2>
+                    <div class="section-kicker" id="previewKicker">Script preview</div>
+                    <h2 class="section-title" id="previewTitle">Four distinct angles so the content system does not flatten your brand.</h2>
                 </div>
-                <p class="section-copy">
+                <p class="section-copy" id="previewCopy">
                     The product does not just rewrite the same idea four times. Each angle is positioned for a different content role inside an agent’s publishing mix.
                 </p>
             </div>
             <div class="preview-layout">
                 <div class="preview-tabs">
                     <button class="preview-tab active" onclick="showStyle(0, this)">
-                        <strong>Professional analysis</strong>
-                        <span>Structured for market commentary, newsletters, and trust-building talking head videos.</span>
+                        <strong id="previewTab1Title">Professional analysis</strong>
+                        <span id="previewTab1Copy">Structured for market commentary, newsletters, and trust-building talking head videos.</span>
                     </button>
                     <button class="preview-tab" onclick="showStyle(1, this)">
-                        <strong>Casual social</strong>
-                        <span>Faster, more conversational framing for short-form posting and daily consistency.</span>
+                        <strong id="previewTab2Title">Casual social</strong>
+                        <span id="previewTab2Copy">Faster, more conversational framing for short-form posting and daily consistency.</span>
                     </button>
                     <button class="preview-tab" onclick="showStyle(2, this)">
-                        <strong>Investor angle</strong>
-                        <span>Built for return, risk, rate, and underwriting conversations.</span>
+                        <strong id="previewTab3Title">Investor angle</strong>
+                        <span id="previewTab3Copy">Built for return, risk, rate, and underwriting conversations.</span>
                     </button>
                     <button class="preview-tab" onclick="showStyle(3, this)">
-                        <strong>Myth-buster</strong>
-                        <span>Sharp framing for objections, misconceptions, and “what agents should explain” content.</span>
+                        <strong id="previewTab4Title">Myth-buster</strong>
+                        <span id="previewTab4Copy">Sharp framing for objections, misconceptions, and “what agents should explain” content.</span>
                     </button>
                 </div>
                 <div class="preview-panel">
-                    <div class="preview-label">Inside the viewer</div>
+                    <div class="preview-label" id="previewLabel">Inside the viewer</div>
                     <div class="preview-surface" id="stylePreview"></div>
                 </div>
             </div>
@@ -988,28 +1003,28 @@
         <section class="section" id="audience">
             <div class="section-head">
                 <div>
-                    <div class="section-kicker">Who it's for</div>
-                    <h2 class="section-title">Three clear fit profiles.</h2>
+                    <div class="section-kicker" id="audienceKicker">Who it's for</div>
+                    <h2 class="section-title" id="audienceTitle">Three clear fit profiles.</h2>
                 </div>
-                <p class="section-copy">
+                <p class="section-copy" id="audienceCopy">
                     REscript is strongest when it sits close to a real publishing habit: daily video, weekly market commentary, or centralized content support for a team.
                 </p>
             </div>
             <div class="audience-grid">
                 <article class="audience-card">
-                    <div class="audience-role">Solo agent</div>
-                    <h3>Needs consistency more than complexity.</h3>
-                    <p>For agents who know video matters but lose time to topic selection and first-draft writing every morning.</p>
+                    <div class="audience-role" id="aud1Role">Solo agent</div>
+                    <h3 id="aud1Title">Needs consistency more than complexity.</h3>
+                    <p id="aud1Copy">For agents who know video matters but lose time to topic selection and first-draft writing every morning.</p>
                 </article>
                 <article class="audience-card">
-                    <div class="audience-role">Team lead</div>
-                    <h3>Needs a repeatable editorial rhythm.</h3>
-                    <p>For teams that want a lightweight daily content engine without building a full in-house editorial desk.</p>
+                    <div class="audience-role" id="aud2Role">Team lead</div>
+                    <h3 id="aud2Title">Needs a repeatable editorial rhythm.</h3>
+                    <p id="aud2Copy">For teams that want a lightweight daily content engine without building a full in-house editorial desk.</p>
                 </article>
                 <article class="audience-card">
-                    <div class="audience-role">Marketing operator</div>
-                    <h3>Needs fast drafts with market context.</h3>
-                    <p>For brokerage marketers or content coordinators who need raw material they can adapt, review, and schedule quickly.</p>
+                    <div class="audience-role" id="aud3Role">Marketing operator</div>
+                    <h3 id="aud3Title">Needs fast drafts with market context.</h3>
+                    <p id="aud3Copy">For brokerage marketers or content coordinators who need raw material they can adapt, review, and schedule quickly.</p>
                 </article>
             </div>
         </section>
@@ -1017,12 +1032,12 @@
         <section class="section">
             <div class="compliance-banner">
                 <div>
-                    <strong>Operational guardrail</strong>
-                    <p>REscript is a draft engine for marketing content. It is not legal, tax, fair housing, or MLS compliance advice.</p>
+                    <strong id="guard1Title">Operational guardrail</strong>
+                    <p id="guard1Copy">REscript is a draft engine for marketing content. It is not legal, tax, fair housing, or MLS compliance advice.</p>
                 </div>
                 <div>
-                    <strong>Publishing expectation</strong>
-                    <p>Agents and marketing teams should review every script before publishing, especially where local regulations, brokerage policy, or fair housing sensitivity apply.</p>
+                    <strong id="guard2Title">Publishing expectation</strong>
+                    <p id="guard2Copy">Agents and marketing teams should review every script before publishing, especially where local regulations, brokerage policy, or fair housing sensitivity apply.</p>
                 </div>
             </div>
         </section>
@@ -1030,34 +1045,34 @@
         <section class="section" id="pricing">
             <div class="pricing-wrap">
                 <div class="pricing-card">
-                    <div class="section-kicker">Pricing</div>
-                    <h3>Simple delivery plan for individual agents and lean teams.</h3>
+                    <div class="section-kicker" id="pricingKicker">Pricing</div>
+                    <h3 id="pricingTitle">Simple delivery plan for individual agents and lean teams.</h3>
                     <div class="price">
                         <strong>$9.99</strong>
-                        <span>per month</span>
+                        <span id="priceSuffix">per month</span>
                     </div>
-                    <p>Daily delivery, private viewer links, bilingual output options, and direct subscription controls in every email.</p>
+                    <p id="pricingCopy">Daily delivery, private viewer links, bilingual output options, and direct subscription controls in every email.</p>
                     <div class="price-list">
-                        <div class="price-item">Market-specific daily output across supported North American metros.</div>
-                        <div class="price-item">Four script angles per topic, designed for distinct publishing roles.</div>
-                        <div class="price-item">Trial-supported onboarding with Stripe subscription management.</div>
-                        <div class="price-item">Human-review positioning baked into the product and copy.</div>
+                        <div class="price-item" id="priceItem1">Market-specific daily output across supported North American metros.</div>
+                        <div class="price-item" id="priceItem2">Four script angles per topic, designed for distinct publishing roles.</div>
+                        <div class="price-item" id="priceItem3">Sample-supported onboarding with Stripe subscription management.</div>
+                        <div class="price-item" id="priceItem4">Human-review positioning baked into the product and copy.</div>
                     </div>
                 </div>
                 <div class="pricing-card">
-                    <div class="section-kicker">Questions agents usually ask</div>
+                    <div class="section-kicker" id="faqKicker">Questions agents usually ask</div>
                     <div class="faq-list">
                         <div class="faq-item">
-                            <h3>What does the free sample include?</h3>
-                            <div class="faq-answer">A full sample delivery using the same private-link viewer flow as the paid product, subject to available output for your selected market.</div>
+                            <h3 id="faq1Title">What does the free sample include?</h3>
+                            <div class="faq-answer" id="faq1Copy">A full sample delivery using the same private-link viewer flow as the paid product, subject to available output for your selected market.</div>
                         </div>
                         <div class="faq-item">
-                            <h3>Can I manage billing myself?</h3>
-                            <div class="faq-answer">Yes. Paid subscribers can open the Stripe billing portal from the manage-subscription page linked in every email.</div>
+                            <h3 id="faq2Title">Can I manage billing myself?</h3>
+                            <div class="faq-answer" id="faq2Copy">Yes. Paid subscribers can open the Stripe billing portal from the manage-subscription page linked in every email.</div>
                         </div>
                         <div class="faq-item">
-                            <h3>Should I publish without editing?</h3>
-                            <div class="faq-answer">No. REscript is best used as a fast draft and filming system. Review before publishing, especially for regulated or market-sensitive claims.</div>
+                            <h3 id="faq3Title">Should I publish without editing?</h3>
+                            <div class="faq-answer" id="faq3Copy">No. REscript is best used as a fast draft and filming system. Review before publishing, especially for regulated or market-sensitive claims.</div>
                         </div>
                     </div>
                 </div>
@@ -1066,39 +1081,331 @@
 
         <footer class="footer">
             <div class="footer-bar">
-                <div>© 2026 REscript · AI video scripts for North American real estate agents</div>
-                <div><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/manage.html">Manage subscription</a></div>
+                <div id="footerCopy">© 2026 REscript · AI video scripts for North American real estate agents</div>
+                <div><a href="/privacy.html" id="footerPrivacy">Privacy</a> · <a href="/terms.html" id="footerTerms">Terms</a> · <a href="/manage.html" id="footerManage">Manage subscription</a></div>
             </div>
         </footer>
     </main>
 
     <script>
-        const styles = [
-            {
-                title: "Professional analysis",
-                pills: ["General", "90 seconds", "Market authority"],
-                hook: "The headline says inventory is improving, but the real opportunity is which neighborhoods are normalizing fastest and which sellers still believe it is 2021.",
-                body: "Built for market commentary. The script opens with a clear signal, frames the data in plain language, and closes with what buyers or sellers should do next. It feels useful, grounded, and publishable for an agent building authority."
+        const copy = {
+            en: {
+                title: 'REscript · Daily real estate video scripts',
+                toggle: '中文',
+                emailPlaceholder: 'you@brokerage.com',
+                marketAria: 'Select market',
+                languageAria: 'Select delivery language',
+                marketOptions: {
+                    'new-york': 'New York',
+                    'los-angeles': 'Los Angeles',
+                    'san-francisco': 'San Francisco Bay Area',
+                    'chicago': 'Chicago',
+                    'miami': 'Miami',
+                    'seattle': 'Seattle',
+                    'boston': 'Boston',
+                    'houston': 'Houston',
+                },
+                text: {
+                    brandText: 'REscript · agent content desk',
+                    navProduct: 'Product',
+                    navWorkflow: 'Workflow',
+                    navAudience: "Who it's for",
+                    navPricing: 'Pricing',
+                    navCta: 'Get a free sample',
+                    heroEyebrow: 'Morning content system for North American agents',
+                    heroTitle: 'Walk into every morning with a market-specific video desk, not a blank content calendar.',
+                    heroSubtitle: 'REscript turns the day’s housing news and evergreen education topics into ready-to-film scripts for residential agents, teams, and brokerage marketing leads. Choose your market, choose your delivery language, and open a private viewer link built for fast review and filming.',
+                    heroPrimary: 'Get the free sample',
+                    heroSecondary: 'See the script format',
+                    metricOne: 'US markets supported today, from New York to Seattle.',
+                    metricTwo: 'Script angles per topic: market analysis, casual, investor, and myth-buster.',
+                    metricThreeValue: 'Private',
+                    metricThree: 'Signed viewer links per recipient. No public date-based output pages.',
+                    noteStrip: 'Built for real estate marketing workflows, not generic AI prompting. Your morning package includes market news, evergreen content modules, copy-ready script cards, and direct subscription controls in every email.',
+                    cardLabel: 'Free sample · no credit card',
+                    cardTitle: 'Send yourself a private sample delivery.',
+                    cardCopy: 'Pick the market you work, choose the output language, and we’ll send a full REscript package through the same private-link flow subscribers receive.',
+                    langOptionEn: 'English delivery',
+                    langOptionZh: 'Chinese delivery',
+                    sampleButton: 'Send free sample',
+                    subscribeButton: 'Start paid delivery · $9.99/mo',
+                    productKicker: 'Product',
+                    productTitle: 'Designed like an agent’s morning brief, not a generic content generator.',
+                    productCopy: 'REscript packages the content decisions that usually eat the first hour of the day: what to talk about, which angle to take, how to localize it, and how to get it into filming format quickly.',
+                    feature1Title: 'Market-matched inputs',
+                    feature1Copy: 'Each run is tied to a specific US market and language preference, so the output you open is aligned to the audience you actually serve.',
+                    feature2Title: 'News + evergreen coverage',
+                    feature2Copy: 'Daily news scripts are paired with recurring buyer, seller, investor, neighborhood, and brand-building modules so you are not held hostage by the news cycle.',
+                    feature3Title: 'Private access by design',
+                    feature3Copy: 'Subscribers do not browse a public feed. They receive private viewer links and a dedicated manage-subscription page with direct billing and delivery controls.',
+                    feature4Title: 'Review-first workflow',
+                    feature4Copy: 'The product is positioned as a draft engine for agents and marketing teams. It supports speed, but still expects human review before anything goes live.',
+                    workflowKicker: 'Workflow',
+                    workflowTitle: 'What lands in the inbox each morning.',
+                    workflowCopy: 'REscript is intentionally simple in the handoff: receive the brief, open the private link, review the angle, copy the version you want, and record.',
+                    wf1Step: 'Step 1',
+                    wf1Title: 'Receive the brief',
+                    wf1Copy: 'An email lands with your market, your preferred language, and a private viewer link to the day’s full content package.',
+                    wf2Step: 'Step 2',
+                    wf2Title: 'Scan by module',
+                    wf2Copy: 'Filter by market news or evergreen module, then narrow to the script angle that best fits your brand voice and platform for the day.',
+                    wf3Step: 'Step 3',
+                    wf3Title: 'Copy, review, publish',
+                    wf3Copy: 'Use the script as a filming draft, add your own compliance review, and move into camera, editing, or scheduling without starting from zero.',
+                    previewKicker: 'Script preview',
+                    previewTitle: 'Four distinct angles so the content system does not flatten your brand.',
+                    previewCopy: 'The product does not just rewrite the same idea four times. Each angle is positioned for a different content role inside an agent’s publishing mix.',
+                    previewTab1Title: 'Professional analysis',
+                    previewTab1Copy: 'Structured for market commentary, newsletters, and trust-building talking head videos.',
+                    previewTab2Title: 'Casual social',
+                    previewTab2Copy: 'Faster, more conversational framing for short-form posting and daily consistency.',
+                    previewTab3Title: 'Investor angle',
+                    previewTab3Copy: 'Built for return, risk, rate, and underwriting conversations.',
+                    previewTab4Title: 'Myth-buster',
+                    previewTab4Copy: 'Sharp framing for objections, misconceptions, and “what agents should explain” content.',
+                    previewLabel: 'Inside the viewer',
+                    audienceKicker: "Who it's for",
+                    audienceTitle: 'Three clear fit profiles.',
+                    audienceCopy: 'REscript is strongest when it sits close to a real publishing habit: daily video, weekly market commentary, or centralized content support for a team.',
+                    aud1Role: 'Solo agent',
+                    aud1Title: 'Needs consistency more than complexity.',
+                    aud1Copy: 'For agents who know video matters but lose time to topic selection and first-draft writing every morning.',
+                    aud2Role: 'Team lead',
+                    aud2Title: 'Needs a repeatable editorial rhythm.',
+                    aud2Copy: 'For teams that want a lightweight daily content engine without building a full in-house editorial desk.',
+                    aud3Role: 'Marketing operator',
+                    aud3Title: 'Needs fast drafts with market context.',
+                    aud3Copy: 'For brokerage marketers or content coordinators who need raw material they can adapt, review, and schedule quickly.',
+                    guard1Title: 'Operational guardrail',
+                    guard1Copy: 'REscript is a draft engine for marketing content. It is not legal, tax, fair housing, or MLS compliance advice.',
+                    guard2Title: 'Publishing expectation',
+                    guard2Copy: 'Agents and marketing teams should review every script before publishing, especially where local regulations, brokerage policy, or fair housing sensitivity apply.',
+                    pricingKicker: 'Pricing',
+                    pricingTitle: 'Simple delivery plan for individual agents and lean teams.',
+                    priceSuffix: 'per month',
+                    pricingCopy: 'Daily delivery, private viewer links, bilingual output options, and direct subscription controls in every email.',
+                    priceItem1: 'Market-specific daily output across supported North American metros.',
+                    priceItem2: 'Four script angles per topic, designed for distinct publishing roles.',
+                    priceItem3: 'One free sample and full Stripe subscription management.',
+                    priceItem4: 'Human-review positioning baked into the product and copy.',
+                    faqKicker: 'Questions agents usually ask',
+                    faq1Title: 'What does the free sample include?',
+                    faq1Copy: 'A full sample delivery using the same private-link viewer flow as the paid product, subject to available output for your selected market.',
+                    faq2Title: 'Can I manage billing myself?',
+                    faq2Copy: 'Yes. Paid subscribers can open the Stripe billing portal from the manage-subscription page linked in every email.',
+                    faq3Title: 'Should I publish without editing?',
+                    faq3Copy: 'No. REscript is best used as a fast draft and filming system. Review before publishing, especially for regulated or market-sensitive claims.',
+                    footerCopy: '© 2026 REscript · AI video scripts for North American real estate agents',
+                    footerPrivacy: 'Privacy',
+                    footerTerms: 'Terms',
+                    footerManage: 'Manage subscription',
+                },
+                html: {
+                    heroTitle: 'Walk into every morning with a <span class="headline-accent">market-specific video desk</span>, not a blank content calendar.',
+                    microcopy: 'By continuing, you agree to the <a href="/privacy.html">Privacy Policy</a> and <a href="/terms.html">Terms</a>. Every email includes direct manage-subscription controls. Content should be reviewed before publication.',
+                },
+                messages: {
+                    sampleEmailRequired: 'Enter your email to receive the private sample.',
+                    preparingSample: 'Preparing your private sample...',
+                    sampleSent: 'Your free sample has been sent. Opening your private access link now.',
+                    sampleQueued: 'You are registered. Your sample email will arrive with the next matching market run.',
+                    sampleUsed: 'You already claimed the free sample. Subscribe to continue receiving daily scripts.',
+                    alreadySubscribed: 'You are already subscribed and will continue receiving daily scripts.',
+                    sampleError: 'Unable to create sample.',
+                    checkoutEmailRequired: 'Enter your email before continuing to checkout.',
+                    redirectingCheckout: 'Redirecting to secure checkout...',
+                    checkoutError: 'Unable to open checkout.',
+                    networkError: 'Network error. Please try again.',
+                    checkoutCancelled: 'Checkout was cancelled before payment completed.',
+                },
+                styleDeck: [
+                    {
+                        title: 'Professional analysis',
+                        pills: ['General', '90 seconds', 'Market authority'],
+                        hook: 'The headline says inventory is improving, but the real opportunity is which neighborhoods are normalizing fastest and which sellers still believe it is 2021.',
+                        body: 'Built for market commentary. The script opens with a clear signal, frames the data in plain language, and closes with what buyers or sellers should do next. It feels useful, grounded, and publishable for an agent building authority.',
+                    },
+                    {
+                        title: 'Casual social',
+                        pills: ['Instagram / TikTok', '90 seconds', 'Conversational'],
+                        hook: 'If your buyers keep asking whether they should wait until summer, here is the part of the market shift they are missing right now.',
+                        body: 'Built for fast short-form posting. The tone is lighter, the pacing is quicker, and the framing is designed to sound natural on camera without collapsing into generic social-media filler.',
+                    },
+                    {
+                        title: 'Investor angle',
+                        pills: ['YouTube', '90 seconds', 'Return + risk'],
+                        hook: 'If rates stay sticky for another quarter, the next investor advantage is not headline pricing. It is who can still underwrite cleanly while everyone else freezes.',
+                        body: 'Built for investor conversations. The script leans into risk, yield, financing pressure, and discipline. It gives agents a way to speak credibly to cash-flow and asset-allocation questions.',
+                    },
+                    {
+                        title: 'Myth-buster',
+                        pills: ['Reels', '90 seconds', 'Objection handling'],
+                        hook: 'A lot of buyers still think more listings automatically mean more leverage. In some submarkets, that assumption is exactly how you overplay your negotiating position.',
+                        body: 'Built for objection-led content. This angle works when the goal is not just to inform, but to reframe a common misconception and earn attention through useful tension rather than empty hype.',
+                    },
+                ],
             },
-            {
-                title: "Casual social",
-                pills: ["Instagram / TikTok", "90 seconds", "Conversational"],
-                hook: "If your buyers keep asking whether they should wait until summer, here is the part of the market shift they are missing right now.",
-                body: "Built for fast short-form posting. The tone is lighter, the pacing is quicker, and the framing is designed to sound natural on camera without collapsing into generic social-media filler."
+            zh: {
+                title: 'REscript · 北美地产经纪人视频文案系统',
+                toggle: 'EN',
+                emailPlaceholder: 'you@brokerage.com',
+                marketAria: '选择市场',
+                languageAria: '选择交付语言',
+                marketOptions: {
+                    'new-york': '纽约',
+                    'los-angeles': '洛杉矶',
+                    'san-francisco': '旧金山湾区',
+                    'chicago': '芝加哥',
+                    'miami': '迈阿密',
+                    'seattle': '西雅图',
+                    'boston': '波士顿',
+                    'houston': '休斯顿',
+                },
+                text: {
+                    brandText: 'REscript · 地产经纪人内容工作台',
+                    navProduct: '产品',
+                    navWorkflow: '工作流',
+                    navAudience: '适合谁用',
+                    navPricing: '价格',
+                    navCta: '领取免费 sample',
+                    heroEyebrow: '面向北美地产经纪人的晨间内容系统',
+                    heroTitle: '每天早上打开的，不该是空白选题表，而是一个按市场生成的视频内容台。',
+                    heroSubtitle: 'REscript 把当天住房新闻和常青教育主题，整理成可直接拍摄的视频脚本，适合个人经纪人、团队负责人和 brokerage marketing lead。选择你服务的城市，选择交付语言，然后通过私有 viewer link 快速审阅、复制和开拍。',
+                    heroPrimary: '领取免费 sample',
+                    heroSecondary: '看看脚本长什么样',
+                    metricOne: '当前支持 8 个北美重点城市，从纽约到西雅图。',
+                    metricTwo: '每个主题提供 4 种脚本角度：专业分析、轻社交、投资者、辟谣拆解。',
+                    metricThreeValue: '私有',
+                    metricThree: '每位用户收到独立签名 viewer link，不再公开按日期暴露内容页。',
+                    noteStrip: '这不是泛用型 AI prompt 工具，而是给地产营销工作流准备的晨报包：包含本地新闻、常青模块、可直接复制的脚本卡片，以及邮件内置的订阅管理入口。',
+                    cardLabel: '免费 sample · 无需信用卡',
+                    cardTitle: '先给自己发一份私有 sample。',
+                    cardCopy: '选择你服务的市场和希望收到的语言，我们会用和正式订阅相同的私有链接流程，发你一整份 REscript 内容包。',
+                    langOptionEn: '英文交付',
+                    langOptionZh: '中文交付',
+                    sampleButton: '发送免费 sample',
+                    subscribeButton: '开启付费订阅 · $9.99/月',
+                    productKicker: '产品',
+                    productTitle: '它更像经纪人的晨间 brief，而不是一个通用内容生成器。',
+                    productCopy: 'REscript 把最耗早晨一小时的内容决策打包处理掉：今天讲什么、用什么角度、怎么本地化、怎么快速进入拍摄格式。',
+                    feature1Title: '按市场和语言匹配',
+                    feature1Copy: '每次生成都绑定具体美国市场和语言偏好，所以你打开的内容，是真正对你受众有用的版本。',
+                    feature2Title: '新闻热点 + 常青内容并行',
+                    feature2Copy: '每天的新闻脚本会和买家、卖家、投资者、社区、个人品牌等常青模块一起交付，不会被新闻周期绑架。',
+                    feature3Title: '从设计上就是私有交付',
+                    feature3Copy: '订阅用户不会去看公开 feed，而是收到私有 viewer link 和独立 manage-subscription 页面，直接管理账单与投递。',
+                    feature4Title: '先审阅，再发布',
+                    feature4Copy: '产品定位是给经纪人和营销团队加速出初稿，不是替代人工判断。速度提升了，但上线前仍然要经过人工审核。',
+                    workflowKicker: '工作流',
+                    workflowTitle: '每天早上邮件里实际会收到什么。',
+                    workflowCopy: 'REscript 的交付刻意保持简单：收到 brief，打开私有链接，挑选角度，复制你要的版本，然后拍摄或排期。',
+                    wf1Step: '第 1 步',
+                    wf1Title: '收到晨报',
+                    wf1Copy: '一封邮件会带着你所在市场、偏好的交付语言，以及当天完整内容包的私有 viewer link 一起送达。',
+                    wf2Step: '第 2 步',
+                    wf2Title: '按模块快速浏览',
+                    wf2Copy: '你可以先看市场新闻，也可以直接跳到常青模块，再按当天平台和人设挑选最合适的脚本角度。',
+                    wf3Step: '第 3 步',
+                    wf3Title: '复制、审阅、发布',
+                    wf3Copy: '把脚本当作拍摄初稿，加上你自己的合规审阅与品牌语气，就能继续进入拍摄、剪辑或排期，不需要从零开始。',
+                    previewKicker: '脚本预览',
+                    previewTitle: '四种角度明确分工，避免内容系统把你的品牌风格压平。',
+                    previewCopy: '它不是把同一个意思机械改写四遍，而是让不同角度承担不同的发布任务，组成真正可用的内容组合。',
+                    previewTab1Title: '专业分析',
+                    previewTab1Copy: '适合市场解读、newsletter、建立专业信任感的 talking-head 视频。',
+                    previewTab2Title: '轻社交',
+                    previewTab2Copy: '更快、更口语化，适合短视频、日更和高频触达。',
+                    previewTab3Title: '投资者角度',
+                    previewTab3Copy: '围绕回报、风险、利率和 underwriting 展开，更适合投资客户沟通。',
+                    previewTab4Title: '辟谣拆解',
+                    previewTab4Copy: '适合处理误解、异议和“经纪人该解释什么”的内容。',
+                    previewLabel: 'viewer 内部样式',
+                    audienceKicker: '适合谁用',
+                    audienceTitle: '最适配的三类用户。',
+                    audienceCopy: '当它贴近真实发布习惯时价值最大：每天拍视频、每周做市场点评，或团队里需要集中支持内容生产。',
+                    aud1Role: '个人经纪人',
+                    aud1Title: '需要的是持续性，不是复杂系统。',
+                    aud1Copy: '适合知道短视频重要，但每天都卡在选题和第一稿上的经纪人。',
+                    aud2Role: '团队负责人',
+                    aud2Title: '需要可重复运转的编辑节奏。',
+                    aud2Copy: '适合希望建立轻量级日更内容引擎，但暂时不想搭完整内容团队的小型团队。',
+                    aud3Role: '营销运营',
+                    aud3Title: '需要带市场语境的快速初稿。',
+                    aud3Copy: '适合 brokerage marketer 或内容协调人，快速拿到原料后做二次编辑、审核和排期。',
+                    guard1Title: '产品边界',
+                    guard1Copy: 'REscript 是营销内容初稿工具，不是法律、税务、公平住房或 MLS 合规建议。',
+                    guard2Title: '发布要求',
+                    guard2Copy: '所有脚本上线前都应由经纪人或营销团队人工审核，尤其涉及本地法规、brokerage 政策或 fair housing 敏感表达时。',
+                    pricingKicker: '价格',
+                    pricingTitle: '面向个人经纪人和轻团队的简单订阅方案。',
+                    priceSuffix: '每月',
+                    pricingCopy: '包含每日交付、私有 viewer link、中英双语输出，以及每封邮件内置的订阅管理入口。',
+                    priceItem1: '按北美重点城市生成的每日内容输出。',
+                    priceItem2: '每个主题 4 种脚本角度，对应不同发布场景。',
+                    priceItem3: '先领取 1 次免费 sample，再进入完整 Stripe 订阅管理。',
+                    priceItem4: '产品和文案里都明确保留人工审核定位。',
+                    faqKicker: '经纪人最常问的问题',
+                    faq1Title: '免费 sample 里有什么？',
+                    faq1Copy: '你会收到一整份 sample，走的就是正式产品同一套私有 viewer 流程，前提是你选择的市场已有可用输出。',
+                    faq2Title: '账单能自己管理吗？',
+                    faq2Copy: '可以。付费订阅用户可以从每封邮件里的 manage-subscription 页面进入 Stripe billing portal。',
+                    faq3Title: '可以不改直接发吗？',
+                    faq3Copy: '不建议。REscript 最适合作为快速初稿和拍摄系统，尤其涉及监管或市场敏感表述时，发布前一定要人工审核。',
+                    footerCopy: '© 2026 REscript · 面向北美地产经纪人的 AI 视频文案系统',
+                    footerPrivacy: '隐私政策',
+                    footerTerms: '服务条款',
+                    footerManage: '管理订阅',
+                },
+                html: {
+                    heroTitle: '每天早上打开的，不该是空白选题表，而是一个<span class="headline-accent">按市场生成的视频内容台</span>。',
+                    microcopy: '继续即表示你同意 <a href="/privacy.html">隐私政策</a> 和 <a href="/terms.html">服务条款</a>。每封邮件都带有直接的订阅管理入口。所有内容发布前都应人工审核。',
+                },
+                messages: {
+                    sampleEmailRequired: '请输入邮箱，我们会把私有 sample 发给你。',
+                    preparingSample: '正在准备你的私有 sample...',
+                    sampleSent: '免费 sample 已发送，正在打开你的专属查看链接。',
+                    sampleQueued: '已登记成功。等到你所选市场下一次生成时，会自动收到 sample 邮件。',
+                    sampleUsed: '你已经领取过免费 sample。继续接收每日文案请直接订阅。',
+                    alreadySubscribed: '你已经是订阅用户了，会继续收到每日文案。',
+                    sampleError: '创建 sample 失败。',
+                    checkoutEmailRequired: '请先填写邮箱，再进入结账。',
+                    redirectingCheckout: '正在跳转到安全支付页面...',
+                    checkoutError: '无法打开支付页面。',
+                    networkError: '网络异常，请稍后再试。',
+                    checkoutCancelled: '你已取消本次支付，尚未完成订阅。',
+                },
+                styleDeck: [
+                    {
+                        title: '专业分析',
+                        pills: ['通用', '90 秒', '专业信任'],
+                        hook: '标题都在说库存回升，但真正的机会，不在“房源变多”这四个字，而在于哪些社区率先恢复正常、哪些卖家还停留在 2021 年的预期里。',
+                        body: '这类脚本适合市场点评。开头先给清晰判断，中间用普通人能听懂的话解释数据，结尾落到买家或卖家下一步该怎么做，整体更像可信的专业内容，而不是空泛结论。',
+                    },
+                    {
+                        title: '轻社交',
+                        pills: ['Instagram / TikTok', '90 秒', '口语化'],
+                        hook: '如果你的买家最近一直在问要不要等到夏天再进场，眼下这波市场变化里，有个关键信号他们大概率还没看到。',
+                        body: '这类脚本适合高频短视频。节奏更快，语气更自然，上镜时不会太像照稿念，也不会掉进那种千篇一律的社媒话术。',
+                    },
+                    {
+                        title: '投资者角度',
+                        pills: ['YouTube', '90 秒', '收益 + 风险'],
+                        hook: '如果利率再黏住一个季度，下一阶段真正有优势的投资者，并不是谁看到更便宜的 headline price，而是谁还能继续做出干净的 underwriting。',
+                        body: '这类脚本适合投资客户沟通，重点放在风险、收益、融资压力和决策纪律，让经纪人能更有说服力地讨论现金流和资产配置。',
+                    },
+                    {
+                        title: '辟谣拆解',
+                        pills: ['Reels', '90 秒', '异议处理'],
+                        hook: '很多买家现在还觉得房源一多，自己谈判筹码就一定更强。但在一些子市场里，这个判断反而最容易让你高估自己的位置。',
+                        body: '这类脚本适合围绕常见误解展开。目标不只是解释，更是先制造一个有价值的张力，再把错误预期重新框正。',
+                    },
+                ],
             },
-            {
-                title: "Investor angle",
-                pills: ["YouTube", "90 seconds", "Return + risk"],
-                hook: "If rates stay sticky for another quarter, the next investor advantage is not headline pricing. It is who can still underwrite cleanly while everyone else freezes.",
-                body: "Built for investor conversations. The script leans into risk, yield, financing pressure, and discipline. It gives agents a way to speak credibly to cash-flow and asset-allocation questions."
-            },
-            {
-                title: "Myth-buster",
-                pills: ["Reels", "90 seconds", "Objection handling"],
-                hook: "A lot of buyers still think more listings automatically mean more leverage. In some submarkets, that assumption is exactly how you overplay your negotiating position.",
-                body: "Built for objection-led content. This angle works when the goal is not just to inform, but to reframe a common misconception and earn attention through useful tension rather than empty hype."
-            }
-        ];
+        };
+
+        let currentLang = 'en';
+        let activeStyleIndex = 0;
+        let deliveryTouched = false;
 
         function escapeHtml(value) {
             return String(value)
@@ -1109,8 +1416,50 @@
                 .replace(/'/g, '&#39;');
         }
 
-        function showStyle(index, button) {
-            const style = styles[index];
+        function setText(id, value) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+            }
+        }
+
+        function setHtml(id, value) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerHTML = value;
+            }
+        }
+
+        function getUi() {
+            return copy[currentLang] || copy.en;
+        }
+
+        function translatePage() {
+            const ui = getUi();
+            document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+            document.title = ui.title;
+
+            Object.entries(ui.text).forEach(([id, value]) => setText(id, value));
+            Object.entries(ui.html).forEach(([id, value]) => setHtml(id, value));
+
+            document.getElementById('langToggle').textContent = ui.toggle;
+            document.getElementById('heroEmail').placeholder = ui.emailPlaceholder;
+            document.getElementById('heroMarket').setAttribute('aria-label', ui.marketAria);
+            document.getElementById('heroLang').setAttribute('aria-label', ui.languageAria);
+
+            Array.from(document.getElementById('heroMarket').options).forEach((option) => {
+                option.textContent = ui.marketOptions[option.value] || option.textContent;
+            });
+
+            if (!deliveryTouched) {
+                document.getElementById('heroLang').value = currentLang;
+            }
+
+            renderStyle();
+        }
+
+        function renderStyle() {
+            const style = getUi().styleDeck[activeStyleIndex];
             document.getElementById('stylePreview').innerHTML = `
                 <div class="preview-meta">
                     ${style.pills.map((pill) => `<span class="preview-pill">${escapeHtml(pill)}</span>`).join('')}
@@ -1122,13 +1471,29 @@
                 </div>
             `;
 
-            document.querySelectorAll('.preview-tab').forEach((tab) => tab.classList.remove('active'));
-            if (button) {
-                button.classList.add('active');
-            }
+            document.querySelectorAll('.preview-tab').forEach((tab, index) => {
+                tab.classList.toggle('active', index === activeStyleIndex);
+            });
         }
 
-        showStyle(0, document.querySelector('.preview-tab'));
+        function showStyle(index) {
+            activeStyleIndex = index;
+            renderStyle();
+        }
+
+        function toggleLang() {
+            setLang(currentLang === 'en' ? 'zh' : 'en');
+        }
+
+        function setLang(nextLang) {
+            currentLang = nextLang === 'zh' ? 'zh' : 'en';
+            localStorage.setItem('rescript-ui-lang', currentLang);
+            translatePage();
+        }
+
+        function tMessage(key) {
+            return getUi().messages[key] || copy.en.messages[key] || key;
+        }
 
         function getFormData() {
             return {
@@ -1147,40 +1512,46 @@
         async function signupTrial() {
             const { email, language, market } = getFormData();
             if (!email) {
-                showMsg('error', 'Enter your email to receive the private sample.');
+                showMsg('error', tMessage('sampleEmailRequired'));
                 return;
             }
 
             try {
-                showMsg('info', 'Preparing your private sample...');
-                const res = await fetch('/api/subscribe/trial', {
+                showMsg('info', tMessage('preparingSample'));
+                const res = await fetch('/api/subscribe/sample', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, language, market }),
                 });
                 const data = await res.json();
                 if (!data.success) {
-                    throw new Error(data.error || 'Unable to create trial');
+                    throw new Error(data.error || tMessage('sampleError'));
                 }
 
-                showMsg('success', data.message || 'Sample delivery created.');
+                const statusMessage = ({
+                    subscriber: tMessage('alreadySubscribed'),
+                    sample_used: tMessage('sampleUsed'),
+                    sample_sent: tMessage('sampleSent'),
+                    sample_ready: tMessage('sampleQueued'),
+                })[data.status] || data.message || tMessage('sampleSent');
+                showMsg('success', statusMessage);
                 if (data.viewUrl) {
                     setTimeout(() => { window.location.href = data.viewUrl; }, 900);
                 }
             } catch (error) {
-                showMsg('error', error.message || 'Network error. Please try again.');
+                showMsg('error', error.message || tMessage('networkError'));
             }
         }
 
         async function startCheckout() {
             const { email, language, market } = getFormData();
             if (!email) {
-                showMsg('error', 'Enter your email before continuing to checkout.');
+                showMsg('error', tMessage('checkoutEmailRequired'));
                 return;
             }
 
             try {
-                showMsg('info', 'Redirecting to secure checkout...');
+                showMsg('info', tMessage('redirectingCheckout'));
                 const res = await fetch('/api/subscribe/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1188,13 +1559,26 @@
                 });
                 const data = await res.json();
                 if (!data.success || !data.url) {
-                    throw new Error(data.error || 'Unable to open checkout');
+                    throw new Error(data.error || tMessage('checkoutError'));
                 }
 
                 window.location.href = data.url;
             } catch (error) {
-                showMsg('error', error.message || 'Network error. Please try again.');
+                showMsg('error', error.message || tMessage('networkError'));
             }
+        }
+
+        document.getElementById('heroLang').addEventListener('change', () => {
+            deliveryTouched = true;
+        });
+
+        const savedLang = localStorage.getItem('rescript-ui-lang');
+        const browserLang = navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+        setLang(savedLang || browserLang);
+        showStyle(0);
+
+        if (new URLSearchParams(window.location.search).get('cancelled') === 'true') {
+            showMsg('info', tMessage('checkoutCancelled'));
         }
     </script>
 </body>

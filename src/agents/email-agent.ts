@@ -82,7 +82,7 @@ function buildEmailHTML(
         <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #92400e;">
           ${t(language,
         `🎁 这是您的免费体验邮件。如需继续接收，请 ${safeSubscribeUrl ? `<a href="${safeSubscribeUrl}" style="color: #4338ca; font-weight: 600;">升级订阅</a>` : '升级订阅'}。`,
-        `🎁 This is your free trial email. ${safeSubscribeUrl ? `<a href="${safeSubscribeUrl}" style="color: #4338ca; font-weight: 600;">Upgrade to continue</a>.` : 'Upgrade to continue.'}`)}
+        `🎁 This is your free sample email. ${safeSubscribeUrl ? `<a href="${safeSubscribeUrl}" style="color: #4338ca; font-weight: 600;">Upgrade to continue</a>.` : 'Upgrade to continue.'}`)}
         </div>
       </div>` : '';
 
@@ -151,7 +151,7 @@ function buildSubject(client: Client, output: DailyOutput, dateLabel: string, is
         `${dateLabel} · ${marketLabel} ${output.articleCount}条热点文案已就绪`,
         `${dateLabel} · ${marketLabel} scripts are ready`,
     );
-    const trialTag = isTrial ? t(client.language, ' [免费体验]', ' [Trial]') : '';
+    const trialTag = isTrial ? t(client.language, ' [免费Sample]', ' [Sample]') : '';
     return `${config.EMAIL_SUBJECT_PREFIX} ${core}${trialTag}`.trim();
 }
 
@@ -178,7 +178,7 @@ async function sendEmail(
     const html = buildEmailHTML(client, output, viewerUrl, manageUrl, dateLabel, isTrial, subscribeUrl);
 
     if (dryRun) {
-        logger.info(`📧 [DRY RUN] Would send to ${client.name} <${client.email}> (${isTrial ? 'trial' : client.plan})`);
+        logger.info(`📧 [DRY RUN] Would send to ${client.name} <${client.email}> (${isTrial ? 'sample' : client.plan})`);
         return true;
     }
 
@@ -195,7 +195,7 @@ async function sendEmail(
                 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
             },
         });
-        logger.info(`✅ Email sent to ${client.name} <${client.email}> (${isTrial ? 'trial' : client.plan})`);
+        logger.info(`✅ Email sent to ${client.name} <${client.email}> (${isTrial ? 'sample' : client.plan})`);
         return true;
     } catch (error) {
         logger.error(`❌ Failed to send to ${client.name} <${client.email}>`, {
@@ -230,6 +230,6 @@ export async function sendBatchEmails(
         }
     }
 
-    logger.info(`📊 Email results (${isTrial ? 'trial' : 'subscriber'}): ${sent} sent, ${failed} failed`);
+    logger.info(`📊 Email results (${isTrial ? 'sample' : 'subscriber'}): ${sent} sent, ${failed} failed`);
     return { sent, failed, sentClientIds };
 }

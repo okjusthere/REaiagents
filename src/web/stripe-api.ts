@@ -62,7 +62,7 @@ function buildViewerUrl(baseUrl: string, client: Client, outputKey: string): str
     return `${baseUrl}/view.html?key=${encodeURIComponent(outputKey)}&token=${encodeURIComponent(token)}`;
 }
 
-router.post('/subscribe/trial', async (req: Request, res: Response) => {
+async function handleSampleRegistration(req: Request, res: Response) {
     try {
         const input = subscribeSchema.parse(req.body);
         const existing = findByEmail(input.email);
@@ -81,10 +81,10 @@ router.post('/subscribe/trial', async (req: Request, res: Response) => {
         if (existing && existing.freeTrialUsed) {
             res.json({
                 success: true,
-                status: 'trial_used',
+                status: 'sample_used',
                 message: input.language === 'zh'
-                    ? '您已使用过免费体验，请订阅以继续接收每日文案。'
-                    : 'You already used the free trial. Subscribe to continue receiving daily scripts.',
+                    ? '您已领取过免费 sample，请订阅以继续接收每日文案。'
+                    : 'You already claimed the free sample. Subscribe to continue receiving daily scripts.',
             });
             return;
         }
@@ -102,12 +102,12 @@ router.post('/subscribe/trial', async (req: Request, res: Response) => {
                     markTrialUsed(client.id);
                     res.status(201).json({
                         success: true,
-                        status: 'trial_sent',
+                        status: 'sample_sent',
                         clientId: client.id,
                         viewUrl: buildViewerUrl(baseUrl, client, latestOutput.key),
                         message: input.language === 'zh'
-                            ? '免费体验邮件已发送，正在打开您的专属查看链接。'
-                            : 'Your trial email has been sent. Opening your private access link now.',
+                            ? '免费 sample 已发送，正在打开您的专属查看链接。'
+                            : 'Your free sample has been sent. Opening your private access link now.',
                     });
                     return;
                 }
@@ -116,17 +116,20 @@ router.post('/subscribe/trial', async (req: Request, res: Response) => {
 
         res.status(201).json({
             success: true,
-            status: 'trial_ready',
+            status: 'sample_ready',
             clientId: client.id,
             message: input.language === 'zh'
-                ? '注册成功。您将在下一次对应市场生成后收到体验邮件。'
-                : 'You are registered. Your trial email will arrive with the next matching market run.',
+                ? '注册成功。您将在下一次对应市场生成后收到 sample 邮件。'
+                : 'You are registered. Your sample email will arrive with the next matching market run.',
         });
     } catch (error) {
-        logger.error('Trial registration error', { error: error instanceof Error ? error.message : String(error) });
+        logger.error('Sample registration error', { error: error instanceof Error ? error.message : String(error) });
         res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'Invalid request' });
     }
-});
+}
+
+router.post('/subscribe/sample', handleSampleRegistration);
+router.post('/subscribe/trial', handleSampleRegistration);
 
 router.post('/subscribe/checkout', async (req: Request, res: Response) => {
     try {
@@ -166,7 +169,6 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
             success_url: `${config.BASE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${config.BASE_URL}/subscribe.html?cancelled=true`,
             subscription_data: {
-                trial_period_days: 7,
                 metadata: {
                     email: client.email,
                     clientId: client.id,
@@ -217,6 +219,7 @@ router.get('/subscribe/session/:sessionId', async (req: Request, res: Response) 
             data: {
                 plan: client.plan,
                 active: client.active,
+                language: client.language,
                 manageUrl: `${baseUrl}/manage.html?token=${encodeURIComponent(manageToken)}`,
                 viewUrl: latestOutputSummary ? buildViewerUrl(baseUrl, client, latestOutputSummary.key) : null,
             },

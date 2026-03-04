@@ -34,12 +34,28 @@
         }
 
         .card {
+            position: relative;
             width: min(100%, 720px);
             padding: 34px;
             border-radius: 28px;
             border: 1px solid var(--line);
             background: rgba(255, 252, 247, 0.86);
             box-shadow: 0 28px 70px rgba(21, 33, 43, 0.10);
+        }
+
+        .lang-toggle {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            min-height: 42px;
+            padding: 0 16px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.88);
+            color: var(--ink);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         .eyebrow {
@@ -150,13 +166,14 @@
 </head>
 <body>
     <main class="card">
-        <div class="eyebrow">Subscription confirmed</div>
-        <h1>Your REscript delivery is active.</h1>
-        <p>
+        <button class="lang-toggle" id="langToggle" onclick="toggleLang()">中文</button>
+        <div class="eyebrow" id="eyebrow">Subscription confirmed</div>
+        <h1 id="pageTitle">Your REscript delivery is active.</h1>
+        <p id="introCopy">
             Checkout is complete. You now have a live subscription with private access links, direct subscription controls, and delivery based on the market and language preferences attached to your account.
         </p>
 
-        <div class="status-bar">
+        <div class="status-bar" id="statusBar">
             Your subscription is configured to start delivering the daily brief on the next scheduled run. You can also open your manage-subscription page from every email.
         </div>
 
@@ -164,22 +181,22 @@
             <div class="step">
                 <div class="step-number">1</div>
                 <div>
-                    <strong>Watch for the first delivery</strong>
-                    REscript sends a private viewer link rather than a public content page. Save the email so you can reopen the day’s package when you need it.
+                    <strong id="step1Title">Watch for the first delivery</strong>
+                    <span id="step1Copy">REscript sends a private viewer link rather than a public content page. Save the email so you can reopen the day’s package when you need it.</span>
                 </div>
             </div>
             <div class="step">
                 <div class="step-number">2</div>
                 <div>
-                    <strong>Review before publishing</strong>
-                    Use the scripts as production drafts. Add your own voice, compliance review, and brokerage-specific guardrails before publishing.
+                    <strong id="step2Title">Review before publishing</strong>
+                    <span id="step2Copy">Use the scripts as production drafts. Add your own voice, compliance review, and brokerage-specific guardrails before publishing.</span>
                 </div>
             </div>
             <div class="step">
                 <div class="step-number">3</div>
                 <div>
-                    <strong>Manage billing and delivery</strong>
-                    The same manage-subscription page controls both email delivery status and Stripe billing access for paid accounts.
+                    <strong id="step3Title">Manage billing and delivery</strong>
+                    <span id="step3Copy">The same manage-subscription page controls both email delivery status and Stripe billing access for paid accounts.</span>
                 </div>
             </div>
         </div>
@@ -190,8 +207,100 @@
     </main>
 
     <script>
+        const copy = {
+            en: {
+                title: 'Subscription Confirmed · REscript',
+                toggle: '中文',
+                eyebrow: 'Subscription confirmed',
+                pageTitle: 'Your REscript delivery is active.',
+                introCopy: 'Checkout is complete. You now have a live subscription with private access links, direct subscription controls, and delivery based on the market and language preferences attached to your account.',
+                statusBar: 'Your subscription is configured to start delivering the daily brief on the next scheduled run. You can also open your manage-subscription page from every email.',
+                step1Title: 'Watch for the first delivery',
+                step1Copy: 'REscript sends a private viewer link rather than a public content page. Save the email so you can reopen the day’s package when you need it.',
+                step2Title: 'Review before publishing',
+                step2Copy: 'Use the scripts as production drafts. Add your own voice, compliance review, and brokerage-specific guardrails before publishing.',
+                step3Title: 'Manage billing and delivery',
+                step3Copy: 'The same manage-subscription page controls both email delivery status and Stripe billing access for paid accounts.',
+                openLatest: 'Open latest scripts',
+                manage: 'Manage subscription',
+                home: 'Back to home',
+            },
+            zh: {
+                title: '订阅已确认 · REscript',
+                toggle: 'EN',
+                eyebrow: '订阅已确认',
+                pageTitle: '你的 REscript 交付已开启。',
+                introCopy: '支付已经完成。你现在拥有正式订阅，可通过私有访问链接查看内容，并直接管理投递与订阅状态；交付内容会按你的市场和语言偏好匹配。',
+                statusBar: '你的订阅会在下一次计划任务执行时开始正式投递。之后每封邮件里也都会附带 manage-subscription 页面入口。',
+                step1Title: '留意第一封正式交付邮件',
+                step1Copy: 'REscript 发送的是私有 viewer link，不是公开内容页。建议保留邮件，后续需要时可以重新打开当天内容包。',
+                step2Title: '发布前先人工审核',
+                step2Copy: '把脚本当作生产初稿使用，在发布前加入你的个人语气、合规判断以及 brokerage 内部要求。',
+                step3Title: '统一管理账单和投递',
+                step3Copy: '同一个 manage-subscription 页面既能控制邮件投递状态，也能给付费用户打开 Stripe billing portal。',
+                openLatest: '打开最新脚本',
+                manage: '管理订阅',
+                home: '返回首页',
+            },
+        };
+
+        let currentLang = 'en';
         const params = new URLSearchParams(window.location.search);
         const sessionId = params.get('session_id');
+
+        function getUi() {
+            return copy[currentLang] || copy.en;
+        }
+
+        function setText(id, value) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+            }
+        }
+
+        function setLang(nextLang) {
+            currentLang = nextLang === 'zh' ? 'zh' : 'en';
+            localStorage.setItem('rescript-ui-lang', currentLang);
+            const ui = getUi();
+            document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+            document.title = ui.title;
+            document.getElementById('langToggle').textContent = ui.toggle;
+            setText('eyebrow', ui.eyebrow);
+            setText('pageTitle', ui.pageTitle);
+            setText('introCopy', ui.introCopy);
+            setText('statusBar', ui.statusBar);
+            setText('step1Title', ui.step1Title);
+            setText('step1Copy', ui.step1Copy);
+            setText('step2Title', ui.step2Title);
+            setText('step2Copy', ui.step2Copy);
+            setText('step3Title', ui.step3Title);
+            setText('step3Copy', ui.step3Copy);
+        }
+
+        function toggleLang() {
+            setLang(currentLang === 'en' ? 'zh' : 'en');
+            renderActions(window.sessionData || null);
+        }
+
+        function renderActions(data) {
+            const ui = getUi();
+            const actions = [];
+            if (data && data.viewUrl) {
+                actions.push(`<a class="button" href="${data.viewUrl}">${ui.openLatest}</a>`);
+            }
+            if (data && data.manageUrl) {
+                actions.push(`<a class="button secondary" href="${data.manageUrl}">${ui.manage}</a>`);
+            }
+            actions.push(`<a class="button secondary" href="/">${ui.home}</a>`);
+            document.getElementById('viewLatest').innerHTML = actions.join('');
+        }
+
+        window.sessionData = null;
+        const savedLang = localStorage.getItem('rescript-ui-lang');
+        const browserLang = navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+        setLang(savedLang || browserLang);
+        renderActions(null);
 
         if (sessionId) {
             fetch(`/api/subscribe/session/${encodeURIComponent(sessionId)}`)
@@ -200,16 +309,11 @@
                     if (!result.success || !result.data) {
                         return;
                     }
-
-                    const actions = [];
-                    if (result.data.viewUrl) {
-                        actions.push(`<a class="button" href="${result.data.viewUrl}">Open latest scripts</a>`);
+                    if (result.data.language === 'zh' || result.data.language === 'en') {
+                        setLang(result.data.language);
                     }
-                    if (result.data.manageUrl) {
-                        actions.push(`<a class="button secondary" href="${result.data.manageUrl}">Manage subscription</a>`);
-                    }
-                    actions.push('<a class="button secondary" href="/">Back to home</a>');
-                    document.getElementById('viewLatest').innerHTML = actions.join('');
+                    window.sessionData = result.data;
+                    renderActions(result.data);
                 })
                 .catch(() => { });
         }
