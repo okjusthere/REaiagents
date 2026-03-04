@@ -2,7 +2,7 @@ import { searchNews } from './agents/news-agent.js';
 import { generateDailyScripts } from './agents/script-writer-agent.js';
 import { generateAllModuleContent } from './agents/content-agent.js';
 import { sendBatchEmails } from './agents/email-agent.js';
-import { getSubscribers, getTrialClients, markTrialUsed, type Client, type Language, type MarketId } from './store/client-store.js';
+import { getSubscribers, getVipClients, getTrialClients, markTrialUsed, type Client, type Language, type MarketId } from './store/client-store.js';
 import { saveDailyOutput } from './store/output-store.js';
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
@@ -36,14 +36,15 @@ export async function runPipeline(dryRun = false): Promise<void> {
     try {
         // ── Determine recipients ─────────────────────────────
         const subscribers = getSubscribers();
+        const vipClients = getVipClients();
         const trialClients = getTrialClients();
-        const allRecipients = [...subscribers, ...trialClients];
+        const allRecipients = [...subscribers, ...vipClients, ...trialClients];
 
         if (allRecipients.length === 0) {
-            logger.warn('⚠️  No recipients found (0 subscribers, 0 pending trials).');
+            logger.warn('⚠️  No recipients found (0 subscribers, 0 VIP, 0 pending trials).');
             return;
         }
-        logger.info(`👥 Recipients: ${subscribers.length} subscribers + ${trialClients.length} trial users = ${allRecipients.length} total`);
+        logger.info(`👥 Recipients: ${subscribers.length} subscribers + ${vipClients.length} VIP + ${trialClients.length} trial users = ${allRecipients.length} total`);
 
         // Group all recipients by language + market
         const groups = groupByPreferences(allRecipients);
@@ -60,7 +61,7 @@ export async function runPipeline(dryRun = false): Promise<void> {
         // ── Process each preference group ────────────────────
         for (const group of groups) {
             const { language, market, clients } = group;
-            const groupSubs = clients.filter(c => c.plan === 'subscriber');
+            const groupSubs = clients.filter(c => c.plan === 'subscriber' || c.plan === 'vip');
             const groupTrials = clients.filter(c => c.plan === 'free' && !c.freeTrialUsed);
 
             logger.info(`\n🌐 ═══ Processing group: ${language}/${market} (${groupSubs.length} subs + ${groupTrials.length} trials) ═══`);
@@ -91,9 +92,9 @@ export async function runPipeline(dryRun = false): Promise<void> {
 
             // Step 4a: Send to paying subscribers
             if (groupSubs.length > 0) {
-                logger.info(`  💳 Sending to ${groupSubs.length} subscribers...`);
+                logger.info(`  💳 Sending to ${groupSubs.length} subscribers/VIP...`);
                 const subResult = await sendBatchEmails(groupSubs, dailyOutput, viewerUrl, dryRun, false);
-                logger.info(`  💳 Subscribers: ${subResult.sent} sent, ${subResult.failed} failed`);
+                logger.info(`  💳 Subscribers/VIP: ${subResult.sent} sent, ${subResult.failed} failed`);
             }
 
             // Step 4b: Send to trial users
@@ -116,7 +117,7 @@ export async function runPipeline(dryRun = false): Promise<void> {
         logger.info(`🎉 Pipeline completed in ${elapsed}s`);
         logger.info(`🎉 Groups processed: ${groups.length}`);
         logger.info(`🎉 Total scripts: ${totalNewsScripts + totalModuleScripts} (news: ${totalNewsScripts}, modules: ${totalModuleScripts})`);
-        logger.info(`🎉 Sent to: ${subscribers.length} subscribers + ${trialClients.length} trial users`);
+        logger.info(`🎉 Sent to: ${subscribers.length} subscribers + ${vipClients.length} VIP + ${trialClients.length} trial users`);
         logger.info('🎉 ═══════════════════════════════════════════');
     } catch (error) {
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);

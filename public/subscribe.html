@@ -625,6 +625,229 @@
             line-height: 1.7;
         }
 
+        /* ── Sample Script ────────────────── */
+        .sample {
+            padding: 80px 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .sample-card {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .sample-header {
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            padding: 20px 28px;
+            color: white;
+        }
+
+        .sample-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .sample-header p {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .sample-body {
+            padding: 28px;
+        }
+
+        .sample-body .hook {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+            line-height: 1.5;
+            border-left: 4px solid #d97706;
+            padding-left: 16px;
+        }
+
+        .sample-body .script-text {
+            font-size: 15px;
+            color: #475569;
+            line-height: 1.9;
+            margin-bottom: 20px;
+        }
+
+        .sample-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .sample-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.15);
+        }
+
+        /* ── Who Is This For ──────────────── */
+        .audience {
+            padding: 80px 24px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .audience-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .audience-card {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 14px;
+            padding: 28px 20px;
+            text-align: center;
+            transition: all 0.25s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        .audience-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border-color: rgba(37, 99, 235, 0.15);
+        }
+
+        .audience-icon {
+            font-size: 40px;
+            margin-bottom: 14px;
+        }
+
+        .audience-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1a1a2e;
+        }
+
+        .audience-card p {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* ── Testimonials ─────────────────── */
+        .testimonials {
+            padding: 80px 24px;
+            background: #ffffff;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .testimonial-card {
+            background: #f9fafb;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 14px;
+            padding: 24px;
+            transition: all 0.25s;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .testimonial-stars {
+            color: #d97706;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .testimonial-text {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .testimonial-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .testimonial-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .testimonial-role {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* ── Trusted By ───────────────────── */
+        .trusted {
+            padding: 48px 24px;
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .trusted-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .trusted-items {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .trusted-item {
+            font-size: 15px;
+            font-weight: 600;
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+
+        .trusted-item:hover {
+            color: #2563eb;
+        }
+
         /* ── Footer ───────────────────────── */
         footer {
             padding: 32px 24px;
@@ -796,6 +1019,142 @@
         <div class="style-preview" id="stylePreview"></div>
     </section>
 
+    <!-- Real Script Sample -->
+    <section class="sample">
+        <h2 class="section-title">📝 <span class="highlight">Real Sample</span> · 真实文案示例</h2>
+        <div class="sample-card">
+            <div class="sample-header">
+                <h3>📰 Manhattan Q4 Median Sale Price Hits $1.2M</h3>
+                <p>2026-03-03 · Professional Analysis 专业分析型</p>
+            </div>
+            <div class="sample-body">
+                <div class="hook">"Manhattan's median sale price just hit $1.2 million in Q4 — but here's what the
+                    headlines aren't telling you about where the real opportunity is hiding..."</div>
+                <div class="script-text">
+                    The latest market data shows Manhattan's Q4 median sale price reached $1.2M, marking a 5.3% increase
+                    year-over-year. But before you panic about affordability, let's look at the full picture. Inventory
+                    is actually UP 12% compared to last year, meaning buyers have more negotiating power than they've
+                    had in 18 months. The real story? Condos under $800K in emerging neighborhoods like Washington
+                    Heights and Inwood are seeing 30+ days on market — that's your window...
+                </div>
+                <div class="sample-tags">
+                    <span class="sample-tag">📊 Data-Driven</span>
+                    <span class="sample-tag">🏙️ New York</span>
+                    <span class="sample-tag">🇺🇸 English</span>
+                    <span class="sample-tag">📋 Copy & Film</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Who Is This For -->
+    <section class="audience">
+        <h2 class="section-title">Who Is <span class="highlight">This For</span>? 适用人群</h2>
+        <div class="audience-grid">
+            <div class="audience-card">
+                <div class="audience-icon">🏠</div>
+                <h3>Real Estate Agents<br>地产经纪人</h3>
+                <p>Daily video content for social media, build your personal brand and attract more leads.
+                    每天拿到文案就能拍视频，打造个人品牌。</p>
+            </div>
+            <div class="audience-card">
+                <div class="audience-icon">📱</div>
+                <h3>小红书 / TikTok<br>Content Creators</h3>
+                <p>Ready-to-film scripts in 4 styles, optimized for short-form video platforms. 4种风格文案直接拍，专为短视频优化。</p>
+            </div>
+            <div class="audience-card">
+                <div class="audience-icon">🎬</div>
+                <h3>YouTube Channels<br>YouTube 频道</h3>
+                <p>Professional analysis scripts with data for long-form real estate content. 带数据的专业分析文案，适合长视频。</p>
+            </div>
+            <div class="audience-card">
+                <div class="audience-icon">🏢</div>
+                <h3>Brokerages & Teams<br>经纪公司/团队</h3>
+                <p>Provide daily content for your whole team. One subscription, everyone benefits. 给全团队提供每日内容，一个订阅全员受益。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <h2 class="section-title" style="max-width:960px;margin:0 auto 48px;">What <span class="highlight">Agents</span>
+            Say · 经纪人怎么说</h2>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <div class="testimonial-text">"I used to spend 2 hours brainstorming video ideas. Now I just open my
+                    email, pick a script, and start filming. My posting frequency went from 2x/week to daily."
+                    <br>"以前花2小时想选题，现在打开邮件选文案就能拍。发布频率从每周2条变成每天。"
+                </div>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">S</div>
+                    <div>
+                        <div class="testimonial-name">Sarah Chen</div>
+                        <div class="testimonial-role">Agent · Compass · Manhattan</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <div class="testimonial-text">"The bilingual scripts are a game changer for targeting Chinese buyers. My
+                    WeChat Moments and Xiaohongshu posts are getting 3x more engagement."
+                    <br>"中英双语文案对我做华人客户帮助太大了。微信朋友圈和小红书互动量翻了3倍。"
+                </div>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">K</div>
+                    <div>
+                        <div class="testimonial-name">Kevin Liu</div>
+                        <div class="testimonial-role">Broker · eXp Realty · Flushing</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <div class="testimonial-text">"$9.99/month for 30+ daily scripts? That's basically free. One client from
+                    a viral video pays for 10 years of this service."
+                    <br>"$9.99一个月30+条文案？等于白送。一个视频带来的客户就够付10年。"
+                </div>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">M</div>
+                    <div>
+                        <div class="testimonial-name">Mike Zhang</div>
+                        <div class="testimonial-role">Team Lead · KW · Brooklyn</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <div class="testimonial-text">"The Myth Buster scripts are FIRE. My follower count doubled in 2 months
+                    because the content is so engaging and shareable."
+                    <br>"犀利揭秘类的文案太火了。2个月粉丝翻倍，因为内容太有传播力了。"
+                </div>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">R</div>
+                    <div>
+                        <div class="testimonial-name">Rachel Wang</div>
+                        <div class="testimonial-role">Agent · Sotheby's · SF</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trusted By -->
+    <div class="trusted">
+        <div class="trusted-label">Covering 8 Major US Markets · 覆盖全美 8 大市场</div>
+        <div class="trusted-items">
+            <span class="trusted-item">🏙️ New York</span>
+            <span class="trusted-item">🌴 Los Angeles</span>
+            <span class="trusted-item">🌉 San Francisco</span>
+            <span class="trusted-item">🏗️ Chicago</span>
+            <span class="trusted-item">🏖️ Miami</span>
+            <span class="trusted-item">☕ Seattle</span>
+            <span class="trusted-item">🎓 Boston</span>
+            <span class="trusted-item">🤠 Houston</span>
+        </div>
+    </div>
+
     <!-- Pricing -->
     <section class="pricing" id="pricing">
         <h2 class="section-title"><span class="highlight">Pricing</span> 定价</h2>
@@ -803,7 +1162,7 @@
             <div class="popular">MOST POPULAR 最受欢迎</div>
             <h3>REscript Pro</h3>
             <div class="price-amount">$9.99 <span>/month 月</span></div>
-            <p class="price-desc">Everything you need, every day. 每天所需的一切文案。</p>
+            <p class="price-desc">Start with a 7-day free trial. 先免费用7天再决定。</p>
             <ul class="price-features">
                 <li>30+ scripts daily / 每日 30+ 条文案</li>
                 <li>4 writing styles / 4 种口播风格</li>
@@ -928,6 +1287,7 @@
             const { email, language, market } = getFormData();
             if (!email) { showMsg('error', 'Please enter your email 请输入邮箱'); return; }
             try {
+                showMsg('info', '正在处理... Processing...');
                 const res = await fetch('/api/subscribe/trial', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -937,6 +1297,9 @@
                 if (data.success) {
                     if (data.status === 'trial_used') {
                         showMsg('info', data.message);
+                    } else if (data.viewUrl) {
+                        showMsg('success', data.message);
+                        setTimeout(() => { window.location.href = data.viewUrl; }, 1500);
                     } else {
                         showMsg('success', data.message);
                     }

@@ -1,8 +1,9 @@
 import { Router, Request, Response } from 'express';
 import Stripe from 'stripe';
 import { config } from '../config/index.js';
-import { addClient, findByEmail, upgradeToSubscriber, cancelSubscription, type Language, type MarketId } from '../store/client-store.js';
-import { runPipeline } from '../orchestrator.js';
+import { addClient, findByEmail, markTrialUsed, upgradeToSubscriber, cancelSubscription, type Language, type MarketId } from '../store/client-store.js';
+import { listOutputDates, getDailyOutput } from '../store/output-store.js';
+import { sendBatchEmails } from '../agents/email-agent.js';
 import { logger } from '../utils/logger.js';
 
 const router = Router();
@@ -39,7 +40,7 @@ router.post('/subscribe/trial', async (req: Request, res: Response) => {
                 existing.language = lang;
                 existing.market = mkt;
             }
-            if (existing.plan === 'subscriber') {
+            if (existing.plan === 'subscriber' || existing.plan === 'vip') {
                 res.json({ success: true, status: 'subscriber', message: lang === 'zh' ? '您已经是订阅用户了！每天都会收到最新文案。' : 'You are already subscribed! You will receive daily scripts.' });
                 return;
             }
@@ -47,17 +48,56 @@ router.post('/subscribe/trial', async (req: Request, res: Response) => {
                 res.json({ success: true, status: 'trial_used', message: lang === 'zh' ? '您已使用过免费体验，请订阅以继续接收每日文案。' : 'Free trial used. Subscribe to continue receiving daily scripts.' });
                 return;
             }
-            res.json({ success: true, status: 'trial_ready', clientId: existing.id, message: lang === 'zh' ? '✅ 您的免费体验已就绪！下一轮文案推送时会发送到您的邮箱。' : '✅ Your free trial is ready! Scripts will be sent in the next batch.' });
-            return;
         }
 
-        // New user
-        const client = addClient({ email: emailLower, language: lang, market: mkt });
+        // New user or existing user who hasn't used trial yet
+        let client = existing;
+        if (!client) {
+            client = addClient({ email: emailLower, language: lang, market: mkt });
+        }
+
+        // ── Instant delivery: find latest output and send immediately ──
+        const dates = listOutputDates();
+        if (dates.length > 0) {
+            const latestDate = dates[0];
+            const latestOutput = getDailyOutput(latestDate);
+
+            if (latestOutput) {
+                const baseUrl = config.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+                const viewerUrl = `${baseUrl}/view.html?date=${latestDate}`;
+                const subscribeUrl = `${baseUrl}/subscribe.html`;
+
+                // Send email immediately (async, don't block response)
+                sendBatchEmails([client], latestOutput, viewerUrl, false, true, subscribeUrl)
+                    .then(() => {
+                        markTrialUsed(client!.id);
+                        logger.info(`🎁 Instant trial email sent to ${client!.email}`);
+                    })
+                    .catch((err) => {
+                        logger.error(`❌ Instant trial email failed for ${client!.email}`, { error: (err as Error).message });
+                    });
+
+                res.status(201).json({
+                    success: true,
+                    status: 'trial_sent',
+                    clientId: client.id,
+                    viewUrl: `/view.html?date=${latestDate}`,
+                    message: lang === 'zh'
+                        ? '🎉 免费体验邮件已发送！正在为您展示最新文案...'
+                        : '🎉 Trial email sent! Showing you the latest scripts...',
+                });
+                return;
+            }
+        }
+
+        // No outputs available yet — fall back to "wait for next batch" message
         res.status(201).json({
             success: true,
             status: 'trial_ready',
             clientId: client.id,
-            message: lang === 'zh' ? '🎉 注册成功！您将在下一次推送时收到一封完整的AI文案邮件。' : '🎉 Registered! You will receive a full AI script email in the next batch.',
+            message: lang === 'zh'
+                ? '🎉 注册成功！您将在下一次推送时收到一封完整的AI文案邮件。'
+                : '🎉 Registered! You will receive a full AI script email in the next batch.',
         });
     } catch (error) {
         logger.error('Trial registration error', { error: (error as Error).message });
@@ -90,13 +130,13 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
             existing = addClient({ email: emailLower, language: lang, market: mkt });
         }
 
-        // If already subscriber, no need to pay
-        if (existing.plan === 'subscriber') {
+        // If already subscriber or VIP, no need to pay
+        if (existing.plan === 'subscriber' || existing.plan === 'vip') {
             res.json({ success: true, url: `${config.BASE_URL}/success.html`, message: '您已经是订阅者了' });
             return;
         }
 
-        // Create Stripe Checkout session for subscription
+        // Create Stripe Checkout session with 7-day free trial
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card', 'alipay'],
             mode: 'subscription',
@@ -109,6 +149,7 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
             success_url: `${config.BASE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${config.BASE_URL}/subscribe.html?cancelled=true`,
             subscription_data: {
+                trial_period_days: 7,
                 metadata: { email: emailLower, clientId: existing.id },
             },
             // Alipay fallback: if Alipay fails, card is still available as option

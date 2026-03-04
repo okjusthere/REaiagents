@@ -34,7 +34,7 @@ export interface Client {
     market: MarketId;
 
     // Subscription fields
-    plan: 'free' | 'subscriber';
+    plan: 'free' | 'subscriber' | 'vip';
     freeTrialUsed: boolean;
     stripeCustomerId?: string;
     stripeSubscriptionId?: string;
@@ -88,6 +88,11 @@ export function getActiveClients(): Client[] {
 /** Get paying subscribers only */
 export function getSubscribers(): Client[] {
     return readClients().filter(c => c.active && c.plan === 'subscriber');
+}
+
+/** Get VIP users (manually added, permanent access) */
+export function getVipClients(): Client[] {
+    return readClients().filter(c => c.active && c.plan === 'vip');
 }
 
 /** Get free users who haven't used their trial yet */
