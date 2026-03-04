@@ -892,6 +892,9 @@
                                 <option value="chinese-community" id="audienceOptionChinese">Chinese-speaking / relocation audience</option>
                             </select>
                         </div>
+                        <p class="microcopy" id="audienceHint">
+                            General mode is tuned for mainstream North American buyer-seller education and market commentary.
+                        </p>
                         <div class="signup-actions">
                             <button class="signup-button trial-button" onclick="signupTrial()" id="sampleButton">Send free sample</button>
                             <button class="signup-button subscribe-button" onclick="startCheckout()" id="subscribeButton">Start paid delivery · $9.99/mo</button>
@@ -1110,6 +1113,26 @@
                     'boston': 'Boston',
                     'houston': 'Houston',
                 },
+                audienceNarrative: {
+                    general: {
+                        cardLabel: 'Free sample · mainstream market desk',
+                        cardTitle: 'Send yourself a private market-desk sample.',
+                        cardCopy: 'Pick your market, delivery language, and audience focus. We’ll send a private package tuned for general North American buyer, seller, investor, and agent-brand content.',
+                        audienceHint: 'General mode is tuned for mainstream North American buyer-seller education, market commentary, and brokerage-friendly publishing workflows.',
+                        feature1Copy: 'Each run is tied to a specific market, delivery language, and audience profile, so the package feels like a local market desk for the clients you already serve.',
+                        audienceTitle: 'Three clear fit profiles inside a mainstream North American workflow.',
+                        audienceCopy: 'Choose this mode if your publishing habit revolves around buyer-seller education, weekly market commentary, listing-adjacent video, or general pipeline content.',
+                    },
+                    'chinese-community': {
+                        cardLabel: 'Free sample · bilingual community desk',
+                        cardTitle: 'Send yourself a private community-desk sample.',
+                        cardCopy: 'Pick your market, delivery language, and audience focus. We’ll send a private package tuned for Chinese-speaking households, relocation flows, bilingual trust content, and community-driven pipeline building.',
+                        audienceHint: 'Chinese-community mode is tuned for bilingual education, relocation clarity, family decision dynamics, and community trust building.',
+                        feature1Copy: 'Each run is tied to a specific market, delivery language, and audience profile, so the package feels aligned to bilingual, relocation, and community-driven client conversations when you need that lens.',
+                        audienceTitle: 'Three clear fit profiles when your content needs a bilingual or relocation lens.',
+                        audienceCopy: 'Choose this mode if your publishing habit includes Chinese-speaking households, relocation clients, bilingual video, or community-trust content alongside standard market education.',
+                    },
+                },
                 text: {
                     brandText: 'REscript · agent content desk',
                     navProduct: 'Product',
@@ -1268,6 +1291,26 @@
                     'seattle': '西雅图',
                     'boston': '波士顿',
                     'houston': '休斯顿',
+                },
+                audienceNarrative: {
+                    general: {
+                        cardLabel: '免费 sample · 主流市场内容台',
+                        cardTitle: '先给自己发一份私有市场内容 sample。',
+                        cardCopy: '选择你服务的市场、交付语言和受众画像，我们会发你一整份偏主流北美买卖家教育、市场点评和经纪人品牌内容的私有内容包。',
+                        audienceHint: '主流北美模式更适合买家卖家教育、市场点评、listing 周边视频和 brokerage 友好的内容工作流。',
+                        feature1Copy: '每次生成都绑定具体市场、交付语言和受众画像，所以你打开的内容，会更像一个服务你现有客户盘的本地市场内容台。',
+                        audienceTitle: '如果你走的是主流北美内容路线，这三类用户最适配。',
+                        audienceCopy: '当你的发布习惯围绕买卖家教育、weekly market update、listing 周边视频和通用获客内容时，选择这个模式会更顺手。',
+                    },
+                    'chinese-community': {
+                        cardLabel: '免费 sample · 双语社群内容台',
+                        cardTitle: '先给自己发一份私有社群 sample。',
+                        cardCopy: '选择你服务的市场、交付语言和受众画像，我们会发你一整份偏华语家庭、搬迁需求、双语教育和社区信任建立的私有内容包。',
+                        audienceHint: '华语 / 搬迁模式更适合双语教育、搬迁流程解释、家庭决策内容和社区转介绍场景。',
+                        feature1Copy: '每次生成都绑定具体市场、交付语言和受众画像，所以当你选择华语 / 搬迁模式时，内容会更贴近双语、搬迁和社区型客户沟通场景。',
+                        audienceTitle: '如果你走的是双语社群或搬迁路线，这三类用户最适配。',
+                        audienceCopy: '当你的发布习惯围绕华语家庭、搬迁客户、双语口播和社区信任建立时，选择这个模式会更贴近真实使用场景。',
+                    },
                 },
                 text: {
                     brandText: 'REscript · 地产经纪人内容工作台',
@@ -1445,6 +1488,23 @@
             return copy[currentLang] || copy.en;
         }
 
+        function getAudienceProfile() {
+            const select = document.getElementById('heroAudience');
+            return select && select.value === 'chinese-community' ? 'chinese-community' : 'general';
+        }
+
+        function applyAudienceNarrative() {
+            const ui = getUi();
+            const narrative = ui.audienceNarrative[getAudienceProfile()] || ui.audienceNarrative.general;
+            setText('cardLabel', narrative.cardLabel);
+            setText('cardTitle', narrative.cardTitle);
+            setText('cardCopy', narrative.cardCopy);
+            setText('audienceHint', narrative.audienceHint);
+            setText('feature1Copy', narrative.feature1Copy);
+            setText('audienceTitle', narrative.audienceTitle);
+            setText('audienceCopy', narrative.audienceCopy);
+        }
+
         function translatePage() {
             const ui = getUi();
             document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
@@ -1471,6 +1531,7 @@
                 document.getElementById('heroAudience').value = currentLang === 'zh' ? 'chinese-community' : 'general';
             }
 
+            applyAudienceNarrative();
             renderStyle();
         }
 
@@ -1592,10 +1653,12 @@
                     ? 'chinese-community'
                     : 'general';
             }
+            applyAudienceNarrative();
         });
 
         document.getElementById('heroAudience').addEventListener('change', () => {
             audienceTouched = true;
+            applyAudienceNarrative();
         });
 
         const savedLang = localStorage.getItem('rescript-ui-lang');

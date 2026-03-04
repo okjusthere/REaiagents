@@ -224,6 +224,22 @@
                 openLatest: 'Open latest scripts',
                 manage: 'Manage subscription',
                 home: 'Back to home',
+                audienceTone: {
+                    general: {
+                        introCopy: 'Checkout is complete. You now have a live subscription with private access links, direct subscription controls, and delivery based on the market, language, and audience preferences attached to your account.',
+                        statusBar: 'Your subscription is set to start on the next scheduled run with the general North American audience lens active for your account.',
+                        step1Copy: 'REscript sends a private viewer link rather than a public content page. Save the email so you can reopen the day’s market-desk package when you need it.',
+                        step2Copy: 'Use the scripts as production drafts for mainstream buyer-seller education, market commentary, and brokerage-friendly publishing.',
+                        step3Copy: 'The same manage-subscription page controls both email delivery status and Stripe billing access for paid accounts.',
+                    },
+                    'chinese-community': {
+                        introCopy: 'Checkout is complete. You now have a live subscription with private access links, direct subscription controls, and delivery based on the market, language, and community-oriented audience preferences attached to your account.',
+                        statusBar: 'Your subscription is set to start on the next scheduled run with the Chinese-speaking and relocation audience lens active for your account.',
+                        step1Copy: 'REscript sends a private viewer link rather than a public content page. Save the email so you can reopen the day’s community-desk package when you need it.',
+                        step2Copy: 'Use the scripts as production drafts for bilingual education, relocation explainers, and trust-building content for Chinese-speaking households.',
+                        step3Copy: 'The same manage-subscription page lets you adjust delivery settings as your audience mix changes, while also opening Stripe billing for paid accounts.',
+                    },
+                },
             },
             zh: {
                 title: '订阅已确认 · REscript',
@@ -241,10 +257,27 @@
                 openLatest: '打开最新脚本',
                 manage: '管理订阅',
                 home: '返回首页',
+                audienceTone: {
+                    general: {
+                        introCopy: '支付已经完成。你现在拥有正式订阅，可通过私有访问链接查看内容，并直接管理投递与订阅状态；交付内容会按你的市场、语言和主流北美客户受众偏好匹配。',
+                        statusBar: '你的订阅会在下一次计划任务执行时开始正式投递，并默认按“主流北美客户受众”模式生成内容。',
+                        step1Copy: 'REscript 发送的是私有 viewer link，不是公开内容页。建议保留邮件，后续需要时可以重新打开当天的市场内容包。',
+                        step2Copy: '把脚本当作面向主流买卖家教育、市场点评和经纪人品牌内容的生产初稿使用。',
+                        step3Copy: '同一个 manage-subscription 页面既能控制邮件投递状态，也能给付费用户打开 Stripe billing portal。',
+                    },
+                    'chinese-community': {
+                        introCopy: '支付已经完成。你现在拥有正式订阅，可通过私有访问链接查看内容，并直接管理投递与订阅状态；交付内容会按你的市场、语言和华语 / 搬迁家庭受众偏好匹配。',
+                        statusBar: '你的订阅会在下一次计划任务执行时开始正式投递，并默认按“华语 / 搬迁家庭受众”模式生成内容。',
+                        step1Copy: 'REscript 发送的是私有 viewer link，不是公开内容页。建议保留邮件，后续需要时可以重新打开当天的社群内容包。',
+                        step2Copy: '把脚本当作双语教育、搬迁流程解释和社区信任建立内容的生产初稿使用。',
+                        step3Copy: '同一个 manage-subscription 页面既能帮你按 audience 切换后续交付，也能给付费用户打开 Stripe billing portal。',
+                    },
+                },
             },
         };
 
         let currentLang = 'en';
+        let currentAudience = 'general';
         const params = new URLSearchParams(window.location.search);
         const sessionId = params.get('session_id');
 
@@ -268,14 +301,20 @@
             document.getElementById('langToggle').textContent = ui.toggle;
             setText('eyebrow', ui.eyebrow);
             setText('pageTitle', ui.pageTitle);
-            setText('introCopy', ui.introCopy);
-            setText('statusBar', ui.statusBar);
             setText('step1Title', ui.step1Title);
-            setText('step1Copy', ui.step1Copy);
             setText('step2Title', ui.step2Title);
-            setText('step2Copy', ui.step2Copy);
             setText('step3Title', ui.step3Title);
-            setText('step3Copy', ui.step3Copy);
+            applyAudienceNarrative();
+        }
+
+        function applyAudienceNarrative() {
+            const ui = getUi();
+            const narrative = ui.audienceTone[currentAudience] || ui.audienceTone.general;
+            setText('introCopy', narrative.introCopy);
+            setText('statusBar', narrative.statusBar);
+            setText('step1Copy', narrative.step1Copy);
+            setText('step2Copy', narrative.step2Copy);
+            setText('step3Copy', narrative.step3Copy);
         }
 
         function toggleLang() {
@@ -312,6 +351,8 @@
                     if (result.data.language === 'zh' || result.data.language === 'en') {
                         setLang(result.data.language);
                     }
+                    currentAudience = result.data.audienceProfile === 'chinese-community' ? 'chinese-community' : 'general';
+                    applyAudienceNarrative();
                     window.sessionData = result.data;
                     renderActions(result.data);
                 })
