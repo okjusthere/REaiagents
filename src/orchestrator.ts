@@ -29,7 +29,7 @@ export async function runPipeline(dryRun = false): Promise<void> {
 
         // ── Step 2: Generate news scripts ────────────────────
         logger.info('\n✍️  Step 2/4: Generating news scripts (per-article × 4 styles)...');
-        const dailyOutput = await generateDailyScripts(articles, 5);
+        const dailyOutput = await generateDailyScripts(articles, 3);
 
         // ── Step 3: Generate content module scripts ──────────
         logger.info('\n📚 Step 3/4: Generating content module scripts...');
