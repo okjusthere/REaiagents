@@ -1,281 +1,218 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎉 订阅成功 — REscript</title>
+    <title>Subscription Confirmed · REscript</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #f7f2e8;
+            --ink: #15212b;
+            --muted: #5b6775;
+            --line: rgba(21, 33, 43, 0.12);
+            --accent: #9b4a32;
+            --navy: #203443;
+            --green: #24483c;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', 'Noto Sans SC', -apple-system, 'PingFang SC', sans-serif;
-            background: #F8F7F4;
-            color: #0f172a;
+            font-family: "IBM Plex Sans", sans-serif;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: grid;
+            place-items: center;
             padding: 24px;
-        }
-
-        body.lang-zh .en {
-            display: none !important;
-        }
-
-        body.lang-en .zh {
-            display: none !important;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(155, 74, 50, 0.10), transparent 24%),
+                radial-gradient(circle at top right, rgba(32, 52, 67, 0.10), transparent 26%),
+                linear-gradient(180deg, #f9f3e8 0%, #f1ecdf 100%);
         }
 
         .card {
-            max-width: 480px;
-            width: 100%;
-            text-align: center;
-            padding: 48px 32px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            width: min(100%, 720px);
+            padding: 34px;
+            border-radius: 28px;
+            border: 1px solid var(--line);
+            background: rgba(255, 252, 247, 0.86);
+            box-shadow: 0 28px 70px rgba(21, 33, 43, 0.10);
         }
 
-        .confetti {
-            font-size: 64px;
-            margin-bottom: 24px;
-            animation: bounceIn 0.6s ease-out;
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            color: var(--accent);
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
         }
 
-        @keyframes bounceIn {
-            0% {
-                transform: scale(0);
-            }
-
-            60% {
-                transform: scale(1.2);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+        .eyebrow::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--accent);
         }
 
         h1 {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: "Cormorant Garamond", serif;
+            font-size: clamp(2.7rem, 7vw, 4.4rem);
+            line-height: 0.96;
+            margin-bottom: 14px;
         }
 
         p {
-            font-size: 16px;
-            color: #64748b;
-            line-height: 1.7;
-            margin-bottom: 16px;
+            color: var(--muted);
+            line-height: 1.8;
+            margin-bottom: 14px;
         }
 
-        .trial-badge {
-            display: inline-block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #d97706;
-            padding: 8px 20px;
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .highlight {
-            font-size: 14px;
-            font-weight: 600;
-            color: #16a34a;
-            padding: 12px 20px;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 10px;
-            margin-bottom: 28px;
+        .status-bar {
+            margin: 22px 0 10px;
+            padding: 18px 20px;
+            border-radius: 18px;
+            background: rgba(36, 72, 60, 0.07);
+            border: 1px solid rgba(36, 72, 60, 0.18);
+            color: var(--green);
         }
 
         .steps {
-            text-align: left;
-            margin-bottom: 32px;
+            margin-top: 24px;
+            display: grid;
+            gap: 12px;
         }
 
         .step {
+            display: grid;
+            grid-template-columns: 54px 1fr;
+            gap: 14px;
+            padding: 18px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.72);
+            border: 1px solid var(--line);
+        }
+
+        .step-number {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: rgba(32, 52, 67, 0.08);
+            color: var(--navy);
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.8rem;
+        }
+
+        .step strong {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--ink);
+        }
+
+        .actions {
             display: flex;
-            align-items: flex-start;
+            flex-wrap: wrap;
             gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
+            margin-top: 26px;
         }
 
-        .step:last-child {
-            border-bottom: none;
-        }
-
-        .step-num {
-            width: 28px;
-            height: 28px;
-            background: #eff6ff;
-            border-radius: 8px;
-            display: flex;
+        .button {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: #2563eb;
-            flex-shrink: 0;
-        }
-
-        .step-text {
-            font-size: 14px;
-            color: #64748b;
-            line-height: 1.5;
-        }
-
-        .step-text strong {
-            color: #0f172a;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 14px 32px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border: none;
-            border-radius: 12px;
+            min-height: 50px;
+            padding: 0 20px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background: var(--navy);
             color: white;
-            font-size: 15px;
             font-weight: 600;
             text-decoration: none;
-            transition: all 0.2s;
-            font-family: inherit;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
-            margin: 0 6px 12px;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #64748b, #475569);
-            box-shadow: 0 2px 8px rgba(100, 116, 139, 0.25);
-        }
-
-        .lang-toggle {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            background: #eff6ff;
-            color: #2563eb;
-            border: 1px solid rgba(37, 99, 235, 0.2);
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .lang-toggle:hover {
-            background: #2563eb;
-            color: white;
+        .button.secondary {
+            background: white;
+            color: var(--ink);
+            border-color: var(--line);
         }
     </style>
 </head>
-
 <body>
-    <a class="lang-toggle" onclick="toggleLang()"><span class="zh">🇺🇸 English</span><span class="en">🇨🇳
-            中文</span></a>
+    <main class="card">
+        <div class="eyebrow">Subscription confirmed</div>
+        <h1>Your REscript delivery is active.</h1>
+        <p>
+            Checkout is complete. You now have a live subscription with private access links, direct subscription controls, and delivery based on the market and language preferences attached to your account.
+        </p>
 
-    <div class="card">
-        <div class="confetti">🎉</div>
-        <h1><span class="zh">订阅成功！</span><span class="en">Subscription Confirmed!</span></h1>
-        <p><span class="zh">感谢您的订阅，您现在是 REscript Pro 会员。</span><span class="en">Thank you for subscribing to REscript.
-                You are now a Pro member.</span></p>
-        <div class="trial-badge"><span class="zh">🎁 7天免费试用已开始，试用期内不收费</span><span class="en">🎁 Your 7-day free trial
-                has started — no charge during trial</span></div>
-        <div class="highlight"><span class="zh">📬 从明天早上 7:00 (EST) 开始，每天收到一份完整 AI 文案邮件</span><span class="en">📬
-                Starting tomorrow at 7:00 AM EST, you'll receive a full AI-generated script email daily</span></div>
+        <div class="status-bar">
+            Your subscription is configured to start delivering the daily brief on the next scheduled run. You can also open your manage-subscription page from every email.
+        </div>
+
         <div class="steps">
             <div class="step">
-                <div class="step-num">1</div>
-                <div class="step-text"><strong><span class="zh">明早7点</span><span class="en">Tomorrow at 7
-                            AM</span></strong> — <span class="zh">检查邮箱（和垃圾邮件文件夹）</span><span class="en">Check your inbox
-                        (and spam folder)</span></div>
+                <div class="step-number">1</div>
+                <div>
+                    <strong>Watch for the first delivery</strong>
+                    REscript sends a private viewer link rather than a public content page. Save the email so you can reopen the day’s package when you need it.
+                </div>
             </div>
             <div class="step">
-                <div class="step-num">2</div>
-                <div class="step-text"><strong><span class="zh">点击链接</span><span class="en">Click the
-                            link</span></strong> — <span class="zh">浏览全部文案，选择你喜欢的风格</span><span class="en">Browse all
-                        scripts and pick your style</span></div>
+                <div class="step-number">2</div>
+                <div>
+                    <strong>Review before publishing</strong>
+                    Use the scripts as production drafts. Add your own voice, compliance review, and brokerage-specific guardrails before publishing.
+                </div>
             </div>
             <div class="step">
-                <div class="step-num">3</div>
-                <div class="step-text"><strong><span class="zh">一键复制</span><span class="en">One-click
-                            copy</span></strong> — <span class="zh">打开相机开拍！</span><span class="en">Open your camera and
-                        start filming!</span></div>
+                <div class="step-number">3</div>
+                <div>
+                    <strong>Manage billing and delivery</strong>
+                    The same manage-subscription page controls both email delivery status and Stripe billing access for paid accounts.
+                </div>
             </div>
         </div>
-        <div id="viewLatest"></div>
-        <a href="/" class="btn"><span class="zh">← 返回首页</span><span class="en">← Back to REscript</span></a>
-    </div>
+
+        <div class="actions" id="viewLatest">
+            <a class="button secondary" href="/">Back to home</a>
+        </div>
+    </main>
 
     <script>
-        // i18n
-        function detectLang() {
-            const saved = localStorage.getItem('re_lang');
-            if (saved) return saved;
-            const nav = navigator.language || navigator.userLanguage || 'en';
-            return nav.startsWith('zh') ? 'zh' : 'en';
-        }
-        function setLang(lang) {
-            document.body.className = document.body.className.replace(/lang-\w+/g, '').trim();
-            document.body.classList.add('lang-' + lang);
-            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-            localStorage.setItem('re_lang', lang);
-        }
-        function toggleLang() {
-            const current = document.body.classList.contains('lang-zh') ? 'zh' : 'en';
-            setLang(current === 'zh' ? 'en' : 'zh');
-        }
-        setLang(detectLang());
-
         const params = new URLSearchParams(window.location.search);
         const sessionId = params.get('session_id');
+
         if (sessionId) {
             fetch(`/api/subscribe/session/${encodeURIComponent(sessionId)}`)
-                .then(r => r.json())
-                .then(result => {
-                    if (!result.success || !result.data) return;
-                    const el = document.getElementById('viewLatest');
+                .then((response) => response.json())
+                .then((result) => {
+                    if (!result.success || !result.data) {
+                        return;
+                    }
+
                     const actions = [];
                     if (result.data.viewUrl) {
-                        actions.push(`<a href="${result.data.viewUrl}" class="btn btn-secondary"><span class="zh">📋 查看最新文案</span><span class="en">📋 View Latest Scripts</span></a>`);
+                        actions.push(`<a class="button" href="${result.data.viewUrl}">Open latest scripts</a>`);
                     }
                     if (result.data.manageUrl) {
-                        actions.push(`<a href="${result.data.manageUrl}" class="btn btn-secondary"><span class="zh">⚙️ 管理订阅</span><span class="en">⚙️ Manage Subscription</span></a>`);
+                        actions.push(`<a class="button secondary" href="${result.data.manageUrl}">Manage subscription</a>`);
                     }
-                    el.innerHTML = actions.join('');
+                    actions.push('<a class="button secondary" href="/">Back to home</a>');
+                    document.getElementById('viewLatest').innerHTML = actions.join('');
                 })
                 .catch(() => { });
         }
     </script>
 </body>
-
 </html>

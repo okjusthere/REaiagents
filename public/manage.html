@@ -4,109 +4,277 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Subscription · REscript</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --ink: #15212b;
+            --muted: #5b6775;
+            --line: rgba(21, 33, 43, 0.12);
+            --accent: #9b4a32;
+            --navy: #203443;
+            --green: #24483c;
+            --danger: #8a2d26;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: "IBM Plex Sans", sans-serif;
             min-height: 100vh;
-            background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
-            color: #0f172a;
+            display: grid;
+            place-items: center;
             padding: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(155, 74, 50, 0.10), transparent 24%),
+                radial-gradient(circle at top right, rgba(32, 52, 67, 0.10), transparent 26%),
+                linear-gradient(180deg, #f9f3e8 0%, #f1ecdf 100%);
         }
+
         .card {
-            width: 100%;
-            max-width: 560px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
-            padding: 32px;
+            width: min(100%, 820px);
+            padding: 34px;
+            border-radius: 30px;
+            border: 1px solid var(--line);
+            background: rgba(255, 252, 247, 0.9);
+            box-shadow: 0 30px 80px rgba(21, 33, 43, 0.10);
         }
-        h1 { font-size: 28px; margin-bottom: 12px; }
-        p { color: #475569; line-height: 1.7; margin-bottom: 14px; }
-        .meta {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 16px;
-            margin: 20px 0;
-        }
-        .meta-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .meta-row:last-child { border-bottom: none; }
-        .label { color: #64748b; font-size: 14px; }
-        .value { font-weight: 600; text-align: right; }
-        .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
-        button, a.button {
+
+        .eyebrow {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            min-height: 46px;
-            padding: 0 18px;
-            border-radius: 12px;
-            border: 1px solid #cbd5e1;
-            background: #0f172a;
-            color: white;
-            text-decoration: none;
-            font: inherit;
-            cursor: pointer;
+            gap: 10px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            color: var(--accent);
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
         }
-        button.secondary, a.button.secondary {
-            background: white;
-            color: #0f172a;
+
+        .eyebrow::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--accent);
         }
-        .status {
-            display: inline-block;
-            padding: 6px 12px;
+
+        h1 {
+            font-family: "Cormorant Garamond", serif;
+            font-size: clamp(2.6rem, 7vw, 4.3rem);
+            line-height: 0.96;
+            margin-bottom: 14px;
+        }
+
+        p {
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        .status-row {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
             border-radius: 999px;
             font-size: 13px;
             font-weight: 700;
-            margin-top: 8px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
-        .status.active { background: #dcfce7; color: #166534; }
-        .status.paused { background: #fee2e2; color: #991b1b; }
+
+        .status-badge.active {
+            background: rgba(36, 72, 60, 0.08);
+            color: var(--green);
+            border: 1px solid rgba(36, 72, 60, 0.18);
+        }
+
+        .status-badge.paused {
+            background: rgba(138, 45, 38, 0.08);
+            color: var(--danger);
+            border: 1px solid rgba(138, 45, 38, 0.18);
+        }
+
+        .status-badge.invalid {
+            background: rgba(91, 103, 117, 0.08);
+            color: var(--muted);
+            border: 1px solid rgba(91, 103, 117, 0.18);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(280px, 320px);
+            gap: 18px;
+            margin-top: 28px;
+        }
+
+        .panel {
+            padding: 24px;
+            border-radius: 22px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.72);
+        }
+
+        .panel h2 {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .detail-list {
+            margin-top: 16px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .detail {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .detail:last-child { border-bottom: none; }
+
+        .detail-label {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .actions {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        button,
+        a.button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+            padding: 0 18px;
+            border-radius: 16px;
+            border: 1px solid transparent;
+            background: var(--navy);
+            color: white;
+            text-decoration: none;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button.secondary,
+        a.button.secondary {
+            background: white;
+            color: var(--ink);
+            border-color: var(--line);
+        }
+
+        button.danger {
+            background: rgba(138, 45, 38, 0.12);
+            color: var(--danger);
+            border-color: rgba(138, 45, 38, 0.16);
+        }
+
         .message {
             margin-top: 18px;
             padding: 14px 16px;
-            border-radius: 12px;
+            border-radius: 16px;
             display: none;
+            line-height: 1.7;
         }
-        .message.success { display: block; background: #dcfce7; color: #166534; }
-        .message.error { display: block; background: #fee2e2; color: #991b1b; }
+
+        .message.success {
+            display: block;
+            background: rgba(36, 72, 60, 0.08);
+            color: var(--green);
+            border: 1px solid rgba(36, 72, 60, 0.16);
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(138, 45, 38, 0.08);
+            color: var(--danger);
+            border: 1px solid rgba(138, 45, 38, 0.16);
+        }
+
+        .helper {
+            margin-top: 14px;
+            font-size: 0.92rem;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        @media (max-width: 860px) {
+            .grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Manage Your Subscription</h1>
-        <p>Use this page to pause or resume delivery, and paid subscribers can open the Stripe billing portal from here.</p>
-        <div id="statusBadge" class="status">Loading...</div>
-        <div class="meta" id="metaBox" style="display:none;">
-            <div class="meta-row"><span class="label">Email</span><span class="value" id="emailValue"></span></div>
-            <div class="meta-row"><span class="label">Plan</span><span class="value" id="planValue"></span></div>
-            <div class="meta-row"><span class="label">Language</span><span class="value" id="languageValue"></span></div>
-            <div class="meta-row"><span class="label">Market</span><span class="value" id="marketValue"></span></div>
+    <main class="card">
+        <div class="eyebrow">Subscriber controls</div>
+        <h1>Manage delivery without opening a support ticket.</h1>
+        <p>
+            This page is tied to your private REscript access link. Use it to pause or resume daily delivery, and if you are on a paid plan, open the Stripe billing portal from the same control surface.
+        </p>
+
+        <div class="status-row">
+            <div id="statusBadge" class="status-badge invalid">Loading access link</div>
         </div>
-        <div class="actions">
-            <button id="pauseBtn" onclick="unsubscribe()">Pause delivery</button>
-            <button id="resumeBtn" class="secondary" onclick="resubscribe()">Resume delivery</button>
-            <button id="billingBtn" class="secondary" onclick="openBilling()">Open billing portal</button>
-            <a href="/" class="button secondary">Back to home</a>
+
+        <div class="grid">
+            <section class="panel">
+                <h2>Subscription details</h2>
+                <p>We use this information to match your delivery to the market and language preferences tied to your account.</p>
+                <div class="detail-list" id="metaBox" style="display:none;">
+                    <div class="detail"><span class="detail-label">Email</span><span class="detail-value" id="emailValue"></span></div>
+                    <div class="detail"><span class="detail-label">Plan</span><span class="detail-value" id="planValue"></span></div>
+                    <div class="detail"><span class="detail-label">Delivery language</span><span class="detail-value" id="languageValue"></span></div>
+                    <div class="detail"><span class="detail-label">Primary market</span><span class="detail-value" id="marketValue"></span></div>
+                </div>
+            </section>
+
+            <aside class="panel">
+                <h2>Actions</h2>
+                <p>Use these controls to pause delivery, resume delivery, or open billing.</p>
+                <div class="actions">
+                    <button id="pauseBtn" class="danger" onclick="unsubscribe()">Pause delivery</button>
+                    <button id="resumeBtn" class="secondary" onclick="resubscribe()">Resume delivery</button>
+                    <button id="billingBtn" class="secondary" onclick="openBilling()">Open Stripe billing</button>
+                    <a class="button secondary" href="/">Back to home</a>
+                </div>
+                <p class="helper">
+                    Pausing delivery stops the daily email. It does not automatically cancel billing unless you manage the plan inside Stripe.
+                </p>
+            </aside>
         </div>
+
         <div id="message" class="message"></div>
-    </div>
+    </main>
 
     <script>
         const params = new URLSearchParams(window.location.search);
         const token = params.get('token') || '';
-        let currentState = null;
 
         function showMessage(type, text) {
             const box = document.getElementById('message');
@@ -116,31 +284,33 @@
 
         async function loadStatus() {
             if (!token) {
-                showMessage('error', 'Missing manage token.');
-                document.getElementById('statusBadge').textContent = 'Invalid link';
+                document.getElementById('statusBadge').textContent = 'Invalid access link';
+                showMessage('error', 'This manage link is missing a token or has already expired.');
                 return;
             }
 
             const response = await fetch(`/api/subscription/status?token=${encodeURIComponent(token)}`);
             const result = await response.json();
             if (!result.success) {
-                showMessage('error', result.error || 'Unable to load this link.');
-                document.getElementById('statusBadge').textContent = 'Invalid link';
+                document.getElementById('statusBadge').textContent = 'Invalid access link';
+                showMessage('error', result.error || 'Unable to load this manage page.');
                 return;
             }
 
-            currentState = result.data;
-            document.getElementById('metaBox').style.display = 'block';
-            document.getElementById('emailValue').textContent = result.data.email;
-            document.getElementById('planValue').textContent = result.data.plan;
-            document.getElementById('languageValue').textContent = result.data.language;
-            document.getElementById('marketValue').textContent = result.data.market;
+            const data = result.data;
+            document.getElementById('metaBox').style.display = 'grid';
+            document.getElementById('emailValue').textContent = data.email;
+            document.getElementById('planValue').textContent = data.plan;
+            document.getElementById('languageValue').textContent = data.language;
+            document.getElementById('marketValue').textContent = data.market;
+
             const badge = document.getElementById('statusBadge');
-            badge.textContent = result.data.active ? 'Delivery active' : 'Delivery paused';
-            badge.className = `status ${result.data.active ? 'active' : 'paused'}`;
-            document.getElementById('pauseBtn').style.display = result.data.active ? 'inline-flex' : 'none';
-            document.getElementById('resumeBtn').style.display = result.data.active ? 'none' : 'inline-flex';
-            document.getElementById('billingBtn').style.display = result.data.hasBilling ? 'inline-flex' : 'none';
+            badge.textContent = data.active ? 'Delivery active' : 'Delivery paused';
+            badge.className = `status-badge ${data.active ? 'active' : 'paused'}`;
+
+            document.getElementById('pauseBtn').style.display = data.active ? 'inline-flex' : 'none';
+            document.getElementById('resumeBtn').style.display = data.active ? 'none' : 'inline-flex';
+            document.getElementById('billingBtn').style.display = data.hasBilling ? 'inline-flex' : 'none';
         }
 
         async function unsubscribe() {
@@ -154,7 +324,7 @@
                 showMessage('error', result.error || 'Unable to pause delivery.');
                 return;
             }
-            showMessage('success', 'Delivery paused. You will no longer receive daily emails until you resume.');
+            showMessage('success', 'Delivery is paused. You will stop receiving the daily brief until you resume it.');
             loadStatus();
         }
 
@@ -169,7 +339,7 @@
                 showMessage('error', result.error || 'Unable to resume delivery.');
                 return;
             }
-            showMessage('success', 'Delivery resumed.');
+            showMessage('success', 'Delivery is active again.');
             loadStatus();
         }
 
@@ -181,13 +351,15 @@
             });
             const result = await response.json();
             if (!result.success || !result.url) {
-                showMessage('error', result.error || 'Unable to open billing portal.');
+                showMessage('error', result.error || 'Unable to open the billing portal.');
                 return;
             }
             window.location.href = result.url;
         }
 
-        loadStatus().catch(() => showMessage('error', 'Unable to load this page.'));
+        loadStatus().catch(() => {
+            showMessage('error', 'Unable to load your manage page.');
+        });
     </script>
 </body>
 </html>

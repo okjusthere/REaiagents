@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎬 今日视频文案 — RE AI Agents</title>
+    <title>REscript Viewer</title>
     <style>
         * {
             margin: 0;
@@ -398,35 +398,35 @@
 
 <body>
     <div class="header">
-        <h1>🎬 房地产经纪人每日视频文案</h1>
+        <h1 id="pageTitle">REscript daily viewer</h1>
         <div class="meta" id="dateMeta">加载中...</div>
         <div class="stats">
             <div class="stat">
                 <div class="stat-val" id="newsCount">-</div>
-                <div class="stat-lbl">新闻</div>
+                <div class="stat-lbl" id="newsLabel">News</div>
             </div>
             <div class="stat">
                 <div class="stat-val" id="moduleCount">-</div>
-                <div class="stat-lbl">模块</div>
+                <div class="stat-lbl" id="moduleLabel">Modules</div>
             </div>
             <div class="stat">
                 <div class="stat-val" id="scriptCount">-</div>
-                <div class="stat-lbl">文案</div>
+                <div class="stat-lbl" id="scriptLabel">Scripts</div>
             </div>
             <div class="stat">
                 <div class="stat-val">4</div>
-                <div class="stat-lbl">风格</div>
+                <div class="stat-lbl" id="styleLabel">Angles</div>
             </div>
         </div>
     </div>
     <div class="container">
         <div class="cat-tabs" id="catTabs"></div>
         <div class="tabs">
-            <div class="tab active" data-style="all">全部风格</div>
-            <div class="tab" data-style="professional">📊 专业</div>
-            <div class="tab" data-style="casual">😄 轻松</div>
-            <div class="tab" data-style="investor">💰 投资</div>
-            <div class="tab" data-style="mythbuster">🔍 避坑</div>
+            <div class="tab active" data-style="all" id="tabAll">All angles</div>
+            <div class="tab" data-style="professional" id="tabProfessional">📊 Professional</div>
+            <div class="tab" data-style="casual" id="tabCasual">😄 Casual</div>
+            <div class="tab" data-style="investor" id="tabInvestor">💰 Investor</div>
+            <div class="tab" data-style="mythbuster" id="tabMythbuster">🔍 Myth-buster</div>
         </div>
         <div id="content"></div>
     </div>
@@ -434,24 +434,110 @@
     <script>
 const API='/api';
 let allSections=[];
+let uiLanguage='en';
+const copyMap={
+  en:{
+    pageTitle:'REscript daily viewer',
+    loading:'Loading your private viewer...',
+    newsLabel:'News',
+    moduleLabel:'Modules',
+    scriptLabel:'Scripts',
+    styleLabel:'Angles',
+    tabAll:'All angles',
+    tabProfessional:'📊 Professional',
+    tabCasual:'😄 Casual',
+    tabInvestor:'💰 Investor',
+    tabMythbuster:'🔍 Myth-buster',
+    missingLink:'Missing access credentials. Open the private viewer link from your email.',
+    invalidLink:'No scripts found for this link.',
+    copyToast:'✅ Script copied',
+    shareToast:'✅ Script copied for sharing',
+    copiedButton:'✅ Copied',
+    copyButton:'📋 Copy',
+    shareButton:'🔗 Share',
+    hook:'Opening hook',
+    body:'Main body',
+    cta:'Call to action',
+    source:'Source',
+    articleLink:'Read source ↗',
+    dateMeta:(data)=>`📅 ${data.date} · ${data.market} · ${String(data.language).toUpperCase()}`,
+    titleForDate:(date)=>`REscript viewer · ${date}`,
+    newsCategory:'📰 News',
+    allCategory:'All',
+    loadFailed:(message)=>`Unable to load viewer: ${message}`,
+  },
+  zh:{
+    pageTitle:'REscript 每日文案查看页',
+    loading:'正在加载专属查看页...',
+    newsLabel:'新闻',
+    moduleLabel:'模块',
+    scriptLabel:'文案',
+    styleLabel:'风格',
+    tabAll:'全部风格',
+    tabProfessional:'📊 专业',
+    tabCasual:'😄 轻松',
+    tabInvestor:'💰 投资',
+    tabMythbuster:'🔍 避坑',
+    missingLink:'缺少访问凭证，请使用邮件中的专属链接打开。',
+    invalidLink:'未找到对应文案。',
+    copyToast:'✅ 文案已复制到剪贴板',
+    shareToast:'✅ 文案已复制，可直接分享',
+    copiedButton:'✅ 已复制',
+    copyButton:'📋 复制',
+    shareButton:'🔗 分享',
+    hook:'开场钩子',
+    body:'主要内容',
+    cta:'行动号召',
+    source:'来源',
+    articleLink:'原文↗',
+    dateMeta:(data)=>`📅 ${data.date} · ${data.market} · ${String(data.language).toUpperCase()}`,
+    titleForDate:(date)=>`REscript 文案查看页 · ${date}`,
+    newsCategory:'📰 新闻',
+    allCategory:'全部',
+    loadFailed:(message)=>`加载失败: ${message}`,
+  }
+};
+function ui(){return copyMap[uiLanguage]||copyMap.en;}
+function applyStaticCopy(){
+  const c=ui();
+  document.documentElement.lang=uiLanguage==='zh'?'zh-CN':'en';
+  document.getElementById('pageTitle').textContent=c.pageTitle;
+  document.getElementById('dateMeta').textContent=c.loading;
+  document.getElementById('newsLabel').textContent=c.newsLabel;
+  document.getElementById('moduleLabel').textContent=c.moduleLabel;
+  document.getElementById('scriptLabel').textContent=c.scriptLabel;
+  document.getElementById('styleLabel').textContent=c.styleLabel;
+  document.getElementById('tabAll').textContent=c.tabAll;
+  document.getElementById('tabProfessional').textContent=c.tabProfessional;
+  document.getElementById('tabCasual').textContent=c.tabCasual;
+  document.getElementById('tabInvestor').textContent=c.tabInvestor;
+  document.getElementById('tabMythbuster').textContent=c.tabMythbuster;
+}
 function escapeHtml(value){return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.toString():null;}catch{return null;}}
 function showToast(message){const toast=document.getElementById('toast');toast.textContent=message;toast.style.display='block';setTimeout(()=>{toast.style.display='none';},2000);}
-function getStyleName(style){return{professional:'专业分析型',casual:'轻松聊天型',investor:'投资顾问型',mythbuster:'犀利避坑型'}[style]||style;}
-function buildText(article,script){return`🎬 ${article.title}\n\n🎯 开场钩子\n${script.hook}\n\n📝 主要内容\n${script.content}\n\n💬 行动号召\n${script.cta}\n\n📱 ${script.platform} ⏱️ ${script.duration}\n🏷️ ${script.tags.join(', ')}`;}
+function getStyleName(style){
+  const zh={professional:'专业分析型',casual:'轻松聊天型',investor:'投资顾问型',mythbuster:'犀利避坑型'};
+  const en={professional:'Professional analysis',casual:'Casual social',investor:'Investor angle',mythbuster:'Myth-buster'};
+  return (uiLanguage==='zh'?zh:en)[style]||style;
+}
+function buildText(article,script){
+  const c=ui();
+  return`🎬 ${article.title}\n\n🎯 ${c.hook}\n${script.hook}\n\n📝 ${c.body}\n${script.content}\n\n💬 ${c.cta}\n${script.cta}\n\n📱 ${script.platform} ⏱️ ${script.duration}\n🏷️ ${script.tags.join(', ')}`;
+}
 function copyScript(sectionIndex,articleIndex,scriptIndex){
   const section=allSections[sectionIndex];const article=section.articles[articleIndex];const script=article.scripts[scriptIndex];
   navigator.clipboard.writeText(buildText(article,script)).then(()=>{
-    showToast('✅ 文案已复制到剪贴板');
+    showToast(ui().copyToast);
     const button=document.getElementById(`cp-${sectionIndex}-${articleIndex}-${scriptIndex}`);
-    if(button){button.textContent='✅ 已复制';button.classList.add('copied');setTimeout(()=>{button.textContent='📋 复制';button.classList.remove('copied');},2000);}
+    if(button){button.textContent=ui().copiedButton;button.classList.add('copied');setTimeout(()=>{button.textContent=ui().copyButton;button.classList.remove('copied');},2000);}
   });
 }
 function shareScript(sectionIndex,articleIndex,scriptIndex){
   const section=allSections[sectionIndex];const article=section.articles[articleIndex];const script=article.scripts[scriptIndex];
   const text=buildText(article,script);
   if(navigator.share){navigator.share({title:article.title,text}).catch(()=>{});}
-  else navigator.clipboard.writeText(text).then(()=>showToast('✅ 文案已复制，可粘贴分享'));
+  else navigator.clipboard.writeText(text).then(()=>showToast(ui().shareToast));
 }
 function filterCat(category){
   document.querySelectorAll('.cat-tab').forEach(tab=>tab.classList.toggle('active',tab.dataset.cat===category));
@@ -463,16 +549,17 @@ function filterStyle(style){
 }
 function renderSection(section,sectionIndex){
   let html='';
+  const c=ui();
   section.articles.forEach((article,articleIndex)=>{
     const link=safeUrl(article.url);
-    html+=`<div class="article-section"><div class="article-header"><div class="article-num">${articleIndex+1}</div><div class="article-info"><div class="article-title">${escapeHtml(article.title)}</div><div class="article-source">${escapeHtml(article.source)}${link?` · <a href="${link}" target="_blank" rel="noopener noreferrer">原文↗</a>`:''}</div></div></div>`;
+    html+=`<div class="article-section"><div class="article-header"><div class="article-num">${articleIndex+1}</div><div class="article-info"><div class="article-title">${escapeHtml(article.title)}</div><div class="article-source">${escapeHtml(article.source)}${link?` · <a href="${link}" target="_blank" rel="noopener noreferrer">${c.articleLink}</a>`:''}</div></div></div>`;
     article.scripts.forEach((script,scriptIndex)=>{
       html+=`<div class="script-card" data-style="${escapeHtml(script.style)}"><div class="card-top"><div class="card-badges"><span class="badge badge-${escapeHtml(script.style)}">${escapeHtml(script.styleName||getStyleName(script.style))}</span><span class="badge badge-platform">📱 ${escapeHtml(script.platform)}</span><span class="badge badge-duration">⏱️ ${escapeHtml(script.duration)}</span></div></div>
-      <div class="section-label">🎯 开场钩子</div><div class="hook">${escapeHtml(script.hook)}</div>
-      <div class="section-label">📝 主要内容</div><div class="content-text">${escapeHtml(script.content).replace(/\n/g,'<br>')}</div>
-      <div class="section-label">💬 行动号召</div><div class="cta-text">${escapeHtml(script.cta)}</div>
+      <div class="section-label">🎯 ${c.hook}</div><div class="hook">${escapeHtml(script.hook)}</div>
+      <div class="section-label">📝 ${c.body}</div><div class="content-text">${escapeHtml(script.content).replace(/\n/g,'<br>')}</div>
+      <div class="section-label">💬 ${c.cta}</div><div class="cta-text">${escapeHtml(script.cta)}</div>
       <div class="tags">${script.tags.map(tag=>`<span class="tag">#${escapeHtml(tag)}</span>`).join('')}</div>
-      <div class="card-actions"><button class="btn" id="cp-${sectionIndex}-${articleIndex}-${scriptIndex}" onclick="copyScript(${sectionIndex},${articleIndex},${scriptIndex})">📋 复制</button><button class="btn" onclick="shareScript(${sectionIndex},${articleIndex},${scriptIndex})">🔗 分享</button></div></div>`;
+      <div class="card-actions"><button class="btn" id="cp-${sectionIndex}-${articleIndex}-${scriptIndex}" onclick="copyScript(${sectionIndex},${articleIndex},${scriptIndex})">${c.copyButton}</button><button class="btn" onclick="shareScript(${sectionIndex},${articleIndex},${scriptIndex})">${c.shareButton}</button></div></div>`;
     });
     html+='</div>';
   });
@@ -483,7 +570,7 @@ async function loadData(){
   const key=params.get('key');
   const token=params.get('token');
   const isAdmin=params.get('admin')==='1';
-  if(!key){document.getElementById('content').innerHTML='<div class="empty-state"><div class="icon">🔒</div><p>缺少访问凭证，请使用邮件中的专属链接打开。</p></div>';return;}
+  if(!key){document.getElementById('content').innerHTML=`<div class="empty-state"><div class="icon">🔒</div><p>${escapeHtml(ui().missingLink)}</p></div>`;return;}
   try{
     const headers={};
     let url=`${API}/viewer/outputs/${encodeURIComponent(key)}?token=${encodeURIComponent(token||'')}`;
@@ -495,29 +582,32 @@ async function loadData(){
     }
     const response=await fetch(url,{headers});
     const result=await response.json();
-    if(!result.success||!result.data){document.getElementById('content').innerHTML=`<div class="empty-state"><div class="icon">📭</div><p>${escapeHtml(result.error||'未找到文案')}</p></div>`;return;}
+    if(!result.success||!result.data){document.getElementById('content').innerHTML=`<div class="empty-state"><div class="icon">📭</div><p>${escapeHtml(result.error||ui().invalidLink)}</p></div>`;return;}
     const data=result.data;
-    document.getElementById('dateMeta').textContent=`📅 ${data.date} · ${data.market} · ${data.language.toUpperCase()}`;
+    uiLanguage=data.language==='zh'?'zh':'en';
+    applyStaticCopy();
+    document.getElementById('dateMeta').textContent=ui().dateMeta(data);
     document.getElementById('newsCount').textContent=data.articleCount;
-    document.title=`🎬 ${data.date} 文案 — REscript`;
-    allSections=[{cat:'news',label:'📰 新闻热点',articles:data.articles}];
+    document.title=ui().titleForDate(data.date);
+    allSections=[{cat:'news',label:ui().newsCategory,articles:data.articles}];
     let moduleScripts=0;
     if(data.modules){data.modules.forEach(module=>{allSections.push({cat:module.moduleId,label:`${module.moduleEmoji} ${module.moduleName}`,articles:module.articles});moduleScripts+=module.articles.reduce((sum,article)=>sum+article.scripts.length,0);});}
     const newsScripts=data.articles.reduce((sum,article)=>sum+article.scripts.length,0);
     document.getElementById('moduleCount').textContent=data.modules?data.modules.length:0;
     document.getElementById('scriptCount').textContent=newsScripts+moduleScripts;
-    let tabs='<div class="cat-tab active" data-cat="all">全部</div><div class="cat-tab" data-cat="news">📰 新闻</div>';
+    let tabs=`<div class="cat-tab active" data-cat="all">${escapeHtml(ui().allCategory)}</div><div class="cat-tab" data-cat="news">${escapeHtml(ui().newsCategory)}</div>`;
     if(data.modules){data.modules.forEach(module=>{tabs+=`<div class="cat-tab" data-cat="${escapeHtml(module.moduleId)}">${escapeHtml(module.moduleEmoji)} ${escapeHtml(module.moduleName)}</div>`;});}
     document.getElementById('catTabs').innerHTML=tabs;
     let html='';
     allSections.forEach((section,index)=>{html+=`<div class="module-section" data-cat="${escapeHtml(section.cat)}"><div class="module-label">${escapeHtml(section.label)}</div>${renderSection(section,index)}</div>`;});
     document.getElementById('content').innerHTML=html;
   }catch(error){
-    document.getElementById('content').innerHTML=`<div class="empty-state"><div class="icon">❌</div><p>加载失败: ${escapeHtml(error.message||'unknown error')}</p></div>`;
+    document.getElementById('content').innerHTML=`<div class="empty-state"><div class="icon">❌</div><p>${escapeHtml(ui().loadFailed(error.message||'unknown error'))}</p></div>`;
   }
 }
 document.getElementById('catTabs').addEventListener('click',event=>{const target=event.target.closest('.cat-tab');if(target)filterCat(target.dataset.cat);});
 document.querySelector('.tabs').addEventListener('click',event=>{const target=event.target.closest('.tab');if(target)filterStyle(target.dataset.style);});
+applyStaticCopy();
 loadData();
     </script>
 </body>
