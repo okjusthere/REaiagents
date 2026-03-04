@@ -3,6 +3,7 @@ import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { retry } from '../utils/retry.js';
 import type { NewsArticle } from './news-agent.js';
+import type { Language, MarketId } from '../store/client-store.js';
 
 // ── Types ────────────────────────────────────────────────────
 export interface ScriptItem {
@@ -31,11 +32,64 @@ export interface DailyOutput {
     modules?: import('./content-agent.js').ModuleOutput[];
 }
 
+// ── Market display names ────────────────────────────────────
+const MARKET_DISPLAY: Record<string, { zh: string; en: string }> = {
+    'new-york': { zh: '纽约', en: 'New York' },
+    'los-angeles': { zh: '洛杉矶', en: 'Los Angeles' },
+    'san-francisco': { zh: '旧金山/湾区', en: 'San Francisco Bay Area' },
+    'chicago': { zh: '芝加哥', en: 'Chicago' },
+    'miami': { zh: '迈阿密/南佛罗里达', en: 'Miami / South Florida' },
+    'seattle': { zh: '西雅图', en: 'Seattle' },
+    'boston': { zh: '波士顿', en: 'Boston' },
+    'houston': { zh: '休斯顿', en: 'Houston' },
+};
+
+function getMarketName(market: MarketId, lang: Language): string {
+    return MARKET_DISPLAY[market]?.[lang] || market;
+}
+
 // ── Prompt ───────────────────────────────────────────────────
-function buildPrompt(article: NewsArticle, date: string): string {
+function buildPrompt(article: NewsArticle, date: string, language: Language, market: MarketId): string {
+    const mkt = getMarketName(market, language);
+
+    if (language === 'en') {
+        return `Today is ${date}.
+
+You are a senior real estate content strategist specializing in the ${mkt} market. Based on the following news article, generate 4 different style video scripts.
+
+News Title: ${article.title}
+News Source: ${article.source}
+News Summary: ${article.description || '(no summary)'}
+News Link: ${article.url}
+
+Generate 4 styles, each representing a different positioning:
+
+1. **Professional Analysis (professional)** — formal, data-driven, suitable for market analysis
+2. **Casual Chat (casual)** — relaxed conversational style, for social media
+3. **Investor Advisor (investor)** — investor perspective, focusing on returns and risk
+4. **Myth Buster (mythbuster)** — bold, direct, exposing hidden risks and pitfalls
+
+Each script must include:
+- **hook**: Opening hook (1-2 sentences, attention-grabbing)
+- **content**: Main body (300-500 words, deep analysis, mention specific neighborhoods and areas in ${mkt})
+- **cta**: Call to action (1-2 sentences, drive engagement)
+- **platform**: Best platform ("Instagram", "TikTok", "YouTube" or "General", cover at least 3 platforms)
+- **duration**: Fixed "90 seconds"
+- **tags**: 5-7 relevant hashtags
+
+Return ONLY this JSON array (no markdown code blocks):
+[
+  {"style":"professional","styleName":"Professional Analysis","platform":"General","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"casual","styleName":"Casual Chat","platform":"TikTok","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"investor","styleName":"Investor Advisor","platform":"YouTube","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"mythbuster","styleName":"Myth Buster","platform":"Instagram","duration":"90 seconds","hook":"...","content":"...","cta":"...","tags":[...]}
+]`;
+    }
+
+    // Chinese prompt
     return `今天是 ${date}。
 
-你是一个纽约地产领域的资深内容策划师。请根据以下新闻，生成 4 种不同风格的短视频口播文案。
+你是一个${mkt}地产领域的资深内容策划师。请根据以下新闻，生成 4 种不同风格的短视频口播文案。
 
 新闻标题：${article.title}
 新闻来源：${article.source}
@@ -51,7 +105,7 @@ function buildPrompt(article: NewsArticle, date: string): string {
 
 每种风格的文案必须包含：
 - **hook**: 开场钩子（1-2句话，吸引眼球）
-- **content**: 主要内容（300-500字，深度解读，提及具体地名如法拉盛、长岛、皇后区等增加本地化）
+- **content**: 主要内容（300-500字，深度解读，提及${mkt}的具体地名和社区增加本地化）
 - **cta**: 行动号召（1-2句话，引导互动）
 - **platform**: 适合的平台（"小红书"、"视频号"、"YouTube" 或 "通用"，4条文案至少覆盖3个不同平台）
 - **duration**: 固定为 "90秒"
@@ -59,51 +113,15 @@ function buildPrompt(article: NewsArticle, date: string): string {
 
 请严格按照以下 JSON 格式返回（不要添加 markdown 代码块标记）：
 [
-  {
-    "style": "professional",
-    "styleName": "专业分析型",
-    "platform": "通用",
-    "duration": "90秒",
-    "hook": "...",
-    "content": "...",
-    "cta": "...",
-    "tags": ["标签1", "标签2", ...]
-  },
-  {
-    "style": "casual",
-    "styleName": "轻松聊天型",
-    "platform": "小红书",
-    "duration": "90秒",
-    "hook": "...",
-    "content": "...",
-    "cta": "...",
-    "tags": [...]
-  },
-  {
-    "style": "investor",
-    "styleName": "投资顾问型",
-    "platform": "YouTube",
-    "duration": "90秒",
-    "hook": "...",
-    "content": "...",
-    "cta": "...",
-    "tags": [...]
-  },
-  {
-    "style": "mythbuster",
-    "styleName": "犀利避坑/揭秘型",
-    "platform": "视频号",
-    "duration": "90秒",
-    "hook": "...",
-    "content": "...",
-    "cta": "...",
-    "tags": [...]
-  }
+  {"style":"professional","styleName":"专业分析型","platform":"通用","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"casual","styleName":"轻松聊天型","platform":"小红书","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"investor","styleName":"投资顾问型","platform":"YouTube","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]},
+  {"style":"mythbuster","styleName":"犀利避坑/揭秘型","platform":"视频号","duration":"90秒","hook":"...","content":"...","cta":"...","tags":[...]}
 ]`;
 }
 
 // ── Call Azure OpenAI ────────────────────────────────────────
-async function callAzureOpenAI(prompt: string): Promise<string> {
+async function callAzureOpenAI(prompt: string, language: Language, market: MarketId): Promise<string> {
     let url = config.AZURE_OPENAI_ENDPOINT;
 
     if (!url.includes('/openai/')) {
@@ -111,8 +129,11 @@ async function callAzureOpenAI(prompt: string): Promise<string> {
     }
 
     const isResponsesAPI = url.includes('/openai/responses');
+    const mkt = getMarketName(market, language);
 
-    const systemPrompt = '你是一个纽约地产领域的资深内容策划师，专门为房地产经纪人创作短视频口播文案。你的文案风格多样，能够精准匹配不同平台和受众。你非常了解纽约各区域（曼哈顿、皇后区法拉盛、布鲁克林、长岛等）的房产市场。请务必只返回 JSON 格式。';
+    const systemPrompt = language === 'en'
+        ? `You are a senior real estate content strategist specializing in ${mkt}. You create engaging video scripts in 4 different styles for real estate professionals. You know the local neighborhoods, market trends, and buyer/seller dynamics. Return ONLY valid JSON.`
+        : `你是一个${mkt}地产领域的资深内容策划师，专门为房地产经纪人创作短视频口播文案。你的文案风格多样，能够精准匹配不同平台和受众。你非常了解${mkt}各区域的房产市场。请务必只返回 JSON 格式。`;
 
     if (isResponsesAPI) {
         try {
@@ -178,14 +199,16 @@ async function generateForArticle(
     article: NewsArticle,
     date: string,
     index: number,
-    total: number
+    total: number,
+    language: Language = 'zh',
+    market: MarketId = 'new-york',
 ): Promise<ArticleScripts> {
-    logger.info(`✍️  [${index + 1}/${total}] Generating 4 scripts for: ${article.title.substring(0, 50)}...`);
+    logger.info(`✍️  [${index + 1}/${total}] Generating 4 scripts for: ${article.title.substring(0, 50)}... (${language}/${market})`);
 
-    const prompt = buildPrompt(article, date);
+    const prompt = buildPrompt(article, date, language, market);
 
     const raw = await retry(
-        async () => callAzureOpenAI(prompt),
+        async () => callAzureOpenAI(prompt, language, market),
         { retries: 3, delayMs: 3000, label: `Scripts for article ${index + 1}` }
     );
 
@@ -203,22 +226,29 @@ async function generateForArticle(
 // ── Generate all scripts for all articles ───────────────────
 export async function generateDailyScripts(
     articles: NewsArticle[],
-    maxArticles: number = 7
+    maxArticles: number = 7,
+    language: Language = 'zh',
+    market: MarketId = 'new-york',
 ): Promise<DailyOutput> {
-    const today = new Date().toLocaleDateString('zh-CN', {
-        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
-        timeZone: 'America/New_York',
-    });
+    const today = language === 'en'
+        ? new Date().toLocaleDateString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
+            timeZone: 'America/New_York',
+        })
+        : new Date().toLocaleDateString('zh-CN', {
+            year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
+            timeZone: 'America/New_York',
+        });
 
     // Pick top N articles
     const selected = articles.slice(0, maxArticles);
 
-    logger.info(`📝 Generating scripts for ${selected.length} articles × 4 styles...`);
+    logger.info(`📝 Generating scripts for ${selected.length} articles × 4 styles (${language}/${market})...`);
 
     const results: ArticleScripts[] = [];
 
     for (let i = 0; i < selected.length; i++) {
-        const result = await generateForArticle(selected[i], today, i, selected.length);
+        const result = await generateForArticle(selected[i], today, i, selected.length, language, market);
         results.push(result);
 
         // Delay between calls to avoid rate limiting
@@ -235,7 +265,7 @@ export async function generateDailyScripts(
     };
 
     const totalScripts = results.reduce((sum, a) => sum + a.scripts.length, 0);
-    logger.info(`🎉 Generated ${totalScripts} total scripts (${results.length} articles × 4 styles)`);
+    logger.info(`🎉 Generated ${totalScripts} total scripts (${results.length} articles × 4 styles) [${language}/${market}]`);
 
     return output;
 }

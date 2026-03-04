@@ -19,6 +19,88 @@
       min-height: 100vh;
     }
 
+    /* ── Login Gate ──────────────────────── */
+    .login-gate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 36px 32px;
+      width: 400px;
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .login-card h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .login-card h1 span {
+      color: #60a5fa;
+    }
+
+    .login-card p {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: #e2e8f0;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .login-card input:focus {
+      border-color: #3b82f6;
+    }
+
+    .login-card .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: #3b82f6;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+
+    .login-card .login-btn:hover {
+      background: #2563eb;
+    }
+
+    .login-error {
+      color: #f87171;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* ── Admin Dashboard (hidden until auth) ── */
+    .admin-content {
+      display: none;
+    }
+
     .header {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       border-bottom: 1px solid #1e293b;
@@ -171,6 +253,19 @@
       font-size: 13px;
     }
 
+    .btn-logout {
+      background: transparent;
+      color: #64748b;
+      border: 1px solid #334155;
+      font-size: 12px;
+      padding: 5px 12px;
+    }
+
+    .btn-logout:hover {
+      background: #334155;
+      color: #f87171;
+    }
+
     .table {
       width: 100%;
       border-collapse: collapse;
@@ -210,72 +305,6 @@
 
     .active-dot.off {
       background: #64748b;
-    }
-
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 28px;
-      width: 440px;
-      max-width: 90vw;
-    }
-
-    .modal h2 {
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: #f1f5f9;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      color: #94a3b8;
-      margin-bottom: 6px;
-      font-weight: 500;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 10px 14px;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      color: #e2e8f0;
-      font-size: 14px;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input:focus {
-      border-color: #3b82f6;
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 24px;
     }
 
     .toast {
@@ -353,7 +382,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* Quick add bar */
     .quick-add {
       display: flex;
       gap: 10px;
@@ -376,7 +404,6 @@
       border-color: #3b82f6;
     }
 
-    /* Output history */
     .output-list {
       display: flex;
       flex-direction: column;
@@ -406,68 +433,114 @@
     .output-date {
       font-size: 14px;
     }
+
+    .plan-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .plan-badge.subscriber {
+      background: #6366f120;
+      color: #a5b4fc;
+      border: 1px solid #6366f140;
+    }
+
+    .plan-badge.free {
+      background: #64748b20;
+      color: #94a3b8;
+      border: 1px solid #64748b40;
+    }
+
+    .plan-badge.trial-used {
+      background: #f59e0b20;
+      color: #fbbf24;
+      border: 1px solid #f59e0b40;
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="header">
-    <h1>🏠 RE AI Agents · <span>管理后台</span></h1>
-    <div class="header-actions">
-      <div id="statusBadge" class="status-badge online">● 运行中</div>
-      <button class="btn btn-success" onclick="sendNow()">🚀 立即发送</button>
+  <!-- ═══ Login Gate ═══ -->
+  <div class="login-gate" id="loginGate">
+    <div class="login-card">
+      <h1>🔒 RE AI <span>Admin</span></h1>
+      <p>请输入管理密码 / Enter admin token</p>
+      <input type="password" id="tokenInput" placeholder="Admin Token"
+        onkeydown="if(event.key==='Enter')attemptLogin()">
+      <button class="login-btn" onclick="attemptLogin()">🔓 登录 Login</button>
+      <div class="login-error" id="loginError">密码错误 / Invalid token</div>
     </div>
   </div>
 
-  <div class="container">
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value" id="totalClients">0</div>
-        <div class="stat-label">总客户数</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="activeClients">0</div>
-        <div class="stat-label">活跃客户</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="scheduleTime">--</div>
-        <div class="stat-label">定时发送</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="modelName">--</div>
-        <div class="stat-label">AI 模型</div>
+  <!-- ═══ Admin Dashboard (hidden until authenticated) ═══ -->
+  <div class="admin-content" id="adminContent">
+    <div class="header">
+      <h1>🏠 RE AI Agents · <span>管理后台</span></h1>
+      <div class="header-actions">
+        <div id="statusBadge" class="status-badge online">● 运行中</div>
+        <button class="btn btn-success" onclick="sendNow()">🚀 立即发送</button>
+        <button class="btn btn-logout" onclick="logout()">🚪 退出</button>
       </div>
     </div>
 
-    <!-- Quick add -->
-    <div class="card">
-      <div class="card-title" style="margin-bottom:12px">⚡ 快速添加订阅</div>
-      <div class="quick-add">
-        <input type="email" id="quickEmail" placeholder="输入邮箱地址即可订阅..." onkeydown="if(event.key==='Enter')quickAdd()">
-        <button class="btn btn-primary" onclick="quickAdd()">+ 添加</button>
-      </div>
-    </div>
-
-    <!-- Client list -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">📋 订阅客户</div>
-          <div class="card-subtitle">每日自动发送文案邮件（所有风格）</div>
+    <div class="container">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="totalClients">0</div>
+          <div class="stat-label">总客户数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="subscriberCount">0</div>
+          <div class="stat-label">💳 付费订阅</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="trialCount">0</div>
+          <div class="stat-label">🎁 待体验</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="scheduleTime">--</div>
+          <div class="stat-label">定时发送</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="modelName">--</div>
+          <div class="stat-label">AI 模型</div>
         </div>
       </div>
-      <div id="clientList"></div>
-    </div>
 
-    <!-- Output history -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">📂 历史文案</div>
-          <div class="card-subtitle">点击查看/分享历史文案</div>
+      <!-- Quick add -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">⚡ 快速添加订阅</div>
+        <div class="quick-add">
+          <input type="email" id="quickEmail" placeholder="输入邮箱地址即可订阅..." onkeydown="if(event.key==='Enter')quickAdd()">
+          <button class="btn btn-primary" onclick="quickAdd()">+ 添加</button>
         </div>
       </div>
-      <div id="outputList"></div>
+
+      <!-- Client list -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📋 订阅客户</div>
+            <div class="card-subtitle">每日自动发送文案邮件（所有风格）</div>
+          </div>
+        </div>
+        <div id="clientList"></div>
+      </div>
+
+      <!-- Output history -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📂 历史文案</div>
+            <div class="card-subtitle">点击查看/分享历史文案</div>
+          </div>
+        </div>
+        <div id="outputList"></div>
+      </div>
     </div>
   </div>
 
@@ -476,6 +549,76 @@
   <script>
     const API = '/api';
 
+    // ── Auth Token Management ─────────────────────────────
+    function getToken() {
+      return sessionStorage.getItem('admin_token') || '';
+    }
+
+    function setToken(token) {
+      sessionStorage.setItem('admin_token', token);
+    }
+
+    function clearToken() {
+      sessionStorage.removeItem('admin_token');
+    }
+
+    function authHeaders() {
+      return {
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'application/json',
+      };
+    }
+
+    // ── Login ─────────────────────────────────────────────
+    async function attemptLogin() {
+      const token = document.getElementById('tokenInput').value.trim();
+      if (!token) return;
+
+      setToken(token);
+
+      try {
+        // Verify token by calling a protected endpoint
+        const res = await fetch(`${API}/status`, { headers: authHeaders() });
+        if (res.status === 401) {
+          clearToken();
+          document.getElementById('loginError').style.display = 'block';
+          return;
+        }
+        // Success — show admin
+        showAdmin();
+      } catch (e) {
+        clearToken();
+        document.getElementById('loginError').style.display = 'block';
+      }
+    }
+
+    function showAdmin() {
+      document.getElementById('loginGate').style.display = 'none';
+      document.getElementById('adminContent').style.display = 'block';
+      loadClients();
+      loadStatus();
+      loadOutputs();
+    }
+
+    function logout() {
+      clearToken();
+      document.getElementById('adminContent').style.display = 'none';
+      document.getElementById('loginGate').style.display = 'flex';
+      document.getElementById('tokenInput').value = '';
+      document.getElementById('loginError').style.display = 'none';
+    }
+
+    // Auto-login if token exists in session
+    if (getToken()) {
+      fetch(`${API}/status`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+        .then(res => {
+          if (res.ok) showAdmin();
+          else { clearToken(); }
+        })
+        .catch(() => { clearToken(); });
+    }
+
+    // ── Toast ─────────────────────────────────────────────
     function showToast(msg, type = 'success') {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -484,16 +627,20 @@
       setTimeout(() => { t.style.display = 'none'; }, 3000);
     }
 
+    // ── Data Loading ──────────────────────────────────────
     async function loadClients() {
-      const res = await fetch(`${API}/clients`);
+      const res = await fetch(`${API}/clients`, { headers: authHeaders() });
+      if (res.status === 401) { logout(); return; }
       const { data } = await res.json();
       renderClients(data);
       document.getElementById('totalClients').textContent = data.length;
-      document.getElementById('activeClients').textContent = data.filter(c => c.active).length;
+      document.getElementById('subscriberCount').textContent = data.filter(c => c.plan === 'subscriber').length;
+      document.getElementById('trialCount').textContent = data.filter(c => c.plan === 'free' && !c.freeTrialUsed).length;
     }
 
     async function loadStatus() {
-      const res = await fetch(`${API}/status`);
+      const res = await fetch(`${API}/status`, { headers: authHeaders() });
+      if (res.status === 401) { logout(); return; }
       const { data } = await res.json();
       const parts = data.schedule.split(' ');
       document.getElementById('scheduleTime').textContent = `${parts[1]}:${parts[0].padStart(2, '0')}`;
@@ -502,7 +649,8 @@
 
     async function loadOutputs() {
       try {
-        const res = await fetch(`${API}/outputs`);
+        const res = await fetch(`${API}/outputs`, { headers: authHeaders() });
+        if (res.status === 401) { logout(); return; }
         const { data } = await res.json();
         const el = document.getElementById('outputList');
         if (!data || data.length === 0) {
@@ -524,24 +672,28 @@
         el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无订阅客户，在上方输入邮箱快速添加</p></div>';
         return;
       }
+      const planBadge = (c) => c.plan === 'subscriber' ? '<span class="plan-badge subscriber">💳 付费</span>' : (c.freeTrialUsed ? '<span class="plan-badge trial-used">🎁 已体验</span>' : '<span class="plan-badge free">🆓 免费</span>');
       const rows = clients.map(c => `<tr>
     <td><span class="active-dot ${c.active ? 'on' : 'off'}"></span>${c.name}</td>
     <td>${c.email}</td>
-    <td>${c.active ? '✅ 启用' : '⏸ 暂停'}</td>
+    <td>${planBadge(c)}</td>
+    <td>${c.active ? '✅' : '⏸'}</td>
     <td>
       <button class="btn btn-ghost btn-sm" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '暂停' : '启用'}</button>
       <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', '${c.name}')">删除</button>
     </td>
   </tr>`).join('');
-      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
+      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>套餐</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
+    // ── Admin Actions ─────────────────────────────────────
     async function quickAdd() {
       const input = document.getElementById('quickEmail');
       const email = input.value.trim();
       if (!email) { showToast('请输入邮箱', 'error'); return; }
       try {
-        const res = await fetch(`${API}/clients`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const res = await fetch(`${API}/clients`, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ email }) });
+        if (res.status === 401) { logout(); return; }
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
         showToast(`✅ ${email} 已添加`);
@@ -552,7 +704,8 @@
 
     async function toggleActive(id, active) {
       try {
-        const res = await fetch(`${API}/clients/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active }) });
+        const res = await fetch(`${API}/clients/${id}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ active }) });
+        if (res.status === 401) { logout(); return; }
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
         showToast(active ? '客户已启用' : '客户已暂停');
@@ -563,7 +716,8 @@
     async function deleteClient(id, name) {
       if (!confirm(`确定删除 "${name}" 吗？`)) return;
       try {
-        const res = await fetch(`${API}/clients/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API}/clients/${id}`, { method: 'DELETE', headers: authHeaders() });
+        if (res.status === 401) { logout(); return; }
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
         showToast('已删除');
@@ -577,12 +731,13 @@
         const badge = document.getElementById('statusBadge');
         badge.textContent = '⏳ 生成中...';
         badge.className = 'status-badge running';
-        const res = await fetch(`${API}/send-now`, { method: 'POST' });
+        const res = await fetch(`${API}/send-now`, { method: 'POST', headers: authHeaders() });
+        if (res.status === 401) { logout(); return; }
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
         showToast('Pipeline 已启动，正在搜索新闻和生成文案...');
         const poll = setInterval(async () => {
-          const sr = await fetch(`${API}/status`);
+          const sr = await fetch(`${API}/status`, { headers: authHeaders() });
           const sd = await sr.json();
           if (!sd.data.isRunning) {
             clearInterval(poll);
@@ -594,10 +749,6 @@
         }, 5000);
       } catch (e) { showToast(e.message, 'error'); }
     }
-
-    loadClients();
-    loadStatus();
-    loadOutputs();
   </script>
 </body>
 

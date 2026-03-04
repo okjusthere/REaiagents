@@ -22,6 +22,17 @@ const envSchema = z.object({
     CRON_SCHEDULE: z.string().default('0 7 * * *'),
     CRON_TIMEZONE: z.string().default('America/New_York'),
 
+    // Admin security
+    ADMIN_TOKEN: z.string().min(8, 'ADMIN_TOKEN must be at least 8 characters'),
+
+    // Stripe (optional — subscription features disabled if not set)
+    STRIPE_SECRET_KEY: z.string().optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
+    STRIPE_PRICE_ID: z.string().optional(),
+
+    // App
+    BASE_URL: z.string().default('http://localhost:3000'),
+
     // Optional
     DRY_RUN: z.string().default('false').transform(v => v === 'true'),
     LOG_LEVEL: z.string().default('info'),

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { logger } from '../utils/logger.js';
 import { retry } from '../utils/retry.js';
+import { SUPPORTED_MARKETS, type MarketId } from '../store/client-store.js';
 
 export interface NewsArticle {
     title: string;
@@ -71,14 +72,11 @@ function deduplicateArticles(articles: NewsArticle[]): NewsArticle[] {
 }
 
 // ── Main Search Function ────────────────────────────────────
-export async function searchNews(): Promise<NewsArticle[]> {
-    logger.info('🔍 Starting news search via Google News RSS...');
+export async function searchNews(market: MarketId = 'new-york'): Promise<NewsArticle[]> {
+    const marketConfig = SUPPORTED_MARKETS.find(m => m.id === market);
+    const queries = marketConfig?.queries || ['real estate market', 'housing market news', 'property market'];
 
-    const queries = [
-        'New York real estate',
-        'NYC housing market',
-        'Manhattan property market',
-    ];
+    logger.info(`🔍 Searching news for market: ${market} (${queries.length} queries)...`);
 
     const allArticles: NewsArticle[] = [];
 
@@ -95,12 +93,12 @@ export async function searchNews(): Promise<NewsArticle[]> {
     // Deduplicate and limit
     const uniqueArticles = deduplicateArticles(allArticles).slice(0, 10);
 
-    logger.info(`📰 Found ${uniqueArticles.length} unique articles`, {
+    logger.info(`📰 Found ${uniqueArticles.length} unique articles for ${market}`, {
         sources: [...new Set(uniqueArticles.map(a => a.source))],
     });
 
     if (uniqueArticles.length === 0) {
-        logger.warn('⚠️  No articles found from any query');
+        logger.warn(`⚠️  No articles found for market: ${market}`);
     }
 
     return uniqueArticles;

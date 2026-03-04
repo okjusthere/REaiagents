@@ -17,7 +17,9 @@ function buildEmailHTML(
   clientName: string,
   output: DailyOutput,
   viewerUrl: string,
-  date: string
+  date: string,
+  isTrial: boolean = false,
+  subscribeUrl?: string,
 ): string {
   const moduleScripts = output.modules
     ? output.modules.reduce((s, m) => s + m.articles.reduce((s2, a) => s2 + a.scripts.length, 0), 0)
@@ -45,6 +47,22 @@ function buildEmailHTML(
     }).join('\n')
     : '';
 
+  // Trial upgrade banner
+  const trialBanner = isTrial && subscribeUrl ? `
+    <div style="margin: 0; padding: 24px; background: linear-gradient(135deg, #6366f1, #8b5cf6); text-align: center;">
+      <p style="margin: 0 0 8px; font-size: 18px; font-weight: 700; color: white;">🔥 喜欢今天的文案吗？</p>
+      <p style="margin: 0 0 16px; font-size: 14px; color: rgba(255,255,255,0.85);">这是您的免费体验邮件。订阅后每天自动收到 ${totalScripts}+ 条文案。</p>
+      <a href="${subscribeUrl}" style="display: inline-block; background: white; color: #6366f1; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 16px; font-weight: 700;">立即订阅 — $9.99/月 →</a>
+      <p style="margin: 12px 0 0; font-size: 12px; color: rgba(255,255,255,0.6);">支持信用卡 / 支付宝 · 随时取消</p>
+    </div>` : '';
+
+  const trialNotice = isTrial ? `
+    <div style="padding: 0 24px 12px;">
+      <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #92400e;">
+        🎁 这是您的 <strong>免费体验邮件</strong>。如果觉得有用，<a href="${subscribeUrl}" style="color: #6366f1; font-weight: 600;">点击这里订阅</a>，每天自动收到新鲜文案。
+      </div>
+    </div>` : '';
+
   return `
 <!DOCTYPE html>
 <html>
@@ -54,13 +72,15 @@ function buildEmailHTML(
 
     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%); padding: 28px 24px; color: white; text-align: center;">
       <h1 style="margin: 0; font-size: 22px; font-weight: 700;">🎬 今日视频文案已就绪</h1>
-      <p style="margin: 8px 0 0; opacity: 0.85; font-size: 14px;">${date} · ${totalScripts} 条文案</p>
+      <p style="margin: 8px 0 0; opacity: 0.85; font-size: 14px;">${date} · ${totalScripts} 条文案${isTrial ? ' · 🎁 免费体验' : ''}</p>
     </div>
 
     <div style="padding: 24px 24px 8px;">
       <p style="color: #4a5568; font-size: 15px; margin: 0 0 4px;">${clientName}，早上好！👋</p>
       <p style="color: #64748b; font-size: 14px; margin: 0 0 20px;">今日共生成 <strong>${totalScripts} 条</strong>视频文案，覆盖新闻热点 + 7 大内容模块。</p>
     </div>
+
+    ${trialNotice}
 
     <div style="padding: 0 24px 20px; text-align: center;">
       <a href="${viewerUrl}" style="display: inline-block; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(59,130,246,0.4);">📋 查看完整文案 & 一键复制</a>
@@ -76,8 +96,10 @@ function buildEmailHTML(
       ${moduleCards}
     </div>` : ''}
 
+    ${trialBanner}
+
     <div style="padding: 16px 24px; background: #0f172a; color: #94a3b8; font-size: 12px; text-align: center;">
-      <p style="margin: 0;">由 RE AI Agents 自动生成 · 纽约地产视频文案日报</p>
+      <p style="margin: 0;">由 AI文案日报 自动生成 · 纽约地产视频文案${isTrial ? '' : ' · <a href="' + (subscribeUrl || '#') + '" style="color: #60a5fa;">管理订阅</a>'}</p>
     </div>
 
   </div>
@@ -90,7 +112,9 @@ async function sendEmail(
   client: Client,
   output: DailyOutput,
   viewerUrl: string,
-  dryRun: boolean
+  dryRun: boolean,
+  isTrial: boolean = false,
+  subscribeUrl?: string,
 ): Promise<boolean> {
   const today = new Date().toLocaleDateString('zh-CN', {
     year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
@@ -98,11 +122,12 @@ async function sendEmail(
   });
 
   const totalScripts = output.articleCount * 4;
-  const subject = `🎬 ${today} · ${output.articleCount}条新闻 × ${totalScripts}条文案已就绪`;
-  const html = buildEmailHTML(client.name, output, viewerUrl, today);
+  const trialTag = isTrial ? ' [🎁 免费体验]' : '';
+  const subject = `🎬 ${today} · ${output.articleCount}条新闻 × ${totalScripts}条文案已就绪${trialTag}`;
+  const html = buildEmailHTML(client.name, output, viewerUrl, today, isTrial, subscribeUrl);
 
   if (dryRun) {
-    logger.info(`📧 [DRY RUN] Would send to ${client.name} <${client.email}>`);
+    logger.info(`📧 [DRY RUN] Would send to ${client.name} <${client.email}> (${isTrial ? 'trial' : 'subscriber'})`);
     return true;
   }
 
@@ -114,7 +139,7 @@ async function sendEmail(
       subject,
       html,
     });
-    logger.info(`✅ Email sent to ${client.name} <${client.email}>`);
+    logger.info(`✅ Email sent to ${client.name} <${client.email}> (${isTrial ? 'trial' : 'subscriber'})`);
     return true;
   } catch (error) {
     logger.error(`❌ Failed to send to ${client.name} <${client.email}>`, {
@@ -129,16 +154,18 @@ export async function sendBatchEmails(
   clients: Client[],
   output: DailyOutput,
   viewerUrl: string,
-  dryRun = false
+  dryRun = false,
+  isTrial = false,
+  subscribeUrl?: string,
 ): Promise<{ sent: number; failed: number }> {
   let sent = 0, failed = 0;
 
   for (const client of clients) {
-    const ok = await sendEmail(client, output, viewerUrl, dryRun);
+    const ok = await sendEmail(client, output, viewerUrl, dryRun, isTrial, subscribeUrl);
     if (ok) sent++; else failed++;
     if (!dryRun) await new Promise(r => setTimeout(r, 1000));
   }
 
-  logger.info(`📊 Email results: ${sent} sent, ${failed} failed`);
+  logger.info(`📊 Email results (${isTrial ? 'trial' : 'subscriber'}): ${sent} sent, ${failed} failed`);
   return { sent, failed };
 }

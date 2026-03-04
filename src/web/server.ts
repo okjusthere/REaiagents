@@ -2,27 +2,57 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import apiRouter from './api.js';
+import stripeRouter from './stripe-api.js';
+import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// ── Auth middleware for admin routes ────────────────────────
+function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction): void {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${config.ADMIN_TOKEN}`) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+    next();
+}
+
 export function startWebServer(port: number = 3000): void {
     const app = express();
 
+    // ── Stripe webhook needs raw body (BEFORE json parser) ──
+    app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
+    // ── Standard JSON parser for all other routes ───────────
     app.use(express.json());
 
-    // Serve static admin dashboard
+    // ── Public routes (no auth required) ────────────────────
+    // Stripe subscribe routes — public-facing
+    app.use('/api', stripeRouter);
+
+    // ── Admin API routes (auth required) ────────────────────
+    app.use('/api', requireAdmin, apiRouter);
+
+    // ── Admin page — require token via query param ──────────
+    app.get('/admin.html', (req, res) => {
+        // Admin page is always served — auth happens client-side via API calls
+        // The page itself contains the login gate
+        res.sendFile(path.join(__dirname, '../../public/admin.html'));
+    });
+
+    // Serve other static files (subscribe.html, success.html, view.html)
     app.use(express.static(path.join(__dirname, '../../public')));
 
-    // API routes
-    app.use('/api', apiRouter);
-
-    // SPA fallback — serve index.html for non-API routes
+    // Default route → subscribe landing page (public-facing)
     app.use((_req, res) => {
-        res.sendFile(path.join(__dirname, '../../public/index.html'));
+        res.sendFile(path.join(__dirname, '../../public/subscribe.html'));
     });
 
     app.listen(port, '0.0.0.0', () => {
-        logger.info(`🌐 Admin dashboard running on port ${port}`);
+        logger.info(`🌐 Web server running on port ${port}`);
+        logger.info(`   📄 Landing page: http://localhost:${port}/`);
+        logger.info(`   🔧 Admin dashboard: http://localhost:${port}/admin.html`);
+        logger.info(`   🔒 Admin API protected with ADMIN_TOKEN`);
     });
 }
