@@ -1,147 +1,164 @@
 import { Router, Request, Response } from 'express';
 import Stripe from 'stripe';
+import { z } from 'zod';
 import { config } from '../config/index.js';
-import { addClient, findByEmail, markTrialUsed, upgradeToSubscriber, cancelSubscription, type Language, type MarketId } from '../store/client-store.js';
-import { listOutputDates, getDailyOutput } from '../store/output-store.js';
+import {
+    addClient,
+    cancelSubscription,
+    findByEmail,
+    findByStripeCustomerId,
+    getClientById,
+    markTrialUsed,
+    SUPPORTED_MARKETS,
+    updateClient,
+    updateClientByEmail,
+    upgradeToSubscriber,
+    type Client,
+    type Language,
+    type MarketId,
+} from '../store/client-store.js';
+import { getDailyOutput, getLatestOutputForPreferences } from '../store/output-store.js';
 import { sendBatchEmails } from '../agents/email-agent.js';
 import { logger } from '../utils/logger.js';
+import { createManageToken, createViewerToken, verifyManageToken } from '../utils/access-links.js';
+import { getBaseAppUrl } from '../orchestrator.js';
 
 const router = Router();
 
-// ── Stripe client (lazy init) ───────────────────────────────
-let _stripe: Stripe | null = null;
+const marketIds = SUPPORTED_MARKETS.map((market) => market.id) as [string, ...string[]];
+const subscribeSchema = z.object({
+    email: z.string().trim().email(),
+    language: z.enum(['zh', 'en']).default('zh'),
+    market: z.string().default('new-york').transform((value) => (
+        marketIds.includes(value) ? value : 'new-york'
+    ) as MarketId),
+});
+
+let stripeClient: Stripe | null = null;
+
 function getStripe(): Stripe {
-    if (!_stripe) {
+    if (!stripeClient) {
         if (!config.STRIPE_SECRET_KEY) {
             throw new Error('STRIPE_SECRET_KEY is not configured');
         }
-        _stripe = new Stripe(config.STRIPE_SECRET_KEY);
+        stripeClient = new Stripe(config.STRIPE_SECRET_KEY);
     }
-    return _stripe;
+    return stripeClient;
 }
 
-// ── POST /api/subscribe/trial — Free trial registration ─────
+function upsertLead(input: { email: string; language: Language; market: MarketId }): Client {
+    const existing = findByEmail(input.email);
+    if (existing) {
+        return updateClient(existing.id, {
+            language: input.language,
+            market: input.market,
+        });
+    }
+    return addClient(input);
+}
+
+function buildViewerUrl(baseUrl: string, client: Client, outputKey: string): string {
+    const token = createViewerToken(client, outputKey);
+    return `${baseUrl}/view.html?key=${encodeURIComponent(outputKey)}&token=${encodeURIComponent(token)}`;
+}
+
 router.post('/subscribe/trial', async (req: Request, res: Response) => {
     try {
-        const { email, language, market } = req.body;
-        if (!email || typeof email !== 'string') {
-            res.status(400).json({ success: false, error: '请输入有效的邮箱地址 / Please enter a valid email' });
+        const input = subscribeSchema.parse(req.body);
+        const existing = findByEmail(input.email);
+
+        if (existing && (existing.plan === 'subscriber' || existing.plan === 'vip')) {
+            res.json({
+                success: true,
+                status: 'subscriber',
+                message: input.language === 'zh'
+                    ? '您已经是订阅用户了，每天都会收到最新文案。'
+                    : 'You are already subscribed and will continue receiving daily scripts.',
+            });
             return;
         }
 
-        const emailLower = email.toLowerCase().trim();
-        const lang = (language === 'en' ? 'en' : 'zh') as Language;
-        const mkt = (market || 'new-york') as MarketId;
-        const existing = findByEmail(emailLower);
-
-        if (existing) {
-            // Update preferences if changed
-            if (existing.language !== lang || existing.market !== mkt) {
-                existing.language = lang;
-                existing.market = mkt;
-            }
-            if (existing.plan === 'subscriber' || existing.plan === 'vip') {
-                res.json({ success: true, status: 'subscriber', message: lang === 'zh' ? '您已经是订阅用户了！每天都会收到最新文案。' : 'You are already subscribed! You will receive daily scripts.' });
-                return;
-            }
-            if (existing.freeTrialUsed) {
-                res.json({ success: true, status: 'trial_used', message: lang === 'zh' ? '您已使用过免费体验，请订阅以继续接收每日文案。' : 'Free trial used. Subscribe to continue receiving daily scripts.' });
-                return;
-            }
+        if (existing && existing.freeTrialUsed) {
+            res.json({
+                success: true,
+                status: 'trial_used',
+                message: input.language === 'zh'
+                    ? '您已使用过免费体验，请订阅以继续接收每日文案。'
+                    : 'You already used the free trial. Subscribe to continue receiving daily scripts.',
+            });
+            return;
         }
 
-        // New user or existing user who hasn't used trial yet
-        let client = existing;
-        if (!client) {
-            client = addClient({ email: emailLower, language: lang, market: mkt });
-        }
+        const client = upsertLead(input);
+        const baseUrl = getBaseAppUrl();
+        const subscribeUrl = `${baseUrl}/subscribe.html`;
+        const latestOutputSummary = getLatestOutputForPreferences(client.language, client.market);
 
-        // ── Instant delivery: find latest output and send immediately ──
-        const dates = listOutputDates();
-        if (dates.length > 0) {
-            const latestDate = dates[0];
-            const latestOutput = getDailyOutput(latestDate);
-
+        if (latestOutputSummary) {
+            const latestOutput = getDailyOutput(latestOutputSummary.key);
             if (latestOutput) {
-                const baseUrl = config.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-                const viewerUrl = `${baseUrl}/view.html?date=${latestDate}`;
-                const subscribeUrl = `${baseUrl}/subscribe.html`;
-
-                // Send email immediately (async, don't block response)
-                sendBatchEmails([client], latestOutput, viewerUrl, false, true, subscribeUrl)
-                    .then(() => {
-                        markTrialUsed(client!.id);
-                        logger.info(`🎁 Instant trial email sent to ${client!.email}`);
-                    })
-                    .catch((err) => {
-                        logger.error(`❌ Instant trial email failed for ${client!.email}`, { error: (err as Error).message });
+                const result = await sendBatchEmails([client], latestOutput, baseUrl, false, true, subscribeUrl);
+                if (result.sentClientIds.includes(client.id)) {
+                    markTrialUsed(client.id);
+                    res.status(201).json({
+                        success: true,
+                        status: 'trial_sent',
+                        clientId: client.id,
+                        viewUrl: buildViewerUrl(baseUrl, client, latestOutput.key),
+                        message: input.language === 'zh'
+                            ? '免费体验邮件已发送，正在打开您的专属查看链接。'
+                            : 'Your trial email has been sent. Opening your private access link now.',
                     });
-
-                res.status(201).json({
-                    success: true,
-                    status: 'trial_sent',
-                    clientId: client.id,
-                    viewUrl: `/view.html?date=${latestDate}`,
-                    message: lang === 'zh'
-                        ? '🎉 免费体验邮件已发送！正在为您展示最新文案...'
-                        : '🎉 Trial email sent! Showing you the latest scripts...',
-                });
-                return;
+                    return;
+                }
             }
         }
 
-        // No outputs available yet — fall back to "wait for next batch" message
         res.status(201).json({
             success: true,
             status: 'trial_ready',
             clientId: client.id,
-            message: lang === 'zh'
-                ? '🎉 注册成功！您将在下一次推送时收到一封完整的AI文案邮件。'
-                : '🎉 Registered! You will receive a full AI script email in the next batch.',
+            message: input.language === 'zh'
+                ? '注册成功。您将在下一次对应市场生成后收到体验邮件。'
+                : 'You are registered. Your trial email will arrive with the next matching market run.',
         });
     } catch (error) {
-        logger.error('Trial registration error', { error: (error as Error).message });
-        res.status(500).json({ success: false, error: (error as Error).message });
+        logger.error('Trial registration error', { error: error instanceof Error ? error.message : String(error) });
+        res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'Invalid request' });
     }
 });
 
-// ── POST /api/subscribe/checkout — Create Stripe Checkout ───
 router.post('/subscribe/checkout', async (req: Request, res: Response) => {
     try {
-        const { email, language, market } = req.body;
-        if (!email) {
-            res.status(400).json({ success: false, error: '请输入邮箱' });
-            return;
-        }
+        const input = subscribeSchema.parse(req.body);
 
         if (!config.STRIPE_PRICE_ID) {
             res.status(500).json({ success: false, error: 'Stripe Price ID not configured' });
             return;
         }
 
-        const stripe = getStripe();
-        const emailLower = email.toLowerCase().trim();
-        const lang = (language === 'en' ? 'en' : 'zh') as Language;
-        const mkt = (market || 'new-york') as MarketId;
-
-        // Ensure the user exists in our system
-        let existing = findByEmail(emailLower);
-        if (!existing) {
-            existing = addClient({ email: emailLower, language: lang, market: mkt });
-        }
-
-        // If already subscriber or VIP, no need to pay
-        if (existing.plan === 'subscriber' || existing.plan === 'vip') {
-            res.json({ success: true, url: `${config.BASE_URL}/success.html`, message: '您已经是订阅者了' });
+        const client = upsertLead(input);
+        if (client.plan === 'subscriber' || client.plan === 'vip') {
+            const manageToken = createManageToken(client);
+            res.json({
+                success: true,
+                url: `${config.BASE_URL}/manage.html?token=${encodeURIComponent(manageToken)}`,
+                message: input.language === 'zh' ? '您已经是订阅者。' : 'You are already subscribed.',
+            });
             return;
         }
 
-        // Create Stripe Checkout session with 7-day free trial
+        const stripe = getStripe();
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card', 'alipay'],
             mode: 'subscription',
-            customer_email: emailLower,
-            metadata: { email: emailLower, clientId: existing.id },
+            customer_email: client.email,
+            metadata: {
+                email: client.email,
+                clientId: client.id,
+                language: client.language,
+                market: client.market,
+            },
             line_items: [{
                 price: config.STRIPE_PRICE_ID,
                 quantity: 1,
@@ -150,9 +167,13 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
             cancel_url: `${config.BASE_URL}/subscribe.html?cancelled=true`,
             subscription_data: {
                 trial_period_days: 7,
-                metadata: { email: emailLower, clientId: existing.id },
+                metadata: {
+                    email: client.email,
+                    clientId: client.id,
+                    language: client.language,
+                    market: client.market,
+                },
             },
-            // Alipay fallback: if Alipay fails, card is still available as option
             payment_method_options: {
                 alipay: {},
             },
@@ -160,12 +181,80 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
 
         res.json({ success: true, url: session.url });
     } catch (error) {
-        logger.error('Checkout creation error', { error: (error as Error).message });
-        res.status(500).json({ success: false, error: (error as Error).message });
+        logger.error('Checkout creation error', { error: error instanceof Error ? error.message : String(error) });
+        res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'Checkout failed' });
     }
 });
 
-// ── POST /api/stripe/webhook — Stripe Webhook handler ───────
+router.get('/subscribe/session/:sessionId', async (req: Request, res: Response) => {
+    try {
+        const sessionId = String(req.params.sessionId);
+        if (!sessionId) {
+            res.status(400).json({ success: false, error: 'Session ID is required' });
+            return;
+        }
+
+        const stripe = getStripe();
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        const email = session.metadata?.email || session.customer_email;
+        if (!email) {
+            res.status(404).json({ success: false, error: 'No subscriber found for this session' });
+            return;
+        }
+
+        const client = findByEmail(email);
+        if (!client) {
+            res.status(404).json({ success: false, error: 'Subscriber not found' });
+            return;
+        }
+
+        const latestOutputSummary = getLatestOutputForPreferences(client.language, client.market);
+        const baseUrl = getBaseAppUrl();
+        const manageToken = createManageToken(client);
+
+        res.json({
+            success: true,
+            data: {
+                plan: client.plan,
+                active: client.active,
+                manageUrl: `${baseUrl}/manage.html?token=${encodeURIComponent(manageToken)}`,
+                viewUrl: latestOutputSummary ? buildViewerUrl(baseUrl, client, latestOutputSummary.key) : null,
+            },
+        });
+    } catch (error) {
+        logger.error('Checkout session lookup error', { error: error instanceof Error ? error.message : String(error) });
+        res.status(500).json({ success: false, error: 'Failed to load checkout session' });
+    }
+});
+
+router.post('/subscription/billing-portal', async (req: Request, res: Response) => {
+    try {
+        const { token } = req.body as { token?: string };
+        const verified = token ? verifyManageToken(token) : null;
+        if (!verified) {
+            res.status(401).json({ success: false, error: 'Invalid or expired manage link' });
+            return;
+        }
+
+        const client = getClientById(verified.clientId);
+        if (!client || !client.stripeCustomerId) {
+            res.status(404).json({ success: false, error: 'No active billing profile found' });
+            return;
+        }
+
+        const stripe = getStripe();
+        const session = await stripe.billingPortal.sessions.create({
+            customer: client.stripeCustomerId,
+            return_url: `${getBaseAppUrl()}/manage.html?token=${encodeURIComponent(token!)}`,
+        });
+
+        res.json({ success: true, url: session.url });
+    } catch (error) {
+        logger.error('Billing portal error', { error: error instanceof Error ? error.message : String(error) });
+        res.status(500).json({ success: false, error: 'Failed to open billing portal' });
+    }
+});
+
 router.post('/stripe/webhook', async (req: Request, res: Response) => {
     try {
         if (!config.STRIPE_WEBHOOK_SECRET) {
@@ -174,38 +263,60 @@ router.post('/stripe/webhook', async (req: Request, res: Response) => {
         }
 
         const stripe = getStripe();
-        const sig = req.headers['stripe-signature'] as string;
+        const signature = req.headers['stripe-signature'] as string;
         let event: Stripe.Event;
 
         try {
-            event = stripe.webhooks.constructEvent(
-                req.body, // raw body — must be Buffer
-                sig,
-                config.STRIPE_WEBHOOK_SECRET,
-            );
-        } catch (err) {
-            logger.error('⚠️ Webhook signature verification failed', { error: (err as Error).message });
+            event = stripe.webhooks.constructEvent(req.body, signature, config.STRIPE_WEBHOOK_SECRET);
+        } catch (error) {
+            logger.error('⚠️ Webhook signature verification failed', { error: (error as Error).message });
             res.status(400).json({ error: 'Webhook signature verification failed' });
             return;
         }
 
-        // Handle events
         switch (event.type) {
             case 'checkout.session.completed': {
                 const session = event.data.object as Stripe.Checkout.Session;
                 const email = session.metadata?.email || session.customer_email;
                 const customerId = session.customer as string;
                 const subscriptionId = session.subscription as string;
+                const language = (session.metadata?.language === 'en' ? 'en' : 'zh') as Language;
+                const market = ((session.metadata?.market as MarketId) || 'new-york');
 
                 if (email && customerId && subscriptionId) {
-                    const upgraded = upgradeToSubscriber(email, customerId, subscriptionId);
-                    if (upgraded) {
-                        logger.info(`🎉 New subscriber via Stripe: ${email}`);
+                    if (!findByEmail(email)) {
+                        addClient({ email, language, market });
                     } else {
-                        // User paid but not in our system — add them
-                        const client = addClient({ email });
-                        upgradeToSubscriber(email, customerId, subscriptionId);
-                        logger.info(`🎉 New subscriber (auto-created): ${email}`);
+                        updateClientByEmail(email, { language, market });
+                    }
+                    upgradeToSubscriber(email, customerId, subscriptionId);
+                    logger.info(`🎉 New subscriber via Stripe: ${email}`);
+                }
+                break;
+            }
+
+            case 'customer.subscription.updated': {
+                const subscription = event.data.object as Stripe.Subscription;
+                const customerId = subscription.customer as string;
+                const client = findByStripeCustomerId(customerId);
+                if (client) {
+                    const isActiveStatus = ['active', 'trialing', 'past_due'].includes(subscription.status);
+                    updateClient(client.id, {
+                        active: isActiveStatus,
+                        plan: isActiveStatus ? 'subscriber' : 'free',
+                        stripeSubscriptionId: subscription.id,
+                    });
+                }
+                break;
+            }
+
+            case 'invoice.payment_failed': {
+                const invoice = event.data.object as Stripe.Invoice;
+                const customerId = typeof invoice.customer === 'string' ? invoice.customer : null;
+                if (customerId) {
+                    const client = findByStripeCustomerId(customerId);
+                    if (client) {
+                        updateClient(client.id, { active: false });
                     }
                 }
                 break;
@@ -224,7 +335,7 @@ router.post('/stripe/webhook', async (req: Request, res: Response) => {
 
         res.json({ received: true });
     } catch (error) {
-        logger.error('Webhook processing error', { error: (error as Error).message });
+        logger.error('Webhook processing error', { error: error instanceof Error ? error.message : String(error) });
         res.status(500).json({ error: 'Webhook processing failed' });
     }
 });

@@ -7,26 +7,33 @@ import { saveDailyOutput } from './store/output-store.js';
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
 
-// ── Group clients by language + market ──────────────────────
 interface ClientGroup {
     language: Language;
     market: MarketId;
     clients: Client[];
 }
 
+let activeRun: Promise<void> | null = null;
+
 function groupByPreferences(clients: Client[]): ClientGroup[] {
     const map = new Map<string, ClientGroup>();
-    for (const c of clients) {
-        const key = `${c.language}|${c.market}`;
+    for (const client of clients) {
+        const key = `${client.language}|${client.market}`;
         if (!map.has(key)) {
-            map.set(key, { language: c.language, market: c.market, clients: [] });
+            map.set(key, { language: client.language, market: client.market, clients: [] });
         }
-        map.get(key)!.clients.push(c);
+        map.get(key)!.clients.push(client);
     }
     return Array.from(map.values());
 }
 
-export async function runPipeline(dryRun = false): Promise<void> {
+function getBaseUrl(): string {
+    return config.BASE_URL || (process.env.RAILWAY_PUBLIC_DOMAIN
+        ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+        : `http://localhost:${process.env.PORT || 3000}`);
+}
+
+async function runPipelineInternal(dryRun = false): Promise<void> {
     const startTime = Date.now();
     logger.info('🚀 ═══════════════════════════════════════════');
     logger.info('🚀 RE AI Agents Pipeline Starting...');
@@ -34,7 +41,6 @@ export async function runPipeline(dryRun = false): Promise<void> {
     logger.info('🚀 ═══════════════════════════════════════════');
 
     try {
-        // ── Determine recipients ─────────────────────────────
         const subscribers = getSubscribers();
         const vipClients = getVipClients();
         const trialClients = getTrialClients();
@@ -44,74 +50,64 @@ export async function runPipeline(dryRun = false): Promise<void> {
             logger.warn('⚠️  No recipients found (0 subscribers, 0 VIP, 0 pending trials).');
             return;
         }
+
         logger.info(`👥 Recipients: ${subscribers.length} subscribers + ${vipClients.length} VIP + ${trialClients.length} trial users = ${allRecipients.length} total`);
 
-        // Group all recipients by language + market
         const groups = groupByPreferences(allRecipients);
-        logger.info(`📊 Preference groups: ${groups.map(g => `${g.language}/${g.market}(${g.clients.length})`).join(', ')}`);
+        logger.info(`📊 Preference groups: ${groups.map((group) => `${group.language}/${group.market}(${group.clients.length})`).join(', ')}`);
 
-        const baseUrl = config.BASE_URL || (process.env.RAILWAY_PUBLIC_DOMAIN
-            ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
-            : `http://localhost:${process.env.PORT || 3000}`);
+        const baseUrl = getBaseUrl();
         const subscribeUrl = `${baseUrl}/subscribe.html`;
 
         let totalNewsScripts = 0;
         let totalModuleScripts = 0;
 
-        // ── Process each preference group ────────────────────
         for (const group of groups) {
             const { language, market, clients } = group;
-            const groupSubs = clients.filter(c => c.plan === 'subscriber' || c.plan === 'vip');
-            const groupTrials = clients.filter(c => c.plan === 'free' && !c.freeTrialUsed);
+            const payingClients = clients.filter((client) => client.plan === 'subscriber' || client.plan === 'vip');
+            const pendingTrialClients = clients.filter((client) => client.plan === 'free' && !client.freeTrialUsed);
 
-            logger.info(`\n🌐 ═══ Processing group: ${language}/${market} (${groupSubs.length} subs + ${groupTrials.length} trials) ═══`);
+            logger.info(`\n🌐 ═══ Processing group: ${language}/${market} (${payingClients.length} subs + ${pendingTrialClients.length} trials) ═══`);
 
-            // Step 1: Search News for this market
             logger.info(`📰 Searching news for ${market}...`);
             const articles = await searchNews(market);
             logger.info(`📰 Found ${articles.length} articles`);
 
-            // Step 2: Generate news scripts in this language
             logger.info(`✍️  Generating news scripts (${language})...`);
             const dailyOutput = await generateDailyScripts(articles, 3, language, market);
 
-            // Step 3: Generate content module scripts
             logger.info(`📚 Generating content module scripts (${language}/${market})...`);
             const dateStr = new Date().toISOString().split('T')[0];
             const modules = await generateAllModuleContent(dateStr, language, market);
             dailyOutput.modules = modules;
 
-            // Save output
-            const outputDate = saveDailyOutput(dailyOutput);
-            const viewerUrl = `${baseUrl}/view.html?date=${outputDate}`;
+            const savedOutput = saveDailyOutput(dailyOutput);
+            dailyOutput.key = savedOutput.key;
 
-            const newsScripts = dailyOutput.articles.reduce((s, a) => s + a.scripts.length, 0);
-            const moduleScripts = modules.reduce((s, m) => s + m.articles.reduce((s2, a) => s2 + a.scripts.length, 0), 0);
+            const newsScripts = dailyOutput.articles.reduce((sum, article) => sum + article.scripts.length, 0);
+            const moduleScripts = modules.reduce((sum, module) => sum + module.articles.reduce((inner, article) => inner + article.scripts.length, 0), 0);
             totalNewsScripts += newsScripts;
             totalModuleScripts += moduleScripts;
 
-            // Step 4a: Send to paying subscribers
-            if (groupSubs.length > 0) {
-                logger.info(`  💳 Sending to ${groupSubs.length} subscribers/VIP...`);
-                const subResult = await sendBatchEmails(groupSubs, dailyOutput, viewerUrl, dryRun, false);
-                logger.info(`  💳 Subscribers/VIP: ${subResult.sent} sent, ${subResult.failed} failed`);
+            if (payingClients.length > 0) {
+                logger.info(`  💳 Sending to ${payingClients.length} subscribers/VIP...`);
+                const subscriberResult = await sendBatchEmails(payingClients, dailyOutput, baseUrl, dryRun, false);
+                logger.info(`  💳 Subscribers/VIP: ${subscriberResult.sent} sent, ${subscriberResult.failed} failed`);
             }
 
-            // Step 4b: Send to trial users
-            if (groupTrials.length > 0) {
-                logger.info(`  🎁 Sending to ${groupTrials.length} trial users...`);
-                const trialResult = await sendBatchEmails(groupTrials, dailyOutput, viewerUrl, dryRun, true, subscribeUrl);
+            if (pendingTrialClients.length > 0) {
+                logger.info(`  🎁 Sending to ${pendingTrialClients.length} trial users...`);
+                const trialResult = await sendBatchEmails(pendingTrialClients, dailyOutput, baseUrl, dryRun, true, subscribeUrl);
                 logger.info(`  🎁 Trials: ${trialResult.sent} sent, ${trialResult.failed} failed`);
 
                 if (!dryRun) {
-                    for (const client of groupTrials) {
-                        markTrialUsed(client.id);
+                    for (const clientId of trialResult.sentClientIds) {
+                        markTrialUsed(clientId);
                     }
                 }
             }
         }
 
-        // ── Summary ──────────────────────────────────────────
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         logger.info('\n🎉 ═══════════════════════════════════════════');
         logger.info(`🎉 Pipeline completed in ${elapsed}s`);
@@ -127,4 +123,24 @@ export async function runPipeline(dryRun = false): Promise<void> {
         });
         throw error;
     }
+}
+
+export function isPipelineRunning(): boolean {
+    return activeRun !== null;
+}
+
+export function getBaseAppUrl(): string {
+    return getBaseUrl();
+}
+
+export async function runPipeline(dryRun = false): Promise<void> {
+    if (activeRun) {
+        throw new Error('Pipeline is already running');
+    }
+
+    activeRun = runPipelineInternal(dryRun).finally(() => {
+        activeRun = null;
+    });
+
+    return activeRun;
 }

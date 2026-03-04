@@ -1,7 +1,7 @@
 {
   "name": "re-ai-agents",
   "version": "1.0.0",
-  "description": "NY Real Estate AI Newsletter Agents - 纽约地产AI口播稿自动推送系统",
+  "description": "REscript - token-gated AI real estate video script delivery",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {

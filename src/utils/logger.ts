@@ -1,10 +1,12 @@
 import winston from 'winston';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { ensureDirSync } from './file-store.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Store logs in data/ directory (persisted via Railway volume at /app/data)
 const logDir = path.join(__dirname, '../../data/logs');
+ensureDirSync(logDir);
 
 export const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',

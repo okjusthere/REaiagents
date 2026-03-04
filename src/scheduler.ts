@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { config } from './config/index.js';
-import { runPipeline } from './orchestrator.js';
+import { isPipelineRunning, runPipeline } from './orchestrator.js';
 import { logger } from './utils/logger.js';
 
 export function startScheduler(): void {
@@ -18,6 +18,10 @@ export function startScheduler(): void {
     cron.schedule(
         schedule,
         async () => {
+            if (isPipelineRunning()) {
+                logger.warn('⏰ Scheduled run skipped because the pipeline is already running');
+                return;
+            }
             logger.info('⏰ Scheduled run triggered');
             try {
                 await runPipeline(config.DRY_RUN);

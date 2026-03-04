@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { z } from 'zod';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { retry } from '../utils/retry.js';
@@ -25,12 +26,28 @@ export interface ArticleScripts {
 }
 
 export interface DailyOutput {
+    key: string;
     date: string;
     generatedAt: string;
+    language: Language;
+    market: MarketId;
     articleCount: number;
     articles: ArticleScripts[];
     modules?: import('./content-agent.js').ModuleOutput[];
 }
+
+export const scriptSchema = z.object({
+    style: z.enum(['professional', 'casual', 'investor', 'mythbuster']),
+    styleName: z.string().min(1).max(80),
+    platform: z.string().min(1).max(40),
+    duration: z.string().min(1).max(40),
+    hook: z.string().min(1).max(800),
+    content: z.string().min(1).max(6000),
+    cta: z.string().min(1).max(800),
+    tags: z.array(z.string().min(1).max(40)).min(3).max(8),
+});
+
+export const scriptsSchema = z.array(scriptSchema).length(4);
 
 // ── Market display names ────────────────────────────────────
 const MARKET_DISPLAY: Record<string, { zh: string; en: string }> = {
@@ -187,11 +204,7 @@ function parseScripts(raw: string): ScriptItem[] {
         cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
     }
 
-    const parsed = JSON.parse(cleaned);
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-        throw new Error('Invalid script format: expected non-empty array');
-    }
-    return parsed as ScriptItem[];
+    return scriptsSchema.parse(JSON.parse(cleaned)) as ScriptItem[];
 }
 
 // ── Generate scripts for one article ────────────────────────
@@ -258,8 +271,11 @@ export async function generateDailyScripts(
     }
 
     const output: DailyOutput = {
+        key: '',
         date: new Date().toISOString().split('T')[0],
         generatedAt: new Date().toISOString(),
+        language,
+        market,
         articleCount: results.length,
         articles: results,
     };

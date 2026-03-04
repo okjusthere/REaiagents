@@ -210,6 +210,10 @@
             display: none;
         }
 
+        .hidden {
+            display: none !important;
+        }
+
         .card-top {
             display: flex;
             align-items: center;
@@ -429,83 +433,91 @@
     <div class="toast" id="toast"></div>
     <script>
 const API='/api';
-let _allSections=[];
-function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>{t.style.display='none';},2000);}
-function getStyleName(s){return{professional:'专业分析型',casual:'轻松聊天型',investor:'投资顾问型',mythbuster:'犀利避坑型'}[s]||s;}
-function buildText(a,s){return`🎬 ${a.title}\n\n🎯 开场钩子\n${s.hook}\n\n📝 主要内容\n${s.content}\n\n💬 行动号召\n${s.cta}\n\n📱 ${s.platform} ⏱️ ${s.duration}\n🏷️ ${s.tags.join(', ')}`;}
-function copyScript(si,ai,sci){
-  const sec=_allSections[si];const a=sec.articles[ai];const s=a.scripts[sci];
-  navigator.clipboard.writeText(buildText(a,s)).then(()=>{
+let allSections=[];
+function escapeHtml(value){return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function safeUrl(value){try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.toString():null;}catch{return null;}}
+function showToast(message){const toast=document.getElementById('toast');toast.textContent=message;toast.style.display='block';setTimeout(()=>{toast.style.display='none';},2000);}
+function getStyleName(style){return{professional:'专业分析型',casual:'轻松聊天型',investor:'投资顾问型',mythbuster:'犀利避坑型'}[style]||style;}
+function buildText(article,script){return`🎬 ${article.title}\n\n🎯 开场钩子\n${script.hook}\n\n📝 主要内容\n${script.content}\n\n💬 行动号召\n${script.cta}\n\n📱 ${script.platform} ⏱️ ${script.duration}\n🏷️ ${script.tags.join(', ')}`;}
+function copyScript(sectionIndex,articleIndex,scriptIndex){
+  const section=allSections[sectionIndex];const article=section.articles[articleIndex];const script=article.scripts[scriptIndex];
+  navigator.clipboard.writeText(buildText(article,script)).then(()=>{
     showToast('✅ 文案已复制到剪贴板');
-    const b=document.getElementById(`cp-${si}-${ai}-${sci}`);if(b){b.textContent='✅ 已复制';b.classList.add('copied');setTimeout(()=>{b.textContent='📋 复制';b.classList.remove('copied');},2000);}
+    const button=document.getElementById(`cp-${sectionIndex}-${articleIndex}-${scriptIndex}`);
+    if(button){button.textContent='✅ 已复制';button.classList.add('copied');setTimeout(()=>{button.textContent='📋 复制';button.classList.remove('copied');},2000);}
   });
 }
-function shareScript(si,ai,sci){
-  const sec=_allSections[si];const a=sec.articles[ai];const s=a.scripts[sci];
-  const t=buildText(a,s);
-  if(navigator.share)navigator.share({title:a.title,text:t}).catch(()=>{});
-  else navigator.clipboard.writeText(t).then(()=>showToast('✅ 文案已复制，可粘贴分享'));
+function shareScript(sectionIndex,articleIndex,scriptIndex){
+  const section=allSections[sectionIndex];const article=section.articles[articleIndex];const script=article.scripts[scriptIndex];
+  const text=buildText(article,script);
+  if(navigator.share){navigator.share({title:article.title,text}).catch(()=>{});}
+  else navigator.clipboard.writeText(text).then(()=>showToast('✅ 文案已复制，可粘贴分享'));
 }
-function filterCat(cat){
-  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.toggle('active',t.dataset.cat===cat));
-  document.querySelectorAll('.module-section').forEach(s=>{if(cat==='all')s.classList.remove('hidden');else s.classList.toggle('hidden',s.dataset.cat!==cat);});
+function filterCat(category){
+  document.querySelectorAll('.cat-tab').forEach(tab=>tab.classList.toggle('active',tab.dataset.cat===category));
+  document.querySelectorAll('.module-section').forEach(section=>{if(category==='all')section.classList.remove('hidden');else section.classList.toggle('hidden',section.dataset.cat!==category);});
 }
 function filterStyle(style){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.style===style));
-  document.querySelectorAll('.script-card').forEach(c=>{if(style==='all')c.classList.remove('hidden');else c.classList.toggle('hidden',c.dataset.style!==style);});
+  document.querySelectorAll('.tab').forEach(tab=>tab.classList.toggle('active',tab.dataset.style===style));
+  document.querySelectorAll('.script-card').forEach(card=>{if(style==='all')card.classList.remove('hidden');else card.classList.toggle('hidden',card.dataset.style!==style);});
 }
-function renderSection(section,si){
-  let h='';
-  section.articles.forEach((a,ai)=>{
-    h+=`<div class="article-section"><div class="article-header"><div class="article-num">${ai+1}</div><div class="article-info"><div class="article-title">${a.title}</div><div class="article-source">${a.source}${a.url?` · <a href="${a.url}" target="_blank">原文↗</a>`:''}</div></div></div>`;
-    a.scripts.forEach((s,sci)=>{
-      h+=`<div class="script-card" data-style="${s.style}"><div class="card-top"><div class="card-badges"><span class="badge badge-${s.style}">${s.styleName||getStyleName(s.style)}</span><span class="badge badge-platform">📱 ${s.platform}</span><span class="badge badge-duration">⏱️ ${s.duration}</span></div></div>
-      <div class="section-label">🎯 开场钩子</div><div class="hook">${s.hook}</div>
-      <div class="section-label">📝 主要内容</div><div class="content-text">${s.content}</div>
-      <div class="section-label">💬 行动号召</div><div class="cta-text">${s.cta}</div>
-      <div class="tags">${s.tags.map(t=>`<span class="tag">#${t}</span>`).join('')}</div>
-      <div class="card-actions"><button class="btn" id="cp-${si}-${ai}-${sci}" onclick="copyScript(${si},${ai},${sci})">📋 复制</button><button class="btn" onclick="shareScript(${si},${ai},${sci})">🔗 分享</button></div></div>`;
+function renderSection(section,sectionIndex){
+  let html='';
+  section.articles.forEach((article,articleIndex)=>{
+    const link=safeUrl(article.url);
+    html+=`<div class="article-section"><div class="article-header"><div class="article-num">${articleIndex+1}</div><div class="article-info"><div class="article-title">${escapeHtml(article.title)}</div><div class="article-source">${escapeHtml(article.source)}${link?` · <a href="${link}" target="_blank" rel="noopener noreferrer">原文↗</a>`:''}</div></div></div>`;
+    article.scripts.forEach((script,scriptIndex)=>{
+      html+=`<div class="script-card" data-style="${escapeHtml(script.style)}"><div class="card-top"><div class="card-badges"><span class="badge badge-${escapeHtml(script.style)}">${escapeHtml(script.styleName||getStyleName(script.style))}</span><span class="badge badge-platform">📱 ${escapeHtml(script.platform)}</span><span class="badge badge-duration">⏱️ ${escapeHtml(script.duration)}</span></div></div>
+      <div class="section-label">🎯 开场钩子</div><div class="hook">${escapeHtml(script.hook)}</div>
+      <div class="section-label">📝 主要内容</div><div class="content-text">${escapeHtml(script.content).replace(/\n/g,'<br>')}</div>
+      <div class="section-label">💬 行动号召</div><div class="cta-text">${escapeHtml(script.cta)}</div>
+      <div class="tags">${script.tags.map(tag=>`<span class="tag">#${escapeHtml(tag)}</span>`).join('')}</div>
+      <div class="card-actions"><button class="btn" id="cp-${sectionIndex}-${articleIndex}-${scriptIndex}" onclick="copyScript(${sectionIndex},${articleIndex},${scriptIndex})">📋 复制</button><button class="btn" onclick="shareScript(${sectionIndex},${articleIndex},${scriptIndex})">🔗 分享</button></div></div>`;
     });
-    h+=`</div>`;
+    html+='</div>';
   });
-  return h;
+  return html;
 }
 async function loadData(){
   const params=new URLSearchParams(window.location.search);
-  const date=params.get('date')||new Date().toISOString().split('T')[0];
+  const key=params.get('key');
+  const token=params.get('token');
+  const isAdmin=params.get('admin')==='1';
+  if(!key){document.getElementById('content').innerHTML='<div class="empty-state"><div class="icon">🔒</div><p>缺少访问凭证，请使用邮件中的专属链接打开。</p></div>';return;}
   try{
-    const res=await fetch(`${API}/outputs/${date}`);
-    const result=await res.json();
-    if(!result.success||!result.data){document.getElementById('content').innerHTML=`<div class="empty-state"><div class="icon">📭</div><p>暂无 ${date} 的文案数据</p></div>`;return;}
+    const headers={};
+    let url=`${API}/viewer/outputs/${encodeURIComponent(key)}?token=${encodeURIComponent(token||'')}`;
+    if(isAdmin){
+      const adminToken=sessionStorage.getItem('admin_token')||'';
+      if(!adminToken){throw new Error('Admin token missing');}
+      headers.Authorization=`Bearer ${adminToken}`;
+      url=`${API}/outputs/${encodeURIComponent(key)}`;
+    }
+    const response=await fetch(url,{headers});
+    const result=await response.json();
+    if(!result.success||!result.data){document.getElementById('content').innerHTML=`<div class="empty-state"><div class="icon">📭</div><p>${escapeHtml(result.error||'未找到文案')}</p></div>`;return;}
     const data=result.data;
-    document.getElementById('dateMeta').textContent=`📅 ${date} · 为您精选的视频文案`;
+    document.getElementById('dateMeta').textContent=`📅 ${data.date} · ${data.market} · ${data.language.toUpperCase()}`;
     document.getElementById('newsCount').textContent=data.articleCount;
-    document.title=`🎬 ${date} 文案 — RE AI Agents`;
-
-    // Build sections: news + modules
-    _allSections=[];
-    _allSections.push({cat:'news',label:'📰 新闻热点',articles:data.articles});
+    document.title=`🎬 ${data.date} 文案 — REscript`;
+    allSections=[{cat:'news',label:'📰 新闻热点',articles:data.articles}];
     let moduleScripts=0;
-    if(data.modules){data.modules.forEach(m=>{_allSections.push({cat:m.moduleId,label:`${m.moduleEmoji} ${m.moduleName}`,articles:m.articles});moduleScripts+=m.articles.reduce((s,a)=>s+a.scripts.length,0);});}
-    const newsScripts=data.articles.reduce((s,a)=>s+a.scripts.length,0);
+    if(data.modules){data.modules.forEach(module=>{allSections.push({cat:module.moduleId,label:`${module.moduleEmoji} ${module.moduleName}`,articles:module.articles});moduleScripts+=module.articles.reduce((sum,article)=>sum+article.scripts.length,0);});}
+    const newsScripts=data.articles.reduce((sum,article)=>sum+article.scripts.length,0);
     document.getElementById('moduleCount').textContent=data.modules?data.modules.length:0;
     document.getElementById('scriptCount').textContent=newsScripts+moduleScripts;
-
-    // Category tabs
-    let catH=`<div class="cat-tab active" data-cat="all">全部</div><div class="cat-tab" data-cat="news">📰 新闻</div>`;
-    if(data.modules)data.modules.forEach(m=>{catH+=`<div class="cat-tab" data-cat="${m.moduleId}">${m.moduleEmoji} ${m.moduleName}</div>`;});
-    document.getElementById('catTabs').innerHTML=catH;
-
-    // Render all sections
+    let tabs='<div class="cat-tab active" data-cat="all">全部</div><div class="cat-tab" data-cat="news">📰 新闻</div>';
+    if(data.modules){data.modules.forEach(module=>{tabs+=`<div class="cat-tab" data-cat="${escapeHtml(module.moduleId)}">${escapeHtml(module.moduleEmoji)} ${escapeHtml(module.moduleName)}</div>`;});}
+    document.getElementById('catTabs').innerHTML=tabs;
     let html='';
-    _allSections.forEach((sec,si)=>{
-      html+=`<div class="module-section" data-cat="${sec.cat}"><div class="module-label">${sec.label}</div>${renderSection(sec,si)}</div>`;
-    });
+    allSections.forEach((section,index)=>{html+=`<div class="module-section" data-cat="${escapeHtml(section.cat)}"><div class="module-label">${escapeHtml(section.label)}</div>${renderSection(section,index)}</div>`;});
     document.getElementById('content').innerHTML=html;
-  }catch(e){document.getElementById('content').innerHTML=`<div class="empty-state"><div class="icon">❌</div><p>加载失败: ${e.message}</p></div>`;}
+  }catch(error){
+    document.getElementById('content').innerHTML=`<div class="empty-state"><div class="icon">❌</div><p>加载失败: ${escapeHtml(error.message||'unknown error')}</p></div>`;
+  }
 }
-document.getElementById('catTabs').addEventListener('click',e=>{if(e.target.classList.contains('cat-tab'))filterCat(e.target.dataset.cat);});
-document.querySelector('.tabs').addEventListener('click',e=>{if(e.target.classList.contains('tab'))filterStyle(e.target.dataset.style);});
+document.getElementById('catTabs').addEventListener('click',event=>{const target=event.target.closest('.cat-tab');if(target)filterCat(target.dataset.cat);});
+document.querySelector('.tabs').addEventListener('click',event=>{const target=event.target.closest('.tab');if(target)filterStyle(target.dataset.style);});
 loadData();
     </script>
 </body>

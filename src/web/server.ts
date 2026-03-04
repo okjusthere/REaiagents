@@ -1,98 +1,109 @@
+import crypto from 'crypto';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import apiRouter from './api.js';
 import stripeRouter from './stripe-api.js';
-import { getDailyOutput, listOutputDates } from '../store/output-store.js';
+import publicApiRouter from './public-api.js';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// ── Simple in-memory rate limiter ──────────────────────────
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT_MAX = 10; // 10 requests per window
+function createRateLimit(max: number, windowMs: number) {
+    const store = new Map<string, { count: number; resetAt: number }>();
 
-function rateLimit(req: express.Request, res: express.Response, next: express.NextFunction): void {
-    const ip = req.ip || req.socket.remoteAddress || 'unknown';
-    const now = Date.now();
-    const entry = rateLimitMap.get(ip);
+    setInterval(() => {
+        const now = Date.now();
+        for (const [key, value] of store.entries()) {
+            if (now > value.resetAt) {
+                store.delete(key);
+            }
+        }
+    }, Math.min(windowMs, 30 * 60 * 1000));
 
-    if (!entry || now > entry.resetAt) {
-        rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+        const ip = req.ip || req.socket.remoteAddress || 'unknown';
+        const now = Date.now();
+        const current = store.get(ip);
+
+        if (!current || now > current.resetAt) {
+            store.set(ip, { count: 1, resetAt: now + windowMs });
+            next();
+            return;
+        }
+
+        if (current.count >= max) {
+            res.status(429).json({ success: false, error: 'Too many requests, please try again later' });
+            return;
+        }
+
+        current.count += 1;
         next();
-        return;
-    }
-
-    if (entry.count >= RATE_LIMIT_MAX) {
-        res.status(429).json({ success: false, error: '请求过于频繁，请稍后再试 / Too many requests, please try later' });
-        return;
-    }
-
-    entry.count++;
-    next();
+    };
 }
 
-// Cleanup stale entries every 30 minutes
-setInterval(() => {
-    const now = Date.now();
-    for (const [ip, entry] of rateLimitMap) {
-        if (now > entry.resetAt) rateLimitMap.delete(ip);
-    }
-}, 30 * 60 * 1000);
-
-// ── Auth middleware for admin routes ────────────────────────
 function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction): void {
     const authHeader = req.headers.authorization;
-    if (!authHeader || authHeader !== `Bearer ${config.ADMIN_TOKEN}`) {
+    if (!authHeader?.startsWith('Bearer ')) {
         res.status(401).json({ success: false, error: 'Unauthorized' });
         return;
     }
+
+    const token = authHeader.slice('Bearer '.length);
+    const provided = Buffer.from(token, 'utf-8');
+    const expected = Buffer.from(config.ADMIN_TOKEN, 'utf-8');
+
+    if (provided.length !== expected.length || !crypto.timingSafeEqual(provided, expected)) {
+        res.status(401).json({ success: false, error: 'Unauthorized' });
+        return;
+    }
+
     next();
 }
 
-export function startWebServer(port: number = 3000): void {
+export function startWebServer(port = 3000): void {
     const app = express();
+    const publicRateLimit = createRateLimit(25, 15 * 60 * 1000);
+    const adminRateLimit = createRateLimit(120, 15 * 60 * 1000);
 
-    // ── Stripe webhook needs raw body (BEFORE json parser) ──
-    app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
-
-    // ── Standard JSON parser for all other routes ───────────
-    app.use(express.json());
-
-    // ── Public routes (no auth required, rate limited) ──────
-
-    // Stripe subscribe routes — public-facing, rate limited
-    app.use('/api/subscribe', rateLimit);
-    app.use('/api', stripeRouter);
-
-    // Output viewing — public (shared via email links)
-    app.get('/api/outputs/:date', (req, res) => {
-        try {
-            const output = getDailyOutput(req.params.date);
-            if (!output) {
-                res.status(404).json({ success: false, error: 'No output found for this date' });
-                return;
-            }
-            res.json({ success: true, data: output });
-        } catch (error) {
-            res.status(500).json({ success: false, error: (error as Error).message });
-        }
+    app.use((req, res, next) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'DENY');
+        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+        res.setHeader(
+            'Content-Security-Policy',
+            [
+                "default-src 'self'",
+                "img-src 'self' data:",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+                "font-src 'self' https://fonts.gstatic.com",
+                "script-src 'self' 'unsafe-inline'",
+                "connect-src 'self'",
+                "frame-ancestors 'none'",
+                "base-uri 'self'",
+            ].join('; ')
+        );
+        next();
     });
 
-    // ── Admin API routes (auth required) ────────────────────
-    app.use('/api', requireAdmin, apiRouter);
+    app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+    app.use(express.json({ limit: '100kb' }));
 
-    // ── Admin page ──────────────────────────────────────────
+    app.use('/api/subscribe', publicRateLimit);
+    app.use('/api/viewer', publicRateLimit);
+    app.use('/api/subscription', publicRateLimit);
+    app.use('/api', stripeRouter);
+    app.use('/api', publicApiRouter);
+    app.use('/api', adminRateLimit, requireAdmin, apiRouter);
+
     app.get('/admin.html', (_req, res) => {
         res.sendFile(path.join(__dirname, '../../public/admin.html'));
     });
 
-    // Serve other static files (subscribe.html, success.html, view.html)
     app.use(express.static(path.join(__dirname, '../../public')));
 
-    // Default route → subscribe landing page (public-facing)
     app.use((_req, res) => {
         res.sendFile(path.join(__dirname, '../../public/subscribe.html'));
     });
@@ -101,6 +112,6 @@ export function startWebServer(port: number = 3000): void {
         logger.info(`🌐 Web server running on port ${port}`);
         logger.info(`   📄 Landing page: http://localhost:${port}/`);
         logger.info(`   🔧 Admin dashboard: http://localhost:${port}/admin.html`);
-        logger.info(`   🔒 Admin API protected with ADMIN_TOKEN`);
+        logger.info('   🔒 Viewer links are token-gated and admin APIs require ADMIN_TOKEN');
     });
 }

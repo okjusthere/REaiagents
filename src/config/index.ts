@@ -17,6 +17,8 @@ const envSchema = z.object({
     // Email Settings
     EMAIL_FROM_NAME: z.string().default('NY地产日报'),
     EMAIL_SUBJECT_PREFIX: z.string().default('[纽约地产AI日报]'),
+    SUPPORT_EMAIL: z.string().email().optional(),
+    COMPANY_ADDRESS: z.string().min(5).optional(),
 
     // Schedule
     CRON_SCHEDULE: z.string().default('0 7 * * *'),
@@ -24,6 +26,7 @@ const envSchema = z.object({
 
     // Admin security
     ADMIN_TOKEN: z.string().min(8, 'ADMIN_TOKEN must be at least 8 characters'),
+    VIEWER_TOKEN_SECRET: z.string().min(16).optional(),
 
     // Stripe (optional — subscription features disabled if not set)
     STRIPE_SECRET_KEY: z.string().optional(),
@@ -50,7 +53,11 @@ function loadConfig() {
         process.exit(1);
     }
 
-    return result.data;
+    return {
+        ...result.data,
+        SUPPORT_EMAIL: result.data.SUPPORT_EMAIL || result.data.GMAIL_USER,
+        VIEWER_TOKEN_SECRET: result.data.VIEWER_TOKEN_SECRET || result.data.ADMIN_TOKEN,
+    };
 }
 
 export const config = loadConfig();

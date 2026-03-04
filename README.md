@@ -1,113 +1,68 @@
-# 🏠 RE AI Agents — 纽约地产AI口播稿自动推送系统
+# REscript
 
-每天自动搜索纽约最新地产新闻，用AI生成不同风格的中文口播稿，定时邮件推送给客户。
+REscript generates daily real estate video scripts for selected US markets, sends them by email, and gates viewer access with signed links.
 
-## ✨ 功能特色
+## Current capabilities
 
-- **智能新闻搜索** — Bing News API + Google News RSS 双源覆盖
-- **4种口播风格** — 专业分析 / 轻松聊天 / 投资顾问 / 犀利避坑
-- **AI脚本生成** — Azure OpenAI gpt-5.2-chat 驱动
-- **定时邮件推送** — 每天自动发送精美HTML邮件
-- **灵活配置** — 客户列表、推送时间、风格偏好全可配
+- Google News RSS ingestion for 8 US real estate markets
+- Bilingual generation (`zh` / `en`) with 4 script styles per topic
+- Daily output isolation by `date + language + market`
+- Private viewer links per recipient instead of public date-based access
+- Trial, paid subscription, manage-subscription, and Stripe billing portal flows
+- Admin dashboard for clients, runs, and historical output inspection
 
-## 🚀 快速开始
-
-### 1. 安装依赖
+## Run locally
 
 ```bash
 npm install
-```
-
-### 2. 配置环境变量
-
-```bash
 cp .env.example .env
+npm run build
+npm run dry-run
 ```
 
-编辑 `.env` 填入你的 API 密钥：
-
-| 变量 | 说明 |
-|------|------|
-| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI 端点 URL |
-| `AZURE_OPENAI_API_KEY` | Azure OpenAI API Key |
-| `AZURE_OPENAI_DEPLOYMENT` | 模型部署名 (默认 `gpt-5.2-chat`) |
-| `BING_NEWS_API_KEY` | Bing News Search API Key |
-| `GMAIL_USER` | Gmail 邮箱地址 |
-| `GMAIL_APP_PASSWORD` | Gmail 应用专用密码 |
-
-### 3. 配置客户列表
-
-编辑 `src/config/clients.ts`，添加你的客户：
-
-```typescript
-const clients: ClientConfig[] = [
-  { name: '张三', email: 'zhang@example.com', style: 'professional' },
-  { name: '李四', email: 'li@example.com', style: 'casual' },
-  { name: '王五', email: 'wang@example.com', style: 'investor' },
-  { name: '赵六', email: 'zhao@example.com', style: 'mythbuster' },
-];
-```
-
-### 4. 运行
+For a full local server:
 
 ```bash
-# 立即执行一次（测试模式，只打印不发邮件）
-npm run dry-run
-
-# 立即执行一次（真实发送邮件）
-npm run send-now
-
-# 启动定时任务（默认每天早7点EST）
 npm start
 ```
 
-## 📋 口播风格说明
+## Required environment variables
 
-| 风格ID | 名称 | 适合场景 |
-|--------|------|----------|
-| `professional` | 专业分析型 | 正式场合、行业报告 |
-| `casual` | 轻松聊天型 | 小红书/抖音短视频 |
-| `investor` | 投资顾问型 | 投资者群体分析 |
-| `mythbuster` | 犀利避坑/揭秘型 | 知识干货、行业揭秘 |
+| Variable | Purpose |
+| --- | --- |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint |
+| `AZURE_OPENAI_API_KEY` | Azure OpenAI API key |
+| `AZURE_OPENAI_DEPLOYMENT` | Azure deployment/model name |
+| `GMAIL_USER` | SMTP sender inbox |
+| `GMAIL_APP_PASSWORD` | Gmail app password |
+| `ADMIN_TOKEN` | Admin API bearer token |
+| `BASE_URL` | Public app URL used in email links |
 
-## 🏗️ 项目结构
+## Optional environment variables
 
-```
-src/
-├── index.ts              # 入口：CLI解析 + 启动
-├── orchestrator.ts       # 编排器：News → Script → Email
-├── scheduler.ts          # 定时调度（node-cron）
-├── agents/
-│   ├── news-agent.ts     # 新闻搜索代理
-│   ├── script-writer-agent.ts  # AI口播稿生成代理
-│   └── email-agent.ts    # 邮件发送代理
-├── config/
-│   ├── index.ts          # 环境变量加载与验证
-│   ├── clients.ts        # 客户列表配置
-│   └── styles.ts         # 口播风格定义
-└── utils/
-    ├── logger.ts         # 日志工具
-    └── retry.ts          # 重试工具
-```
+| Variable | Purpose |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret |
+| `STRIPE_PRICE_ID` | Stripe subscription price ID |
+| `SUPPORT_EMAIL` | Reply-to and support address |
+| `COMPANY_ADDRESS` | Footer mailing address |
+| `VIEWER_TOKEN_SECRET` | Secret for signed viewer/manage links |
+| `CRON_SCHEDULE` | Cron schedule, default `0 7 * * *` |
+| `CRON_TIMEZONE` | Cron timezone, default `America/New_York` |
+| `DRY_RUN` | `true` to skip actual email sends |
+| `LOG_LEVEL` | Winston log level |
 
-## 🔑 获取 API Keys
+## Main entry points
 
-### Azure OpenAI
-1. 登录 [Azure Portal](https://portal.azure.com)
-2. 创建 Azure OpenAI 资源
-3. 部署 `gpt-5.2-chat` 模型
-4. 在"Keys and Endpoint"获取密钥
+- [src/index.ts](/Users/weizhengle/Downloads/vibecoding/REaiagents/src/index.ts)
+- [src/orchestrator.ts](/Users/weizhengle/Downloads/vibecoding/REaiagents/src/orchestrator.ts)
+- [src/web/server.ts](/Users/weizhengle/Downloads/vibecoding/REaiagents/src/web/server.ts)
+- [src/web/stripe-api.ts](/Users/weizhengle/Downloads/vibecoding/REaiagents/src/web/stripe-api.ts)
+- [public/subscribe.html](/Users/weizhengle/Downloads/vibecoding/REaiagents/public/subscribe.html)
+- [public/manage.html](/Users/weizhengle/Downloads/vibecoding/REaiagents/public/manage.html)
 
-### Bing News Search
-1. 登录 [Azure Portal](https://portal.azure.com)
-2. 创建 "Bing Search" 资源（免费层 1000次/月）
-3. 获取 API Key
+## Notes
 
-### Gmail App Password
-1. 进入 [Google Account](https://myaccount.google.com) → Security
-2. 开启两步验证
-3. 生成应用专用密码（选"Mail"）
-
-## 📄 License
-
-ISC
+- Generated content still requires human review before publication, especially for legal, tax, fair housing, MLS, or brokerage-sensitive claims.
+- `public/privacy.html` and `public/terms.html` are baseline product pages and should still be reviewed by counsel before launch.

@@ -3,7 +3,7 @@ import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { retry } from '../utils/retry.js';
 import { contentModules, getTodayTopics, type ContentModule, type TopicItem } from '../config/topics.js';
-import type { ScriptItem, ArticleScripts } from './script-writer-agent.js';
+import { scriptsSchema, type ScriptItem, type ArticleScripts } from './script-writer-agent.js';
 import type { Language, MarketId } from '../store/client-store.js';
 
 // ── Types ────────────────────────────────────────────────────
@@ -153,9 +153,7 @@ function parseScripts(raw: string): ScriptItem[] {
     if (cleaned.startsWith('```')) {
         cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
     }
-    const parsed = JSON.parse(cleaned);
-    if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('Invalid format');
-    return parsed as ScriptItem[];
+    return scriptsSchema.parse(JSON.parse(cleaned)) as ScriptItem[];
 }
 
 // ── Generate content for all modules ────────────────────────

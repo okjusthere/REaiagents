@@ -256,20 +256,25 @@
         }
         setLang(detectLang());
 
-        // Try to load latest output date and show "View Latest" button
-        fetch('/api/outputs').then(r => r.json()).catch(() => null).then(data => {
-            // This will 401 since outputs list is admin-only, but we try anyway
-        }).catch(() => { });
-
-        // Show "view latest" button if there's a date in the past
-        const today = new Date().toISOString().split('T')[0];
-        fetch(`/api/outputs/${today}`).then(r => r.json()).then(data => {
-            if (data.success && data.data) {
-                const el = document.getElementById('viewLatest');
-                const isZh = detectLang() === 'zh';
-                el.innerHTML = `<a href="/view.html?date=${today}" class="btn btn-secondary"><span class="zh">📋 查看今日文案</span><span class="en">📋 View Today's Scripts</span></a>`;
-            }
-        }).catch(() => { });
+        const params = new URLSearchParams(window.location.search);
+        const sessionId = params.get('session_id');
+        if (sessionId) {
+            fetch(`/api/subscribe/session/${encodeURIComponent(sessionId)}`)
+                .then(r => r.json())
+                .then(result => {
+                    if (!result.success || !result.data) return;
+                    const el = document.getElementById('viewLatest');
+                    const actions = [];
+                    if (result.data.viewUrl) {
+                        actions.push(`<a href="${result.data.viewUrl}" class="btn btn-secondary"><span class="zh">📋 查看最新文案</span><span class="en">📋 View Latest Scripts</span></a>`);
+                    }
+                    if (result.data.manageUrl) {
+                        actions.push(`<a href="${result.data.manageUrl}" class="btn btn-secondary"><span class="zh">⚙️ 管理订阅</span><span class="en">⚙️ Manage Subscription</span></a>`);
+                    }
+                    el.innerHTML = actions.join('');
+                })
+                .catch(() => { });
+        }
     </script>
 </body>
 
