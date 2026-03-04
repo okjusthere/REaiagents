@@ -30,6 +30,14 @@
             padding: 24px;
         }
 
+        body.lang-zh .en {
+            display: none !important;
+        }
+
+        body.lang-en .zh {
+            display: none !important;
+        }
+
         .card {
             max-width: 480px;
             width: 100%;
@@ -76,6 +84,18 @@
             color: #64748b;
             line-height: 1.7;
             margin-bottom: 16px;
+        }
+
+        .trial-badge {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #d97706;
+            padding: 8px 20px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
 
         .highlight {
@@ -143,41 +163,114 @@
             transition: all 0.2s;
             font-family: inherit;
             box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+            margin: 0 6px 12px;
         }
 
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
         }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748b, #475569);
+            box-shadow: 0 2px 8px rgba(100, 116, 139, 0.25);
+        }
+
+        .lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle:hover {
+            background: #2563eb;
+            color: white;
+        }
     </style>
 </head>
 
 <body>
+    <a class="lang-toggle" onclick="toggleLang()"><span class="zh">🇺🇸 English</span><span class="en">🇨🇳
+            中文</span></a>
+
     <div class="card">
         <div class="confetti">🎉</div>
-        <h1>Subscription Confirmed! 订阅成功！</h1>
-        <p>Thank you for subscribing to REscript. You are now a Pro member.<br>感谢您的订阅，您现在是 REscript Pro 会员。</p>
-        <div class="highlight">📬 Starting tomorrow at 7:00 AM EST, you'll receive a full AI-generated script email
-            daily<br>从明天早上 7:00 (EST) 开始，每天收到一份完整文案</div>
+        <h1><span class="zh">订阅成功！</span><span class="en">Subscription Confirmed!</span></h1>
+        <p><span class="zh">感谢您的订阅，您现在是 REscript Pro 会员。</span><span class="en">Thank you for subscribing to REscript.
+                You are now a Pro member.</span></p>
+        <div class="trial-badge"><span class="zh">🎁 7天免费试用已开始，试用期内不收费</span><span class="en">🎁 Your 7-day free trial
+                has started — no charge during trial</span></div>
+        <div class="highlight"><span class="zh">📬 从明天早上 7:00 (EST) 开始，每天收到一份完整 AI 文案邮件</span><span class="en">📬
+                Starting tomorrow at 7:00 AM EST, you'll receive a full AI-generated script email daily</span></div>
         <div class="steps">
             <div class="step">
                 <div class="step-num">1</div>
-                <div class="step-text"><strong>Tomorrow at 7 AM 明早7点</strong> — Check your inbox (and spam folder) 检查邮箱
-                </div>
+                <div class="step-text"><strong><span class="zh">明早7点</span><span class="en">Tomorrow at 7
+                            AM</span></strong> — <span class="zh">检查邮箱（和垃圾邮件文件夹）</span><span class="en">Check your inbox
+                        (and spam folder)</span></div>
             </div>
             <div class="step">
                 <div class="step-num">2</div>
-                <div class="step-text"><strong>Click the link 点击链接</strong> — Browse all scripts and pick your style
-                    浏览文案选择风格</div>
+                <div class="step-text"><strong><span class="zh">点击链接</span><span class="en">Click the
+                            link</span></strong> — <span class="zh">浏览全部文案，选择你喜欢的风格</span><span class="en">Browse all
+                        scripts and pick your style</span></div>
             </div>
             <div class="step">
                 <div class="step-num">3</div>
-                <div class="step-text"><strong>One-click copy 一键复制</strong> — Open your camera and start filming 打开相机开拍！
-                </div>
+                <div class="step-text"><strong><span class="zh">一键复制</span><span class="en">One-click
+                            copy</span></strong> — <span class="zh">打开相机开拍！</span><span class="en">Open your camera and
+                        start filming!</span></div>
             </div>
         </div>
-        <a href="/" class="btn">← Back to REscript 返回首页</a>
+        <div id="viewLatest"></div>
+        <a href="/" class="btn"><span class="zh">← 返回首页</span><span class="en">← Back to REscript</span></a>
     </div>
+
+    <script>
+        // i18n
+        function detectLang() {
+            const saved = localStorage.getItem('re_lang');
+            if (saved) return saved;
+            const nav = navigator.language || navigator.userLanguage || 'en';
+            return nav.startsWith('zh') ? 'zh' : 'en';
+        }
+        function setLang(lang) {
+            document.body.className = document.body.className.replace(/lang-\w+/g, '').trim();
+            document.body.classList.add('lang-' + lang);
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+            localStorage.setItem('re_lang', lang);
+        }
+        function toggleLang() {
+            const current = document.body.classList.contains('lang-zh') ? 'zh' : 'en';
+            setLang(current === 'zh' ? 'en' : 'zh');
+        }
+        setLang(detectLang());
+
+        // Try to load latest output date and show "View Latest" button
+        fetch('/api/outputs').then(r => r.json()).catch(() => null).then(data => {
+            // This will 401 since outputs list is admin-only, but we try anyway
+        }).catch(() => { });
+
+        // Show "view latest" button if there's a date in the past
+        const today = new Date().toISOString().split('T')[0];
+        fetch(`/api/outputs/${today}`).then(r => r.json()).then(data => {
+            if (data.success && data.data) {
+                const el = document.getElementById('viewLatest');
+                const isZh = detectLang() === 'zh';
+                el.innerHTML = `<a href="/view.html?date=${today}" class="btn btn-secondary"><span class="zh">📋 查看今日文案</span><span class="en">📋 View Today's Scripts</span></a>`;
+            }
+        }).catch(() => { });
+    </script>
 </body>
 
 </html>

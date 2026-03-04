@@ -9,6 +9,39 @@ import { logger } from '../utils/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// ── Simple in-memory rate limiter ──────────────────────────
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_MAX = 10; // 10 requests per window
+
+function rateLimit(req: express.Request, res: express.Response, next: express.NextFunction): void {
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const entry = rateLimitMap.get(ip);
+
+    if (!entry || now > entry.resetAt) {
+        rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+        next();
+        return;
+    }
+
+    if (entry.count >= RATE_LIMIT_MAX) {
+        res.status(429).json({ success: false, error: '请求过于频繁，请稍后再试 / Too many requests, please try later' });
+        return;
+    }
+
+    entry.count++;
+    next();
+}
+
+// Cleanup stale entries every 30 minutes
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, entry] of rateLimitMap) {
+        if (now > entry.resetAt) rateLimitMap.delete(ip);
+    }
+}, 30 * 60 * 1000);
+
 // ── Auth middleware for admin routes ────────────────────────
 function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction): void {
     const authHeader = req.headers.authorization;
@@ -28,9 +61,10 @@ export function startWebServer(port: number = 3000): void {
     // ── Standard JSON parser for all other routes ───────────
     app.use(express.json());
 
-    // ── Public routes (no auth required) ────────────────────
+    // ── Public routes (no auth required, rate limited) ──────
 
-    // Stripe subscribe routes — public-facing
+    // Stripe subscribe routes — public-facing, rate limited
+    app.use('/api/subscribe', rateLimit);
     app.use('/api', stripeRouter);
 
     // Output viewing — public (shared via email links)

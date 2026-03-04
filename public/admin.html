@@ -558,12 +558,15 @@
         </div>
       </div>
 
-      <!-- Client list -->
       <div class="card">
-        <div class="card-header">
+        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
           <div>
             <div class="card-title">📋 订阅客户</div>
             <div class="card-subtitle">每日自动发送文案邮件（所有风格）</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" style="font-size:12px;padding:6px 12px;background:#0f766e;" onclick="exportCSV()">📥 导出
+              CSV</button>
           </div>
         </div>
         <div id="clientList"></div>
@@ -706,6 +709,7 @@
     }
 
     function renderClients(clients) {
+      window._cachedClients = clients;
       const el = document.getElementById('clientList');
       if (clients.length === 0) {
         el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无订阅客户，在上方输入邮箱快速添加</p></div>';
@@ -812,6 +816,26 @@
         if (!result.success) throw new Error(result.error);
         showToast('已取消 VIP');
         loadClients();
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    function exportCSV() {
+      try {
+        const clients = window._cachedClients || [];
+        if (!clients.length) { showToast('无数据可导出', 'error'); return; }
+        const header = 'Name,Email,Plan,Language,Market,Active,Created';
+        const rows = clients.map(c =>
+          [c.name, c.email, c.plan, c.language, c.market, c.active, c.createdAt].map(v => `"${v}"`).join(',')
+        );
+        const csv = [header, ...rows].join('\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `rescript-clients-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('📥 CSV 已下载');
       } catch (e) { showToast(e.message, 'error'); }
     }
 

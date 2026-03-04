@@ -99,7 +99,11 @@ function buildEmailHTML(
     ${trialBanner}
 
     <div style="padding: 16px 24px; background: #0f172a; color: #94a3b8; font-size: 12px; text-align: center;">
-      <p style="margin: 0;">由 AI文案日报 自动生成 · 纽约地产视频文案${isTrial ? '' : ' · <a href="' + (subscribeUrl || '#') + '" style="color: #60a5fa;">管理订阅</a>'}</p>
+      <p style="margin: 0 0 6px;">📰 REscript by <a href="https://kevv.ai" style="color: #60a5fa; text-decoration: none;">kevv.ai</a> · AI-powered Real Estate Video Scripts</p>
+      ${isTrial
+      ? '<p style="margin: 0; color: #64748b;">这是您的免费体验邮件 / This is your free trial email</p>'
+      : `<p style="margin: 0;"><a href="${config.BASE_URL}/subscribe.html" style="color: #60a5fa; text-decoration: none;">管理订阅 Manage Subscription</a> · 回复此邮件可取消订阅 Reply to unsubscribe</p>`
+    }
     </div>
 
   </div>
