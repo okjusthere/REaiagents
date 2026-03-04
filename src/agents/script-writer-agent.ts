@@ -28,6 +28,7 @@ export interface DailyOutput {
     generatedAt: string;
     articleCount: number;
     articles: ArticleScripts[];
+    modules?: import('./content-agent.js').ModuleOutput[];
 }
 
 // ── Prompt ───────────────────────────────────────────────────
