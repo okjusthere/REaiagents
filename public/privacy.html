@@ -4,7 +4,28 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy · REscript</title>
-    <meta name="description" content="Privacy Policy for REscript, including data collection, usage, retention, and rights.">
+    <meta name="description" id="metaDescription" content="Privacy Policy for REscript, including data collection, usage, retention, and user rights.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" id="canonicalLink" href="https://rescript.kevv.ai/privacy.html">
+    <link rel="alternate" hreflang="en" href="https://rescript.kevv.ai/privacy.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://rescript.kevv.ai/privacy.html?lang=zh">
+    <link rel="alternate" hreflang="x-default" href="https://rescript.kevv.ai/privacy.html">
+    <meta property="og:site_name" content="REscript">
+    <meta property="og:type" content="article">
+    <meta property="og:title" id="ogTitle" content="Privacy Policy · REscript">
+    <meta property="og:description" id="ogDescription" content="How REscript handles personal data, subscription metadata, and privacy controls.">
+    <meta property="og:url" id="ogUrl" content="https://rescript.kevv.ai/privacy.html">
+    <meta property="og:image" content="https://rescript.kevv.ai/og-cover.svg">
+    <meta property="og:image:type" content="image/svg+xml">
+    <meta property="og:locale" id="ogLocale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="twitterTitle" content="Privacy Policy · REscript">
+    <meta name="twitter:description" id="twitterDescription" content="How REscript handles data collection, usage, and user rights.">
+    <meta name="twitter:image" content="https://rescript.kevv.ai/og-cover.svg">
+    <meta name="theme-color" content="#243949">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="manifest" href="/site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -436,6 +457,54 @@
     </div>
 
     <script>
+        const SEO_META = {
+            en: {
+                title: 'Privacy Policy · REscript',
+                description: 'Privacy Policy for REscript, including data collection, usage, retention, and user rights.',
+                ogTitle: 'Privacy Policy · REscript',
+                ogDescription: 'How REscript handles personal data, subscription metadata, and privacy controls.',
+                canonical: 'https://rescript.kevv.ai/privacy.html',
+                ogLocale: 'en_US',
+            },
+            zh: {
+                title: '隐私政策 · REscript',
+                description: 'REscript 隐私政策，说明数据收集、使用、保存与用户控制权。',
+                ogTitle: '隐私政策 · REscript',
+                ogDescription: '了解 REscript 如何处理账号信息、订阅元数据与隐私请求。',
+                canonical: 'https://rescript.kevv.ai/privacy.html?lang=zh',
+                ogLocale: 'zh_CN',
+            },
+        };
+
+        function applySeoMeta(lang) {
+            const meta = lang === 'zh' ? SEO_META.zh : SEO_META.en;
+            const pairs = [
+                ['metaDescription', 'content', meta.description],
+                ['ogTitle', 'content', meta.ogTitle],
+                ['ogDescription', 'content', meta.ogDescription],
+                ['twitterTitle', 'content', meta.ogTitle],
+                ['twitterDescription', 'content', meta.ogDescription],
+                ['canonicalLink', 'href', meta.canonical],
+                ['ogUrl', 'content', meta.canonical],
+                ['ogLocale', 'content', meta.ogLocale],
+            ];
+            pairs.forEach(([id, attr, value]) => {
+                const node = document.getElementById(id);
+                if (node) node.setAttribute(attr, value);
+            });
+            document.title = meta.title;
+        }
+
+        function syncLangQuery(lang) {
+            const url = new URL(window.location.href);
+            if (lang === 'zh') {
+                url.searchParams.set('lang', 'zh');
+            } else {
+                url.searchParams.delete('lang');
+            }
+            window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+        }
+
         function setLang(lang) {
             const isZh = lang === 'zh';
             const en = document.getElementById('langEn');
@@ -462,7 +531,6 @@
                 heroMeta.textContent = '生效日期：2026年3月5日';
                 actionTerms.textContent = '服务条款';
                 actionBack.textContent = '返回订阅页';
-                document.title = '隐私政策 · REscript';
             } else {
                 heroEyebrow.textContent = 'Privacy';
                 heroTitle.textContent = 'Privacy Policy';
@@ -470,15 +538,18 @@
                 heroMeta.textContent = 'Effective date: March 5, 2026';
                 actionTerms.textContent = 'Terms';
                 actionBack.textContent = 'Back to subscribe';
-                document.title = 'Privacy Policy · REscript';
             }
 
             localStorage.setItem('rescript-legal-lang', isZh ? 'zh' : 'en');
+            syncLangQuery(isZh ? 'zh' : 'en');
+            applySeoMeta(isZh ? 'zh' : 'en');
         }
 
         const savedLang = localStorage.getItem('rescript-legal-lang');
         const browserZh = navigator.language.toLowerCase().startsWith('zh');
-        setLang(savedLang || (browserZh ? 'zh' : 'en'));
+        const queryLang = new URLSearchParams(window.location.search).get('lang');
+        const preferredLang = queryLang === 'zh' || queryLang === 'en' ? queryLang : (savedLang || (browserZh ? 'zh' : 'en'));
+        setLang(preferredLang);
     </script>
 </body>
 </html>

@@ -102,6 +102,10 @@ export function startWebServer(port = 3000): void {
         res.sendFile(path.join(__dirname, '../../public/admin.html'));
     });
 
+    app.get('/favicon.ico', (_req, res) => {
+        res.redirect(301, '/favicon.svg');
+    });
+
     app.use(express.static(path.join(__dirname, '../../public')));
 
     app.use((_req, res) => {
