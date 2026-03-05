@@ -22,10 +22,14 @@
             --hero-glow: radial-gradient(circle at top right, rgba(155, 74, 50, 0.26), transparent 34%);
             --tab-bg: rgba(255, 255, 255, 0.72);
             --card-bg: rgba(255, 255, 255, 0.84);
-            --hook-bg: rgba(155, 74, 50, 0.08);
-            --hook-border: #9b4a32;
-            --cta-bg: rgba(35, 68, 62, 0.10);
-            --cta-border: #24483c;
+            --segment-bg: rgba(255, 255, 255, 0.78);
+            --segment-border: rgba(32, 43, 54, 0.14);
+            --segment-hook-tint: rgba(155, 74, 50, 0.08);
+            --segment-hook-accent: #9b4a32;
+            --segment-content-tint: rgba(32, 67, 100, 0.08);
+            --segment-content-accent: #36556d;
+            --segment-cta-tint: rgba(35, 68, 62, 0.10);
+            --segment-cta-accent: #24483c;
             --badge-professional: #203443;
             --badge-casual: #9b4a32;
             --badge-investor: #8f6c23;
@@ -46,10 +50,14 @@
             --hero-glow: radial-gradient(circle at top right, rgba(217, 119, 6, 0.26), transparent 34%);
             --tab-bg: rgba(255, 252, 247, 0.76);
             --card-bg: rgba(255, 251, 244, 0.86);
-            --hook-bg: rgba(217, 119, 6, 0.08);
-            --hook-border: #d97706;
-            --cta-bg: rgba(37, 95, 85, 0.10);
-            --cta-border: #255f55;
+            --segment-bg: rgba(255, 252, 246, 0.84);
+            --segment-border: rgba(120, 53, 15, 0.16);
+            --segment-hook-tint: rgba(217, 119, 6, 0.08);
+            --segment-hook-accent: #d97706;
+            --segment-content-tint: rgba(37, 95, 85, 0.08);
+            --segment-content-accent: #255f55;
+            --segment-cta-tint: rgba(37, 95, 85, 0.10);
+            --segment-cta-accent: #255f55;
             --badge-professional: #255f55;
             --badge-casual: #b45309;
             --badge-investor: #8f6c23;
@@ -416,34 +424,55 @@
             font-weight: 700;
         }
 
-        .hook {
-            padding: 14px 16px;
-            border-radius: 18px;
-            background: var(--hook-bg);
-            border-left: 4px solid var(--hook-border);
+        .hook,
+        .content-text,
+        .cta-text {
+            position: relative;
+            padding: 14px 16px 14px 19px;
+            border-radius: 16px;
+            border: 1px solid var(--segment-border);
+            background:
+                linear-gradient(130deg, var(--segment-tint), transparent 58%),
+                var(--segment-bg);
             color: var(--ink);
             font-size: 15px;
-            line-height: 1.7;
+            line-height: 1.8;
+            margin-bottom: 12px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+        }
+
+        .hook::before,
+        .content-text::before,
+        .cta-text::before {
+            content: "";
+            position: absolute;
+            left: 10px;
+            top: 12px;
+            bottom: 12px;
+            width: 3px;
+            border-radius: 999px;
+            background: var(--segment-accent);
+            opacity: 0.92;
+        }
+
+        .hook {
+            --segment-tint: var(--segment-hook-tint);
+            --segment-accent: var(--segment-hook-accent);
             font-weight: 600;
-            margin-bottom: 14px;
         }
 
         .content-text {
+            --segment-tint: var(--segment-content-tint);
+            --segment-accent: var(--segment-content-accent);
             font-size: 14px;
-            line-height: 1.9;
-            color: var(--ink);
-            margin-bottom: 14px;
+            font-weight: 500;
+            overflow-wrap: anywhere;
         }
 
         .cta-text {
-            padding: 12px 14px;
-            border-radius: 16px;
-            background: var(--cta-bg);
-            border-left: 4px solid var(--cta-border);
-            color: var(--ink);
+            --segment-tint: var(--segment-cta-tint);
+            --segment-accent: var(--segment-cta-accent);
             font-weight: 600;
-            line-height: 1.7;
-            margin-bottom: 12px;
         }
 
         .tags {
