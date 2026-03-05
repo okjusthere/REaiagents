@@ -38,6 +38,8 @@ export interface Client {
     freeTrialUsed: boolean;
     stripeCustomerId?: string;
     stripeSubscriptionId?: string;
+    stripeCancelAtPeriodEnd?: boolean;
+    stripeCurrentPeriodEnd?: string;
 }
 
 type ClientUpdate = Partial<Omit<Client, 'id' | 'createdAt'>>;
@@ -97,6 +99,8 @@ function migrateClient(input: any): Client {
         freeTrialUsed: Boolean(input.freeTrialUsed),
         stripeCustomerId: input.stripeCustomerId || undefined,
         stripeSubscriptionId: input.stripeSubscriptionId || undefined,
+        stripeCancelAtPeriodEnd: Boolean(input.stripeCancelAtPeriodEnd),
+        stripeCurrentPeriodEnd: input.stripeCurrentPeriodEnd || undefined,
     };
 }
 
@@ -155,6 +159,12 @@ function sanitizeUpdate(current: Client, data: ClientUpdate): Client {
     }
     if (data.plan !== undefined) {
         next.plan = normalizePlan(data.plan);
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'stripeCancelAtPeriodEnd')) {
+        next.stripeCancelAtPeriodEnd = Boolean(data.stripeCancelAtPeriodEnd);
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'stripeCurrentPeriodEnd')) {
+        next.stripeCurrentPeriodEnd = data.stripeCurrentPeriodEnd || undefined;
     }
 
     return next;
@@ -288,6 +298,8 @@ export function upgradeToSubscriber(
         active: true,
         stripeCustomerId,
         stripeSubscriptionId,
+        stripeCancelAtPeriodEnd: false,
+        stripeCurrentPeriodEnd: undefined,
     });
     if (updated) {
         logger.info(`💳 Upgraded to subscriber: ${updated.name} <${updated.email}>`);
@@ -303,6 +315,8 @@ export function cancelSubscription(stripeSubscriptionId: string): Client | null 
             plan: 'free',
             active: false,
             stripeSubscriptionId: undefined,
+            stripeCancelAtPeriodEnd: false,
+            stripeCurrentPeriodEnd: undefined,
             updatedAt: new Date().toISOString(),
         }),
     );

@@ -358,10 +358,17 @@ router.post('/stripe/webhook', async (req: Request, res: Response) => {
                 const client = findByStripeCustomerId(customerId);
                 if (client) {
                     const isActiveStatus = ['active', 'trialing', 'past_due'].includes(subscription.status);
+                    const cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
+                    const rawCurrentPeriodEnd = (subscription as any).current_period_end ?? subscription.cancel_at;
+                    const currentPeriodEnd = typeof rawCurrentPeriodEnd === 'number'
+                        ? new Date(rawCurrentPeriodEnd * 1000).toISOString()
+                        : undefined;
                     updateClient(client.id, {
                         active: isActiveStatus,
                         plan: isActiveStatus ? 'subscriber' : 'free',
                         stripeSubscriptionId: subscription.id,
+                        stripeCancelAtPeriodEnd: cancelAtPeriodEnd,
+                        stripeCurrentPeriodEnd: cancelAtPeriodEnd ? currentPeriodEnd : undefined,
                     });
                 }
                 break;
