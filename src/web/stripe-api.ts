@@ -73,6 +73,37 @@ function buildViewerUrl(baseUrl: string, client: Client, outputKey: string): str
     return `${baseUrl}/view.html?key=${encodeURIComponent(outputKey)}&token=${encodeURIComponent(token)}`;
 }
 
+function buildCheckoutCustomText(
+    language: Language,
+    baseUrl: string,
+): Stripe.Checkout.SessionCreateParams.CustomText {
+    if (language === 'zh') {
+        return {
+            submit: {
+                message: '订阅后将按你的市场和受众，每日发送可直接发布的地产短视频文案。可随时在管理页取消。',
+            },
+            terms_of_service_acceptance: {
+                message: `订阅即表示你同意服务条款与隐私政策（${baseUrl}/terms.html，${baseUrl}/privacy.html）。`,
+            },
+            after_submit: {
+                message: '支付完成后会返回激活页，你可立即查看私有链接并管理订阅。',
+            },
+        };
+    }
+
+    return {
+        submit: {
+            message: 'Daily, market-ready real estate video scripts tailored to your market and audience. Cancel anytime from your manage page.',
+        },
+        terms_of_service_acceptance: {
+            message: `By subscribing, you agree to the Terms and Privacy Policy (${baseUrl}/terms.html, ${baseUrl}/privacy.html).`,
+        },
+        after_submit: {
+            message: 'After payment, you will return to activation with your private links and subscription controls.',
+        },
+    };
+}
+
 async function handleSampleRegistration(req: Request, res: Response) {
     try {
         const input = subscribeSchema.parse(req.body);
@@ -163,11 +194,17 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
         }
 
         const stripe = getStripe();
+        const baseUrl = getBaseAppUrl();
         const checkoutLocale: Stripe.Checkout.SessionCreateParams.Locale = client.language === 'zh' ? 'zh' : 'en';
+        const checkoutCustomText = buildCheckoutCustomText(client.language, baseUrl);
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'subscription',
             locale: checkoutLocale,
+            consent_collection: {
+                terms_of_service: 'required',
+            },
+            custom_text: checkoutCustomText,
             customer_email: client.email,
             metadata: {
                 email: client.email,
@@ -180,8 +217,8 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
                 price: config.STRIPE_PRICE_ID,
                 quantity: 1,
             }],
-            success_url: `${config.BASE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${config.BASE_URL}/subscribe.html?cancelled=true`,
+            success_url: `${baseUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${baseUrl}/subscribe.html?cancelled=true`,
             subscription_data: {
                 metadata: {
                     email: client.email,
@@ -261,6 +298,7 @@ router.post('/subscription/billing-portal', async (req: Request, res: Response) 
         const stripe = getStripe();
         const session = await stripe.billingPortal.sessions.create({
             customer: client.stripeCustomerId,
+            locale: client.language === 'zh' ? 'zh' : 'en',
             return_url: `${getBaseAppUrl()}/manage.html?token=${encodeURIComponent(token!)}`,
         });
 
