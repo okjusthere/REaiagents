@@ -493,6 +493,72 @@
       border-color: #3b82f6;
       outline: none;
     }
+
+    .view-switch {
+      display: inline-flex;
+      gap: 6px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .view-btn {
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .view-btn.active {
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+    }
+
+    .billing-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .billing-badge.active {
+      background: #065f4620;
+      color: #34d399;
+      border: 1px solid #34d39940;
+    }
+
+    .billing-badge.ending {
+      background: #f59e0b20;
+      color: #fbbf24;
+      border: 1px solid #f59e0b40;
+    }
+
+    .billing-badge.ended {
+      background: #ef444420;
+      color: #fca5a5;
+      border: 1px solid #ef444440;
+    }
+
+    .billing-badge.vip {
+      background: #d9770620;
+      color: #fbbf24;
+      border: 1px solid #d9770640;
+    }
+
+    .billing-badge.free {
+      background: #64748b20;
+      color: #94a3b8;
+      border: 1px solid #64748b40;
+    }
   </style>
 </head>
 
@@ -562,9 +628,13 @@
         <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
           <div>
             <div class="card-title">📋 订阅客户</div>
-            <div class="card-subtitle">每日自动发送文案邮件（所有风格）</div>
+            <div class="card-subtitle" id="clientSubtitle">每日自动发送文案邮件（所有风格）</div>
           </div>
-          <div style="display:flex;gap:8px;">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <div class="view-switch">
+              <button class="view-btn active" id="viewActivePaidBtn" onclick="setClientView('active-paid')">活跃付费/VIP</button>
+              <button class="view-btn" id="viewAllBtn" onclick="setClientView('all')">全部客户</button>
+            </div>
             <button class="btn" style="font-size:12px;padding:6px 12px;background:#0f766e;" onclick="exportCSV()">📥 导出
               CSV</button>
           </div>
@@ -589,6 +659,7 @@
 
   <script>
     const API = '/api';
+    let clientView = 'active-paid';
     function escapeHtml(value) {
       return String(value)
         .replace(/&/g, '&amp;')
@@ -718,9 +789,17 @@
 
     function renderClients(clients) {
       window._cachedClients = clients;
+      const visibleClients = clientView === 'all'
+        ? clients
+        : clients.filter(c => c.active && (c.plan === 'subscriber' || c.plan === 'vip'));
+      const subtitle = document.getElementById('clientSubtitle');
+      subtitle.textContent = clientView === 'all'
+        ? `全部客户视图（${visibleClients.length}/${clients.length}）`
+        : `活跃付费/VIP 视图（${visibleClients.length}/${clients.length}）`;
+
       const el = document.getElementById('clientList');
-      if (clients.length === 0) {
-        el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无订阅客户，在上方输入邮箱快速添加</p></div>';
+      if (visibleClients.length === 0) {
+        el.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>${clientView === 'all' ? '暂无客户，在上方输入邮箱快速添加' : '当前筛选下没有活跃付费/VIP 客户'}</p></div>`;
         return;
       }
       const planBadge = (c) => {
@@ -729,9 +808,23 @@
         if (c.freeTrialUsed) return '<span class="plan-badge trial-used">🎁 已体验</span>';
         return '<span class="plan-badge free">🆓 免费</span>';
       };
-      const langLabel = (l) => l === 'zh' ? '🇨🇳 中文' : '🇺🇸 EN';
+      const formatDate = (iso) => {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return '';
+        return d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
+      };
+      const billingBadge = (c) => {
+        if (c.plan === 'vip') return '<span class="billing-badge vip">VIP 手动托管</span>';
+        if (c.plan === 'subscriber' && c.active && c.stripeCancelAtPeriodEnd) {
+          const until = formatDate(c.stripeCurrentPeriodEnd);
+          return `<span class="billing-badge ending">期末取消${until ? `（至 ${until}）` : ''}</span>`;
+        }
+        if (c.plan === 'subscriber' && c.active) return '<span class="billing-badge active">自动续费中</span>';
+        if (!c.active) return '<span class="billing-badge ended">已停用</span>';
+        return '<span class="billing-badge free">未付费</span>';
+      };
       const markets = ['new-york', 'los-angeles', 'san-francisco', 'chicago', 'miami', 'seattle', 'boston', 'houston'];
-      const audienceLabel = (audience) => audience === 'chinese-community' ? '华语/搬迁' : '广义北美';
       const langSelect = (c) => `<select class="inline-select" onchange="updatePref('${c.id}','language',this.value)">
         <option value="zh" ${c.language === 'zh' ? 'selected' : ''}>🇨🇳 中文</option>
         <option value="en" ${c.language === 'en' ? 'selected' : ''}>🇺🇸 EN</option>
@@ -743,7 +836,7 @@
         <option value="general" ${c.audienceProfile === 'general' ? 'selected' : ''}>广义北美</option>
         <option value="chinese-community" ${c.audienceProfile === 'chinese-community' ? 'selected' : ''}>华语/搬迁</option>
       </select>`;
-      const rows = clients.map(c => `<tr>
+      const rows = visibleClients.map(c => `<tr>
     <td><span class="active-dot ${c.active ? 'on' : 'off'}"></span>${escapeHtml(c.name)}</td>
     <td>${escapeHtml(c.email)}</td>
     <td>${planBadge(c)}</td>
@@ -751,13 +844,21 @@
     <td>${mktSelect(c)}</td>
     <td>${audienceSelect(c)}</td>
     <td>${c.active ? '✅' : '⏸'}</td>
+    <td>${billingBadge(c)}</td>
     <td>
       <button class="btn btn-ghost btn-sm" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '暂停' : '启用'}</button>
       ${c.plan !== 'vip' ? `<button class="btn btn-vip btn-sm" onclick="setVip('${c.id}')">👑 VIP</button>` : `<button class="btn btn-ghost btn-sm" onclick="removeVip('${c.id}')">取消VIP</button>`}
       <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', ${JSON.stringify(c.name)})">删除</button>
     </td>
   </tr>`).join('');
-      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>套餐</th><th>语言</th><th>城市</th><th>受众</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
+      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>套餐</th><th>语言</th><th>城市</th><th>受众</th><th>状态</th><th>账单状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function setClientView(mode) {
+      clientView = mode === 'all' ? 'all' : 'active-paid';
+      document.getElementById('viewActivePaidBtn').classList.toggle('active', clientView === 'active-paid');
+      document.getElementById('viewAllBtn').classList.toggle('active', clientView === 'all');
+      renderClients(window._cachedClients || []);
     }
 
     // ── Admin Actions ─────────────────────────────────────
