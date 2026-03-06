@@ -1344,6 +1344,7 @@
     </main>
 
     <script>
+        const SAMPLE_REQUEST_STORAGE_KEY = 'rescript-sample-request';
         const copy = {
             en: {
                 title: 'REscript · Daily real estate video scripts',
@@ -1940,28 +1941,14 @@
 
             try {
                 setSampleButtonBusy(true);
-                showMsg('info', tMessage('preparingSample'));
-                const res = await fetch('/api/subscribe/sample', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, language, market, audienceProfile }),
-                });
-                const data = await res.json();
-                if (!data.success) {
-                    throw new Error(data.error || tMessage('sampleError'));
-                }
-
-                const statusMessage = data.message || ({
-                    subscriber: tMessage('alreadySubscribed'),
-                    sample_used: tMessage('sampleUsed'),
-                    sample_sent: tMessage('sampleSent'),
-                    sample_view_ready: tMessage('sampleSent'),
-                    sample_ready: tMessage('sampleQueued'),
-                })[data.status] || data.message || tMessage('sampleSent');
-                showMsg('success', statusMessage);
-                if (data.viewUrl) {
-                    setTimeout(() => { window.location.href = data.viewUrl; }, 600);
-                }
+                sessionStorage.setItem(SAMPLE_REQUEST_STORAGE_KEY, JSON.stringify({
+                    email,
+                    language,
+                    market,
+                    audienceProfile,
+                    uiLang: currentLang,
+                }));
+                window.location.href = currentLang === 'zh' ? '/sample-loading.html?lang=zh' : '/sample-loading.html';
             } catch (error) {
                 showMsg('error', error.message || tMessage('networkError'));
             } finally {
