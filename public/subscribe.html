@@ -503,15 +503,65 @@
         }
 
         .trial-button {
-            background: rgba(255, 255, 255, 0.85);
-            border: 1px solid rgba(21, 33, 43, 0.12);
-            color: var(--ink);
+            background: linear-gradient(135deg, var(--navy), #35566e);
+            color: white;
+            box-shadow: 0 14px 30px rgba(32, 52, 67, 0.22);
         }
 
         .subscribe-button {
-            background: linear-gradient(135deg, var(--accent), #be6a41);
-            color: white;
-            box-shadow: 0 14px 30px rgba(155, 74, 50, 0.22);
+            background: rgba(255, 255, 255, 0.84);
+            color: var(--accent);
+            border: 1px solid rgba(155, 74, 50, 0.2);
+            box-shadow: none;
+        }
+
+        .proof-panel {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(32, 52, 67, 0.05);
+            border: 1px solid rgba(32, 52, 67, 0.08);
+        }
+
+        .proof-title {
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--navy);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .proof-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .proof-item {
+            display: flex;
+            gap: 10px;
+            align-items: start;
+            color: var(--ink);
+            font-size: 0.93rem;
+            line-height: 1.65;
+        }
+
+        .proof-item::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            margin-top: 8px;
+            flex: 0 0 auto;
+            background: var(--accent);
+            box-shadow: 0 0 0 6px rgba(155, 74, 50, 0.08);
+        }
+
+        .proof-timing {
+            margin-top: 12px;
+            color: var(--green);
+            font-size: 0.86rem;
+            line-height: 1.6;
         }
 
         .microcopy {
@@ -891,8 +941,9 @@
         @media (max-width: 760px) {
             .topbar {
                 position: static;
-                margin-top: 12px;
+                margin-top: 8px;
                 flex-wrap: wrap;
+                padding: 14px 16px;
             }
 
             .nav-links {
@@ -903,15 +954,21 @@
             }
 
             .hero {
-                padding-top: 24px;
+                padding-top: 18px;
             }
 
             .hero-copy {
-                padding-top: 10px;
+                padding-top: 0;
             }
 
             h1 {
-                font-size: 3.5rem;
+                font-size: 3rem;
+                line-height: 0.98;
+            }
+
+            .hero-subtitle {
+                margin-top: 18px;
+                font-size: 1rem;
             }
 
             .hero-meta,
@@ -929,6 +986,16 @@
 
             .section-copy {
                 margin-top: 14px;
+            }
+
+            .signup-card {
+                position: static;
+                top: auto;
+                padding: 22px;
+            }
+
+            .metric {
+                padding: 16px;
             }
         }
     </style>
@@ -1033,6 +1100,15 @@
                             General mode is tuned for mainstream North American buyer-seller education and market
                             commentary.
                         </p>
+                        <div class="proof-panel">
+                            <div class="proof-title" id="proofTitle">What opens in your live sample</div>
+                            <div class="proof-list">
+                                <div class="proof-item" id="proofItem1">1 local market news topic with 4 filming angles.</div>
+                                <div class="proof-item" id="proofItem2">2 evergreen modules matched to your market and audience.</div>
+                                <div class="proof-item" id="proofItem3">A private viewer link you can review now and reopen later from email.</div>
+                            </div>
+                            <div class="proof-timing" id="proofTiming">Usually ready in 45 to 90 seconds.</div>
+                        </div>
                         <div class="signup-actions">
                             <button class="signup-button trial-button" onclick="signupTrial()" id="sampleButton">Generate
                                 now and open</button>
@@ -1093,31 +1169,31 @@
             <div class="section-head">
                 <div>
                     <div class="section-kicker" id="workflowKicker">Workflow</div>
-                    <h2 class="section-title" id="workflowTitle">Open, scan, film.</h2>
+                    <h2 class="section-title" id="workflowTitle">Try it once. Keep it daily.</h2>
                 </div>
                 <p class="section-copy" id="workflowCopy">
-                    REscript is intentionally simple in the handoff: receive the brief, open the private link, review
-                    the angle, copy the version you want, and record.
+                    The conversion path should feel obvious: test a real package now, decide if the viewer is useful,
+                    then turn on the daily delivery rhythm only if it earns the habit.
                 </p>
             </div>
             <div class="workflow-grid">
                 <article class="workflow-card">
                     <div class="workflow-step" id="wf1Step">Step 1</div>
-                    <h3 id="wf1Title">Receive the brief</h3>
-                    <p id="wf1Copy">An email lands with your market, your preferred language, and a private viewer link
-                        to the day’s full content package.</p>
+                    <h3 id="wf1Title">Generate the live sample</h3>
+                    <p id="wf1Copy">Choose your market, delivery language, and audience focus. We generate a private
+                        sample package on demand and open it immediately.</p>
                 </article>
                 <article class="workflow-card">
                     <div class="workflow-step" id="wf2Step">Step 2</div>
-                    <h3 id="wf2Title">Scan by module</h3>
-                    <p id="wf2Copy">Filter by market news or evergreen module, then narrow to the script angle that best
-                        fits your brand voice and platform for the day.</p>
+                    <h3 id="wf2Title">Review the actual viewer</h3>
+                    <p id="wf2Copy">See one local news topic, two evergreen modules, and four script angles per topic,
+                        then decide whether the package feels publishable for your market.</p>
                 </article>
                 <article class="workflow-card">
                     <div class="workflow-step" id="wf3Step">Step 3</div>
-                    <h3 id="wf3Title">Copy, review, publish</h3>
-                    <p id="wf3Copy">Use the script as a filming draft, add your own compliance review, and move into
-                        camera, editing, or scheduling without starting from zero.</p>
+                    <h3 id="wf3Title">Turn on daily delivery</h3>
+                    <p id="wf3Copy">If the sample fits, unlock the US$9.90 plan and keep the same market, language, and
+                        audience settings flowing every morning.</p>
                 </article>
             </div>
         </section>
@@ -1331,8 +1407,13 @@
                     langOptionZh: 'Chinese delivery',
                     audienceOptionGeneral: 'General North American audience',
                     audienceOptionChinese: 'Chinese-speaking / relocation audience',
+                    proofTitle: 'What opens in your live sample',
+                    proofItem1: '1 local market news topic with 4 filming angles.',
+                    proofItem2: '2 evergreen modules matched to your market and audience.',
+                    proofItem3: 'A private viewer link you can review now and reopen later from email.',
+                    proofTiming: 'Usually ready in 45 to 90 seconds.',
                     sampleButton: 'Generate now and open',
-                    subscribeButton: 'Start paid delivery · US$9.90/mo',
+                    subscribeButton: 'Unlock daily delivery · US$9.90/mo',
                     productKicker: 'Product',
                     productTitle: 'Morning brief, not a generic AI tool.',
                     productCopy: 'REscript handles the decisions that eat your first hour: topic, angle, localization, and filming format.',
@@ -1345,17 +1426,17 @@
                     feature4Title: 'Review-first workflow',
                     feature4Copy: 'The product is positioned as a draft engine for agents and marketing teams. It supports speed, but still expects human review before anything goes live.',
                     workflowKicker: 'Workflow',
-                    workflowTitle: 'Open, scan, film.',
-                    workflowCopy: 'Receive the brief, open your private link, pick an angle, copy, and record.',
+                    workflowTitle: 'Try it once. Keep it daily.',
+                    workflowCopy: 'The conversion path should feel obvious: test a real package now, decide if the viewer is useful, then turn on the daily delivery rhythm only if it earns the habit.',
                     wf1Step: 'Step 1',
-                    wf1Title: 'Receive the brief',
-                    wf1Copy: 'An email lands with your market, your preferred language, and a private viewer link to the day’s full content package.',
+                    wf1Title: 'Generate the live sample',
+                    wf1Copy: 'Choose your market, delivery language, and audience focus. We generate a private sample package on demand and open it immediately.',
                     wf2Step: 'Step 2',
-                    wf2Title: 'Scan by module',
-                    wf2Copy: 'Filter by market news or evergreen module, then narrow to the script angle that best fits your brand voice and platform for the day.',
+                    wf2Title: 'Review the actual viewer',
+                    wf2Copy: 'See one local news topic, two evergreen modules, and four script angles per topic, then decide whether the package feels publishable for your market.',
                     wf3Step: 'Step 3',
-                    wf3Title: 'Copy, review, publish',
-                    wf3Copy: 'Use the script as a filming draft, add your own compliance review, and move into camera, editing, or scheduling without starting from zero.',
+                    wf3Title: 'Turn on daily delivery',
+                    wf3Copy: 'If the sample fits, unlock the US$9.90 plan and keep the same market, language, and audience settings flowing every morning.',
                     previewKicker: 'Script preview',
                     previewTitle: 'Four angles. Four publishing roles.',
                     previewCopy: 'Not the same idea rewritten four times — each angle fills a different slot in your content mix.',
@@ -1514,8 +1595,13 @@
                     langOptionZh: '中文交付',
                     audienceOptionGeneral: '主流北美客户受众',
                     audienceOptionChinese: '华语 / 搬迁家庭受众',
+                    proofTitle: '你会立刻打开什么',
+                    proofItem1: '1 条本地市场新闻主题，附 4 种可拍角度。',
+                    proofItem2: '2 个按你的市场和受众匹配的常青模块。',
+                    proofItem3: '一个可以立即查看、也能从邮箱再次打开的私有 viewer link。',
+                    proofTiming: '通常 45 到 90 秒内准备完成。',
                     sampleButton: '立即生成并打开',
-                    subscribeButton: '开启付费订阅 · US$9.90/月',
+                    subscribeButton: '开启每日交付 · US$9.90/月',
                     productKicker: '产品',
                     productTitle: '晨间 brief，不是通用工具。',
                     productCopy: '选题、角度、本地化、拍摄格式——一小时的决策，一封邮件搞定。',
@@ -1528,17 +1614,17 @@
                     feature4Title: '先审阅，再发布',
                     feature4Copy: '产品定位是给经纪人和营销团队加速出初稿，不是替代人工判断。速度提升了，但上线前仍然要经过人工审核。',
                     workflowKicker: '工作流',
-                    workflowTitle: '打开、浏览、开拍。',
-                    workflowCopy: '收邮件、开链接、选角度、复制、开拍。',
+                    workflowTitle: '先试一次，再决定日更。',
+                    workflowCopy: '这条转化路径应该足够直白：先立刻试一份真实 sample，确认 viewer 有价值，再决定是否开启每天早上的正式交付。',
                     wf1Step: '第 1 步',
-                    wf1Title: '收到晨报',
-                    wf1Copy: '一封邮件会带着你所在市场、偏好的交付语言，以及当天完整内容包的私有 viewer link 一起送达。',
+                    wf1Title: '现场生成 sample',
+                    wf1Copy: '选择你的市场、交付语言和受众画像后，我们会现场生成一份私有 sample，并立即打开。',
                     wf2Step: '第 2 步',
-                    wf2Title: '按模块快速浏览',
-                    wf2Copy: '你可以先看市场新闻，也可以直接跳到常青模块，再按当天平台和人设挑选最合适的脚本角度。',
+                    wf2Title: '直接看 viewer 成果',
+                    wf2Copy: '你会看到 1 条本地新闻、2 个常青模块，以及每个主题下的 4 种脚本角度，再判断这套输出是否适合你的市场。',
                     wf3Step: '第 3 步',
-                    wf3Title: '复制、审阅、发布',
-                    wf3Copy: '把脚本当作拍摄初稿，加上你自己的合规审阅与品牌语气，就能继续进入拍摄、剪辑或排期，不需要从零开始。',
+                    wf3Title: '开启每日正式交付',
+                    wf3Copy: '如果 sample 合适，就开启 US$9.90/月，把同一套市场、语言和受众设置变成每天早上的固定交付。',
                     previewKicker: '脚本预览',
                     previewTitle: '四种角度，四个发布位。',
                     previewCopy: '不是改写四遍，是四个角度各司其职。',
