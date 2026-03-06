@@ -18,11 +18,11 @@ import {
     type Language,
     type MarketId,
 } from '../store/client-store.js';
-import { getDailyOutput, getLatestOutputForPreferences } from '../store/output-store.js';
+import { getLatestOutputForPreferences } from '../store/output-store.js';
 import { sendBatchEmails } from '../agents/email-agent.js';
 import { logger } from '../utils/logger.js';
 import { createManageToken, createViewerToken, verifyManageToken } from '../utils/access-links.js';
-import { getBaseAppUrl } from '../orchestrator.js';
+import { getBaseAppUrl, getOrGenerateInstantSampleOutput } from '../orchestrator.js';
 
 const router = Router();
 
@@ -134,35 +134,23 @@ async function handleSampleRegistration(req: Request, res: Response) {
         const client = upsertLead(input);
         const baseUrl = getBaseAppUrl();
         const subscribeUrl = `${baseUrl}/subscribe.html`;
-        const latestOutputSummary = getLatestOutputForPreferences(client.language, client.market, client.audienceProfile);
-
-        if (latestOutputSummary) {
-            const latestOutput = getDailyOutput(latestOutputSummary.key);
-            if (latestOutput) {
-                const result = await sendBatchEmails([client], latestOutput, baseUrl, false, true, subscribeUrl);
-                if (result.sentClientIds.includes(client.id)) {
-                    markTrialUsed(client.id);
-                    res.status(201).json({
-                        success: true,
-                        status: 'sample_sent',
-                        clientId: client.id,
-                        viewUrl: buildViewerUrl(baseUrl, client, latestOutput.key),
-                        message: input.language === 'zh'
-                            ? '免费 sample 已发送，正在打开您的专属查看链接。'
-                            : 'Your free sample has been sent. Opening your private access link now.',
-                    });
-                    return;
-                }
-            }
-        }
+        const instantOutput = await getOrGenerateInstantSampleOutput(client.language, client.market, client.audienceProfile);
+        const emailResult = await sendBatchEmails([client], instantOutput, baseUrl, false, true, subscribeUrl);
+        const emailDelivered = emailResult.sentClientIds.includes(client.id);
+        markTrialUsed(client.id);
 
         res.status(201).json({
             success: true,
-            status: 'sample_ready',
+            status: emailDelivered ? 'sample_sent' : 'sample_view_ready',
             clientId: client.id,
+            viewUrl: buildViewerUrl(baseUrl, client, instantOutput.key),
             message: input.language === 'zh'
-                ? '注册成功。您将在下一次对应市场生成后收到 sample 邮件。'
-                : 'You are registered. Your sample email will arrive with the next matching market run.',
+                ? (emailDelivered
+                    ? '你的 sample 已现场生成，正在打开私有 viewer，并同步把链接发到你的邮箱。'
+                    : '你的 sample 已现场生成，正在打开私有 viewer。邮件副本暂时未送达，但你现在就可以直接查看。')
+                : (emailDelivered
+                    ? 'Your sample is ready now. Opening the private viewer and sending the same link to your inbox.'
+                    : 'Your sample is ready now. Opening the private viewer. Email delivery missed, but you can review it immediately.'),
         });
     } catch (error) {
         logger.error('Sample registration error', { error: error instanceof Error ? error.message : String(error) });

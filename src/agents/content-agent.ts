@@ -217,8 +217,9 @@ function parseScripts(raw: string): ScriptItem[] {
 }
 
 // ── Generate content for all modules ────────────────────────
-export async function generateAllModuleContent(
+async function generateModuleContent(
     dateStr: string,
+    activeModules: ContentModule[],
     language: Language = 'zh',
     market: MarketId = 'new-york',
     audienceProfile: AudienceProfile = defaultAudienceProfile(language),
@@ -233,7 +234,6 @@ export async function generateAllModuleContent(
             timeZone: 'America/New_York',
         });
 
-    const activeModules = getActiveContentModules(language, market, audienceProfile);
     const results: ModuleOutput[] = [];
 
     for (const module of activeModules) {
@@ -279,4 +279,28 @@ export async function generateAllModuleContent(
     logger.info(`\n🎉 Content modules: ${totalScripts} scripts generated across ${results.length} modules [${language}/${market}/${audienceProfile}]`);
 
     return results;
+}
+
+export async function generateAllModuleContent(
+    dateStr: string,
+    language: Language = 'zh',
+    market: MarketId = 'new-york',
+    audienceProfile: AudienceProfile = defaultAudienceProfile(language),
+): Promise<ModuleOutput[]> {
+    const activeModules = getActiveContentModules(language, market, audienceProfile);
+    return generateModuleContent(dateStr, activeModules, language, market, audienceProfile);
+}
+
+export async function generateSelectedModuleContent(
+    dateStr: string,
+    moduleIds: string[],
+    language: Language = 'zh',
+    market: MarketId = 'new-york',
+    audienceProfile: AudienceProfile = defaultAudienceProfile(language),
+): Promise<ModuleOutput[]> {
+    const moduleIdSet = new Set(moduleIds);
+    const activeModules = getActiveContentModules(language, market, audienceProfile);
+    const selectedModules = activeModules.filter((module) => moduleIdSet.has(module.id));
+    const fallbackModules = selectedModules.length > 0 ? selectedModules : activeModules.slice(0, 2);
+    return generateModuleContent(dateStr, fallbackModules, language, market, audienceProfile);
 }

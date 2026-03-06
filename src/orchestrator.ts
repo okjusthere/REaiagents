@@ -1,9 +1,9 @@
 import { searchNews } from './agents/news-agent.js';
 import { generateDailyScripts } from './agents/script-writer-agent.js';
-import { generateAllModuleContent } from './agents/content-agent.js';
+import { generateAllModuleContent, generateSelectedModuleContent } from './agents/content-agent.js';
 import { sendBatchEmails } from './agents/email-agent.js';
 import { getSubscribers, getVipClients, getTrialClients, markTrialUsed, type AudienceProfile, type Client, type Language, type MarketId } from './store/client-store.js';
-import { saveDailyOutput } from './store/output-store.js';
+import { getDailyOutput, getLatestOutputForPreferences, saveDailyOutput, type OutputSummary } from './store/output-store.js';
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
 
@@ -15,6 +15,11 @@ interface ClientGroup {
 }
 
 let activeRun: Promise<void> | null = null;
+const instantSampleRuns = new Map<string, Promise<OutputSummary>>();
+const INSTANT_SAMPLE_MODULES: Record<AudienceProfile, string[]> = {
+    general: ['market-playbooks', 'buyer-strategy'],
+    'chinese-community': ['market-playbooks', 'bilingual-and-relocation'],
+};
 
 function groupByPreferences(clients: Client[]): ClientGroup[] {
     const map = new Map<string, ClientGroup>();
@@ -37,6 +42,71 @@ function getBaseUrl(): string {
     return config.BASE_URL || (process.env.RAILWAY_PUBLIC_DOMAIN
         ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
         : `http://localhost:${process.env.PORT || 3000}`);
+}
+
+function buildPreferenceKey(language: Language, market: MarketId, audienceProfile: AudienceProfile): string {
+    return `${language}|${market}|${audienceProfile}`;
+}
+
+function getTodayDateKey(): string {
+    return new Date().toISOString().split('T')[0];
+}
+
+async function generateInstantSampleOutputInternal(
+    language: Language,
+    market: MarketId,
+    audienceProfile: AudienceProfile,
+): Promise<OutputSummary> {
+    logger.info(`⚡ Generating instant sample for ${language}/${market}/${audienceProfile}...`);
+    const articles = await searchNews(market);
+    const dailyOutput = await generateDailyScripts(articles, 1, language, market, audienceProfile);
+    const dateStr = getTodayDateKey();
+    dailyOutput.modules = await generateSelectedModuleContent(
+        dateStr,
+        INSTANT_SAMPLE_MODULES[audienceProfile],
+        language,
+        market,
+        audienceProfile,
+    );
+    return saveDailyOutput(dailyOutput);
+}
+
+export async function getOrGenerateInstantSampleOutput(
+    language: Language,
+    market: MarketId,
+    audienceProfile: AudienceProfile,
+) {
+    const latestOutputSummary = getLatestOutputForPreferences(language, market, audienceProfile);
+    const todayKey = getTodayDateKey();
+    if (latestOutputSummary?.date === todayKey) {
+        const latestOutput = getDailyOutput(latestOutputSummary.key);
+        if (latestOutput) {
+            return latestOutput;
+        }
+    }
+
+    const preferenceKey = buildPreferenceKey(language, market, audienceProfile);
+    const activeRunForPreference = instantSampleRuns.get(preferenceKey);
+    if (activeRunForPreference) {
+        const summary = await activeRunForPreference;
+        const output = getDailyOutput(summary.key);
+        if (output) {
+            return output;
+        }
+    }
+
+    const nextRun = generateInstantSampleOutputInternal(language, market, audienceProfile)
+        .finally(() => {
+            instantSampleRuns.delete(preferenceKey);
+        });
+    instantSampleRuns.set(preferenceKey, nextRun);
+
+    const summary = await nextRun;
+    const output = getDailyOutput(summary.key);
+    if (!output) {
+        throw new Error(`Instant sample output missing after generation: ${summary.key}`);
+    }
+    return output;
 }
 
 async function runPipelineInternal(dryRun = false): Promise<void> {

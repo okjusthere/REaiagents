@@ -495,6 +495,13 @@
             transform: translateY(-1px);
         }
 
+        .signup-button:disabled {
+            cursor: wait;
+            opacity: 0.72;
+            transform: none;
+            box-shadow: none;
+        }
+
         .trial-button {
             background: rgba(255, 255, 255, 0.85);
             border: 1px solid rgba(21, 33, 43, 0.12);
@@ -942,7 +949,7 @@
         </nav>
         <div style="display:flex;align-items:center;gap:10px;">
             <button class="lang-toggle" id="langToggle" onclick="toggleLang()">中文</button>
-            <a class="nav-cta" href="#signup" id="navCta">Start the free brief</a>
+            <a class="nav-cta" href="#signup" id="navCta" onclick="return focusSignup(event)">Try it live</a>
         </div>
     </header>
 
@@ -957,13 +964,12 @@
                         Not another blank calendar.
                     </h1>
                     <p class="hero-subtitle" id="heroSubtitle">
-                        REscript turns the day’s housing news and evergreen education topics into ready-to-film scripts
-                        for residential agents, teams, and brokerage marketing leads. Choose your market, choose your
-                        delivery language, and open a private viewer link built for fast review and filming.
+                        Start with a live sample generated for your market right now. Once you subscribe, REscript
+                        continues as the daily private delivery system for your local video workflow.
                     </p>
                     <div class="hero-actions">
-                        <a class="button button-primary" href="#signup" id="heroPrimary">Get the free brief</a>
-                        <a class="button button-secondary" href="#preview" id="heroSecondary">See the script format</a>
+                        <a class="button button-primary" href="#signup" id="heroPrimary" onclick="return focusSignup(event)">Start live sample</a>
+                        <a class="button button-secondary" href="#preview" id="heroSecondary">See the viewer first</a>
                     </div>
                     <div class="hero-meta">
                         <div class="metric">
@@ -983,19 +989,19 @@
                         </div>
                     </div>
                     <div class="note-strip" id="noteStrip">
-                        Built for real estate marketing workflows, not generic AI prompting. Your morning package
-                        includes market news, evergreen content modules, copy-ready script cards, and direct
-                        subscription controls in every email.
+                        Start with one live sample now. We generate a private package on demand, then subscribers
+                        continue with the full morning delivery rhythm.
                     </div>
                 </div>
 
                 <aside class="signup-card" id="signup">
                     <div class="signup-content">
-                        <div class="card-label" id="cardLabel">Free sample · no credit card</div>
-                        <h2 class="card-title" id="cardTitle">Send yourself a private sample delivery.</h2>
+                        <div class="card-label" id="cardLabel">Live sample · no credit card</div>
+                        <h2 class="card-title" id="cardTitle">Generate a private sample and open it right away.</h2>
                         <p class="card-copy" id="cardCopy">
-                            Pick your market, delivery language, and audience focus. We’ll send a full REscript package
-                            through the same private-link flow subscribers receive.
+                            Pick your market, delivery language, and audience focus. We generate a compact but real
+                            REscript package on demand, open the private viewer immediately, and email you the same
+                            link.
                         </p>
                         <div class="stack">
                             <input id="heroEmail" class="field" type="email" placeholder="you@brokerage.com"
@@ -1028,8 +1034,8 @@
                             commentary.
                         </p>
                         <div class="signup-actions">
-                            <button class="signup-button trial-button" onclick="signupTrial()" id="sampleButton">Send
-                                free sample</button>
+                            <button class="signup-button trial-button" onclick="signupTrial()" id="sampleButton">Generate
+                                now and open</button>
                             <button class="signup-button subscribe-button" onclick="startCheckout()"
                                 id="subscribeButton">Start paid delivery · US$9.90/mo</button>
                         </div>
@@ -1282,18 +1288,18 @@
                 },
                 audienceNarrative: {
                     general: {
-                        cardLabel: 'Free sample · mainstream market desk',
-                        cardTitle: 'Send yourself a private market-desk sample.',
-                        cardCopy: 'Pick your market, delivery language, and audience focus. We’ll send a private package tuned for general North American buyer, seller, investor, and agent-brand content.',
+                        cardLabel: 'Live sample · mainstream market desk',
+                        cardTitle: 'Generate a private market-desk sample and open it right away.',
+                        cardCopy: 'Pick your market, delivery language, and audience focus. We generate a private package tuned for general North American buyer, seller, and local market content, then open the viewer immediately and email you the same link.',
                         audienceHint: 'General mode is tuned for mainstream North American buyer-seller education, market commentary, and brokerage-friendly publishing workflows.',
                         feature1Copy: 'Each run is tied to a specific market, delivery language, and audience profile, so the package feels like a local market desk for the clients you already serve.',
                         audienceTitle: 'Three clear fit profiles inside a mainstream North American workflow.',
                         audienceCopy: 'Choose this mode if your publishing habit revolves around buyer-seller education, weekly market commentary, listing-adjacent video, or general pipeline content.',
                     },
                     'chinese-community': {
-                        cardLabel: 'Free sample · bilingual community desk',
-                        cardTitle: 'Send yourself a private community-desk sample.',
-                        cardCopy: 'Pick your market, delivery language, and audience focus. We’ll send a private package tuned for Chinese-speaking households, relocation flows, bilingual trust content, and community-driven pipeline building.',
+                        cardLabel: 'Live sample · bilingual community desk',
+                        cardTitle: 'Generate a private community-desk sample and open it right away.',
+                        cardCopy: 'Pick your market, delivery language, and audience focus. We generate a private package tuned for Chinese-speaking households, relocation flows, and bilingual trust content, then open the viewer immediately and email you the same link.',
                         audienceHint: 'Chinese-community mode is tuned for bilingual education, relocation clarity, family decision dynamics, and community trust building.',
                         feature1Copy: 'Each run is tied to a specific market, delivery language, and audience profile, so the package feels aligned to bilingual, relocation, and community-driven client conversations when you need that lens.',
                         audienceTitle: 'Three clear fit profiles when your content needs a bilingual or relocation lens.',
@@ -1307,25 +1313,25 @@
                     navAudience: "Who it's for",
                     navMarkets: 'Markets',
                     navPricing: 'Pricing',
-                    navCta: 'Get a free sample',
+                    navCta: 'Try it live',
                     heroEyebrow: 'For North American real estate agents',
                     heroTitle: 'Your daily video desk. Not another blank calendar.',
-                    heroSubtitle: 'REscript delivers market-specific, ready-to-film video scripts every morning. Pick your city, your language, your audience — open a private link and start filming.',
-                    heroPrimary: 'Get the free sample',
-                    heroSecondary: 'See the script format',
+                    heroSubtitle: 'Start with a live sample generated for your market right now. Once you subscribe, REscript continues as the daily private delivery system for your local video workflow.',
+                    heroPrimary: 'Start live sample',
+                    heroSecondary: 'See the viewer first',
                     metricOne: 'US metros covered, from NYC to Seattle.',
                     metricTwo: 'Script angles per topic — analysis, social, investor, myth-buster.',
                     metricThreeValue: 'Private',
                     metricThree: 'Signed links per subscriber. No public pages.',
-                    noteStrip: 'Built for real estate workflows, not generic AI. Each morning pack: local news + evergreen modules + copy-ready scripts + subscription controls.',
-                    cardLabel: 'Free sample · no credit card',
-                    cardTitle: 'Send yourself a private sample delivery.',
-                    cardCopy: 'Pick your market, delivery language, and audience focus. We’ll send a full REscript package through the same private-link flow subscribers receive.',
+                    noteStrip: 'Start with one live sample now. We generate a private package on demand, then subscribers continue with the full morning delivery rhythm.',
+                    cardLabel: 'Live sample · no credit card',
+                    cardTitle: 'Generate a private sample and open it right away.',
+                    cardCopy: 'Pick your market, delivery language, and audience focus. We generate a compact but real REscript package on demand, open the private viewer immediately, and email you the same link.',
                     langOptionEn: 'English delivery',
                     langOptionZh: 'Chinese delivery',
                     audienceOptionGeneral: 'General North American audience',
                     audienceOptionChinese: 'Chinese-speaking / relocation audience',
-                    sampleButton: 'Send free sample',
+                    sampleButton: 'Generate now and open',
                     subscribeButton: 'Start paid delivery · US$9.90/mo',
                     productKicker: 'Product',
                     productTitle: 'Morning brief, not a generic AI tool.',
@@ -1384,11 +1390,11 @@
                     pricingCopy: 'Daily scripts, private links, bilingual output, full subscription control.',
                     priceItem1: 'Market-specific daily output across supported North American metros.',
                     priceItem2: 'Four script angles per topic, designed for distinct publishing roles.',
-                    priceItem3: 'One free sample and full Stripe subscription management.',
+                    priceItem3: 'One live sample first, then full Stripe subscription management.',
                     priceItem4: 'Human-review positioning baked into the product and copy.',
                     faqKicker: 'Questions agents usually ask',
                     faq1Title: 'What does the free sample include?',
-                    faq1Copy: 'A full sample delivery using the same private-link viewer flow as the paid product, subject to available output for your selected market.',
+                    faq1Copy: 'A live sample generated for your selected market and audience, opened immediately in the same private viewer flow used by paid subscribers, with the link also sent by email.',
                     faq2Title: 'Can I manage billing myself?',
                     faq2Copy: 'Yes. Paid subscribers can open the Stripe billing portal from the manage-subscription page linked in every email.',
                     faq3Title: 'Should I publish without editing?',
@@ -1406,9 +1412,10 @@
                 },
                 messages: {
                     sampleEmailRequired: 'Enter your email to receive the private sample.',
-                    preparingSample: 'Preparing your private sample...',
-                    sampleSent: 'Your free sample has been sent. Opening your private access link now.',
-                    sampleQueued: 'You are registered. Your sample email will arrive with the next matching market run.',
+                    preparingSample: 'Generating your private sample now. This usually takes 30 to 90 seconds...',
+                    sampleSent: 'Your sample is ready. Opening your private viewer now.',
+                    sampleQueued: 'Your request is saved. Keep this tab open while we finish preparing the sample.',
+                    sampleButtonBusy: 'Generating sample...',
                     sampleUsed: 'You already claimed the free sample. Subscribe to continue receiving daily scripts.',
                     alreadySubscribed: 'You are already subscribed and will continue receiving daily scripts.',
                     sampleError: 'Unable to create sample.',
@@ -1464,18 +1471,18 @@
                 },
                 audienceNarrative: {
                     general: {
-                        cardLabel: '免费 sample · 主流市场内容台',
-                        cardTitle: '先给自己发一份私有市场内容 sample。',
-                        cardCopy: '选择你服务的市场、交付语言和受众画像，我们会发你一整份偏主流北美买卖家教育、市场点评和经纪人品牌内容的私有内容包。',
+                        cardLabel: '即时 sample · 主流市场内容台',
+                        cardTitle: '现场生成一份私有市场内容 sample。',
+                        cardCopy: '选择你服务的市场、交付语言和受众画像后，我们会立刻生成一份偏主流北美买卖家教育和本地市场解读的私有内容包，直接打开 viewer，并把同一链接发到你的邮箱。',
                         audienceHint: '主流北美模式更适合买家卖家教育、市场点评、listing 周边视频和 brokerage 友好的内容工作流。',
                         feature1Copy: '每次生成都绑定具体市场、交付语言和受众画像，所以你打开的内容，会更像一个服务你现有客户盘的本地市场内容台。',
                         audienceTitle: '如果你走的是主流北美内容路线，这三类用户最适配。',
                         audienceCopy: '当你的发布习惯围绕买卖家教育、weekly market update、listing 周边视频和通用获客内容时，选择这个模式会更顺手。',
                     },
                     'chinese-community': {
-                        cardLabel: '免费 sample · 双语社群内容台',
-                        cardTitle: '先给自己发一份私有社群 sample。',
-                        cardCopy: '选择你服务的市场、交付语言和受众画像，我们会发你一整份偏华语家庭、搬迁需求、双语教育和社区信任建立的私有内容包。',
+                        cardLabel: '即时 sample · 双语社群内容台',
+                        cardTitle: '现场生成一份私有社群 sample。',
+                        cardCopy: '选择你服务的市场、交付语言和受众画像后，我们会立刻生成一份偏华语家庭、搬迁需求和双语信任内容的私有内容包，直接打开 viewer，并把同一链接发到你的邮箱。',
                         audienceHint: '华语 / 搬迁模式更适合双语教育、搬迁流程解释、家庭决策内容和社区转介绍场景。',
                         feature1Copy: '每次生成都绑定具体市场、交付语言和受众画像，所以当你选择华语 / 搬迁模式时，内容会更贴近双语、搬迁和社区型客户沟通场景。',
                         audienceTitle: '如果你走的是双语社群或搬迁路线，这三类用户最适配。',
@@ -1489,25 +1496,25 @@
                     navAudience: '适合谁用',
                     navMarkets: '城市市场',
                     navPricing: '价格',
-                    navCta: '领取免费 sample',
+                    navCta: '立即体验',
                     heroEyebrow: '北美地产经纪人专属',
                     heroTitle: '你的每日视频内容台。不再从零开始。',
-                    heroSubtitle: 'REscript 每天早上交付按城市生成的视频脚本。选城市、选语言、选受众，打开私有链接直接开拍。',
-                    heroPrimary: '领取免费 sample',
-                    heroSecondary: '看看脚本长什么样',
+                    heroSubtitle: '先现场生成一份属于你市场的 sample。完成订阅后，REscript 再切到每天早上按市场交付的私有内容工作流。',
+                    heroPrimary: '开始即时 sample',
+                    heroSecondary: '先看 viewer 样式',
                     metricOne: '覆盖 8 个北美城市，纽约到西雅图。',
                     metricTwo: '每题 4 种角度：分析、社交、投资、辟谣。',
                     metricThreeValue: '私有',
                     metricThree: '独立签名链接，不公开暴露。',
-                    noteStrip: '不是通用 AI 工具。每日晨报包含本地新闻 + 常青模块 + 可复制脚本 + 订阅管理。',
-                    cardLabel: '免费 sample · 无需信用卡',
-                    cardTitle: '先给自己发一份私有 sample。',
-                    cardCopy: '选择你服务的市场、交付语言和受众画像，我们会用和正式订阅相同的私有链接流程，发你一整份 REscript 内容包。',
+                    noteStrip: '先体验 1 次即时 sample。点击后会现场生成私有内容包；正式订阅后再切到完整的每日晨报交付。',
+                    cardLabel: '即时 sample · 无需信用卡',
+                    cardTitle: '现场生成一份私有 sample。',
+                    cardCopy: '选择你服务的市场、交付语言和受众画像后，我们会立刻生成一份精简但真实的 REscript 内容包，直接打开私有 viewer，并把同一链接发到你的邮箱。',
                     langOptionEn: '英文交付',
                     langOptionZh: '中文交付',
                     audienceOptionGeneral: '主流北美客户受众',
                     audienceOptionChinese: '华语 / 搬迁家庭受众',
-                    sampleButton: '发送免费 sample',
+                    sampleButton: '立即生成并打开',
                     subscribeButton: '开启付费订阅 · US$9.90/月',
                     productKicker: '产品',
                     productTitle: '晨间 brief，不是通用工具。',
@@ -1566,11 +1573,11 @@
                     pricingCopy: '每日脚本 + 私有链接 + 双语输出 + 订阅管理。',
                     priceItem1: '按北美重点城市生成的每日内容输出。',
                     priceItem2: '每个主题 4 种脚本角度，对应不同发布场景。',
-                    priceItem3: '先领取 1 次免费 sample，再进入完整 Stripe 订阅管理。',
+                    priceItem3: '先体验 1 次即时 sample，再进入完整 Stripe 订阅管理。',
                     priceItem4: '产品和文案里都明确保留人工审核定位。',
                     faqKicker: '经纪人最常问的问题',
                     faq1Title: '免费 sample 里有什么？',
-                    faq1Copy: '你会收到一整份 sample，走的就是正式产品同一套私有 viewer 流程，前提是你选择的市场已有可用输出。',
+                    faq1Copy: '你会收到一份按你所选市场和受众现场生成的 sample，直接打开正式产品同一套私有 viewer，并同步把链接发到邮箱。',
                     faq2Title: '账单能自己管理吗？',
                     faq2Copy: '可以。付费订阅用户可以从每封邮件里的 manage-subscription 页面进入 Stripe billing portal。',
                     faq3Title: '可以不改直接发吗？',
@@ -1588,9 +1595,10 @@
                 },
                 messages: {
                     sampleEmailRequired: '请输入邮箱，我们会把私有 sample 发给你。',
-                    preparingSample: '正在准备你的私有 sample...',
-                    sampleSent: '免费 sample 已发送，正在打开你的专属查看链接。',
-                    sampleQueued: '已登记成功。等到你所选市场下一次生成时，会自动收到 sample 邮件。',
+                    preparingSample: '正在现场生成你的私有 sample，通常需要 30 到 90 秒...',
+                    sampleSent: '你的 sample 已准备好，正在打开私有 viewer。',
+                    sampleQueued: '请求已记录。请保持当前页面打开，我们正在继续准备 sample。',
+                    sampleButtonBusy: '正在生成 sample...',
                     sampleUsed: '你已经领取过免费 sample。继续接收每日文案请直接订阅。',
                     alreadySubscribed: '你已经是订阅用户了，会继续收到每日文案。',
                     sampleError: '创建 sample 失败。',
@@ -1792,6 +1800,23 @@
             translatePage();
         }
 
+        function focusSignup(event) {
+            if (event) {
+                event.preventDefault();
+            }
+            const signup = document.getElementById('signup');
+            const email = document.getElementById('heroEmail');
+            if (signup) {
+                signup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            window.setTimeout(() => {
+                if (email) {
+                    email.focus();
+                }
+            }, 280);
+            return false;
+        }
+
         function tMessage(key) {
             return getUi().messages[key] || copy.en.messages[key] || key;
         }
@@ -1811,6 +1836,15 @@
             el.textContent = text;
         }
 
+        function setSampleButtonBusy(isBusy) {
+            const button = document.getElementById('sampleButton');
+            if (!button) {
+                return;
+            }
+            button.disabled = isBusy;
+            button.textContent = isBusy ? tMessage('sampleButtonBusy') : getUi().text.sampleButton;
+        }
+
         async function signupTrial() {
             const { email, language, market, audienceProfile } = getFormData();
             if (!email) {
@@ -1819,6 +1853,7 @@
             }
 
             try {
+                setSampleButtonBusy(true);
                 showMsg('info', tMessage('preparingSample'));
                 const res = await fetch('/api/subscribe/sample', {
                     method: 'POST',
@@ -1830,18 +1865,21 @@
                     throw new Error(data.error || tMessage('sampleError'));
                 }
 
-                const statusMessage = ({
+                const statusMessage = data.message || ({
                     subscriber: tMessage('alreadySubscribed'),
                     sample_used: tMessage('sampleUsed'),
                     sample_sent: tMessage('sampleSent'),
+                    sample_view_ready: tMessage('sampleSent'),
                     sample_ready: tMessage('sampleQueued'),
                 })[data.status] || data.message || tMessage('sampleSent');
                 showMsg('success', statusMessage);
                 if (data.viewUrl) {
-                    setTimeout(() => { window.location.href = data.viewUrl; }, 900);
+                    setTimeout(() => { window.location.href = data.viewUrl; }, 600);
                 }
             } catch (error) {
                 showMsg('error', error.message || tMessage('networkError'));
+            } finally {
+                setSampleButtonBusy(false);
             }
         }
 
