@@ -10,9 +10,12 @@ const envSchema = z.object({
     AZURE_OPENAI_DEPLOYMENT: z.string().default('gpt-5.2-chat'),
     AZURE_OPENAI_API_VERSION: z.string().default('2025-01-01-preview'),
 
-    // Gmail SMTP
-    GMAIL_USER: z.string().email(),
-    GMAIL_APP_PASSWORD: z.string().min(1),
+    // Email provider
+    EMAIL_PROVIDER: z.enum(['gmail', 'resend']).default('gmail'),
+    GMAIL_USER: z.string().email().optional(),
+    GMAIL_APP_PASSWORD: z.string().min(1).optional(),
+    RESEND_API_KEY: z.string().min(1).optional(),
+    EMAIL_FROM_ADDRESS: z.string().email().optional(),
 
     // Email Settings
     EMAIL_FROM_NAME: z.string().default('NY地产日报'),
@@ -53,9 +56,44 @@ function loadConfig() {
         process.exit(1);
     }
 
+    const providerConfigErrors: string[] = [];
+    const emailProvider = result.data.EMAIL_PROVIDER;
+
+    if (emailProvider === 'gmail') {
+        if (!result.data.GMAIL_USER) {
+            providerConfigErrors.push('GMAIL_USER: required when EMAIL_PROVIDER=gmail');
+        }
+        if (!result.data.GMAIL_APP_PASSWORD) {
+            providerConfigErrors.push('GMAIL_APP_PASSWORD: required when EMAIL_PROVIDER=gmail');
+        }
+    }
+
+    if (emailProvider === 'resend') {
+        if (!result.data.RESEND_API_KEY) {
+            providerConfigErrors.push('RESEND_API_KEY: required when EMAIL_PROVIDER=resend');
+        }
+        if (!result.data.EMAIL_FROM_ADDRESS) {
+            providerConfigErrors.push('EMAIL_FROM_ADDRESS: required when EMAIL_PROVIDER=resend');
+        }
+    }
+
+    if (providerConfigErrors.length > 0) {
+        console.error('❌ Environment configuration errors:');
+        for (const issue of providerConfigErrors) {
+            console.error(`   ${issue}`);
+        }
+        console.error('\n📋 Copy .env.example to .env and fill in your values.');
+        process.exit(1);
+    }
+
+    const effectiveFromAddress = emailProvider === 'resend'
+        ? result.data.EMAIL_FROM_ADDRESS!
+        : result.data.GMAIL_USER!;
+
     return {
         ...result.data,
-        SUPPORT_EMAIL: result.data.SUPPORT_EMAIL || result.data.GMAIL_USER,
+        EMAIL_FROM_ADDRESS: effectiveFromAddress,
+        SUPPORT_EMAIL: result.data.SUPPORT_EMAIL || effectiveFromAddress,
         VIEWER_TOKEN_SECRET: result.data.VIEWER_TOKEN_SECRET || result.data.ADMIN_TOKEN,
     };
 }
