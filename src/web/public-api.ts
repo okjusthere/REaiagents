@@ -40,7 +40,14 @@ router.get('/viewer/outputs/:key', (req: Request, res: Response) => {
         return;
     }
 
-    res.json({ success: true, data: output });
+    res.json({
+        success: true,
+        data: output,
+        viewerContext: {
+            showUpgradeCta: client.plan === 'free',
+            plan: client.plan,
+        },
+    });
 });
 
 router.get('/subscription/status', (req: Request, res: Response) => {

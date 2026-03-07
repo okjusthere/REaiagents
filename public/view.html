@@ -1182,6 +1182,7 @@
                 }
 
                 const data = result.data;
+                const showUpgradeCta = !isAdmin && Boolean(result.viewerContext?.showUpgradeCta);
                 uiLanguage = data.language === 'zh' ? 'zh' : 'en';
                 applyTheme(data.audienceProfile);
                 renderHeroCopy(data);
@@ -1225,11 +1226,13 @@
 
                 // Show upgrade CTA after content loads
                 const upgradeCta = document.getElementById('upgradeCta');
-                if (upgradeCta) {
+                if (upgradeCta && showUpgradeCta) {
                     document.getElementById('upgradeTitle').textContent = ui().upgradeTitle;
                     document.getElementById('upgradeCopy').textContent = ui().upgradeCopy;
                     document.getElementById('upgradeBtn').textContent = ui().upgradeBtn;
                     upgradeCta.style.display = '';
+                } else if (upgradeCta) {
+                    upgradeCta.style.display = 'none';
                 }
             } catch (error) {
                 document.getElementById('content').innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>${escapeHtml(ui().loadFailed(error.message || 'unknown error'))}</p></div>`;

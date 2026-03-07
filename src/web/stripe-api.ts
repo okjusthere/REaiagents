@@ -161,6 +161,16 @@ async function handleSampleRegistration(req: Request, res: Response) {
 router.post('/subscribe/sample', handleSampleRegistration);
 router.post('/subscribe/trial', handleSampleRegistration);
 
+router.get('/subscribe/options', (_req: Request, res: Response) => {
+    res.json({
+        success: true,
+        data: {
+            hasMonthlyPrice: Boolean(config.STRIPE_PRICE_ID),
+            hasAnnualPrice: Boolean(config.STRIPE_ANNUAL_PRICE_ID),
+        },
+    });
+});
+
 router.post('/subscribe/checkout', async (req: Request, res: Response) => {
     try {
         const input = subscribeSchema.parse(req.body);
@@ -249,11 +259,16 @@ router.post('/subscribe/checkout-annual', async (req: Request, res: Response) =>
 
         const baseUrl = getBaseAppUrl();
         const checkoutLocale: Stripe.Checkout.SessionCreateParams.Locale = client.language === 'zh' ? 'zh' : 'en';
+        const checkoutCustomText = buildCheckoutCustomText(client.language, baseUrl);
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'subscription',
             locale: checkoutLocale,
+            consent_collection: {
+                terms_of_service: 'required',
+            },
+            custom_text: checkoutCustomText,
             customer_email: client.email,
             metadata: {
                 email: client.email,
@@ -266,6 +281,9 @@ router.post('/subscribe/checkout-annual', async (req: Request, res: Response) =>
                 metadata: {
                     email: client.email,
                     clientId: client.id,
+                    language: client.language,
+                    market: client.market,
+                    audienceProfile: client.audienceProfile,
                 },
             },
             line_items: [{

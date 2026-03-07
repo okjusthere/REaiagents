@@ -1124,6 +1124,7 @@
                                 id="subscribeButton">Start paid delivery · US$9.90/mo</button>
                             <button class="signup-button subscribe-button" onclick="startAnnualCheckout()"
                                 id="annualButton"
+                                hidden
                                 style="background:linear-gradient(135deg,rgba(155,74,50,0.12),rgba(36,72,60,0.10));border-color:rgba(36,72,60,0.22);color:var(--green);">Annual
                                 plan · US$88/year (save 26%)</button>
                         </div>
@@ -1839,6 +1840,21 @@
             setText('audienceCopy', narrative.audienceCopy);
         }
 
+        async function loadCheckoutOptions() {
+            const annualButton = document.getElementById('annualButton');
+            if (!annualButton) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/subscribe/options');
+                const result = await response.json();
+                annualButton.hidden = !result.success || !result.data?.hasAnnualPrice;
+            } catch (_error) {
+                annualButton.hidden = true;
+            }
+        }
+
         function translatePage() {
             const ui = getUi();
             document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
@@ -2043,6 +2059,7 @@
         const preferredLang = queryLang === 'zh' || queryLang === 'en' ? queryLang : (savedLang || browserLang);
         setLang(preferredLang);
         showStyle(0);
+        loadCheckoutOptions();
 
         if (new URLSearchParams(window.location.search).get('cancelled') === 'true') {
             showMsg('info', tMessage('checkoutCancelled'));
