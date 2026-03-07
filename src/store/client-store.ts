@@ -10,6 +10,7 @@ const CLIENTS_FILE = path.join(DATA_DIR, 'clients.json');
 export type Language = 'zh' | 'en';
 export type ClientPlan = 'free' | 'subscriber' | 'vip';
 export type AudienceProfile = 'general' | 'chinese-community';
+export type BillingInterval = 'month' | 'year';
 
 export const SUPPORTED_MARKETS = [
     { id: 'new-york', label: 'New York / 纽约', queries: ['New York real estate', 'NYC housing market', 'Manhattan property market'] },
@@ -36,8 +37,10 @@ export interface Client {
     audienceProfile: AudienceProfile;
     plan: ClientPlan;
     freeTrialUsed: boolean;
+    billingInterval?: BillingInterval;
     stripeCustomerId?: string;
     stripeSubscriptionId?: string;
+    stripeSubscriptionStatus?: string;
     stripeCancelAtPeriodEnd?: boolean;
     stripeCurrentPeriodEnd?: string;
 }
@@ -48,6 +51,7 @@ const SUPPORTED_LANGUAGE_SET = new Set<Language>(['zh', 'en']);
 const SUPPORTED_MARKET_SET = new Set<MarketId>(SUPPORTED_MARKETS.map((market) => market.id));
 const PLAN_SET = new Set<ClientPlan>(['free', 'subscriber', 'vip']);
 const AUDIENCE_SET = new Set<AudienceProfile>(['general', 'chinese-community']);
+const BILLING_INTERVAL_SET = new Set<BillingInterval>(['month', 'year']);
 
 function ensureDataFile(): void {
     ensureDirSync(DATA_DIR);
@@ -82,6 +86,12 @@ function normalizeAudienceProfile(audienceProfile: unknown, language: Language):
         : defaultAudienceProfile(language);
 }
 
+function normalizeBillingInterval(value: unknown): BillingInterval | undefined {
+    return BILLING_INTERVAL_SET.has(value as BillingInterval)
+        ? (value as BillingInterval)
+        : undefined;
+}
+
 function migrateClient(input: any): Client {
     const now = new Date().toISOString();
     const language = normalizeLanguage(input.language);
@@ -97,8 +107,10 @@ function migrateClient(input: any): Client {
         audienceProfile: normalizeAudienceProfile(input.audienceProfile, language),
         plan: normalizePlan(input.plan),
         freeTrialUsed: Boolean(input.freeTrialUsed),
+        billingInterval: normalizeBillingInterval(input.billingInterval),
         stripeCustomerId: input.stripeCustomerId || undefined,
         stripeSubscriptionId: input.stripeSubscriptionId || undefined,
+        stripeSubscriptionStatus: input.stripeSubscriptionStatus || undefined,
         stripeCancelAtPeriodEnd: Boolean(input.stripeCancelAtPeriodEnd),
         stripeCurrentPeriodEnd: input.stripeCurrentPeriodEnd || undefined,
     };
@@ -160,6 +172,12 @@ function sanitizeUpdate(current: Client, data: ClientUpdate): Client {
     if (data.plan !== undefined) {
         next.plan = normalizePlan(data.plan);
     }
+    if (Object.prototype.hasOwnProperty.call(data, 'billingInterval')) {
+        next.billingInterval = normalizeBillingInterval(data.billingInterval);
+    }
+    if (Object.prototype.hasOwnProperty.call(data, 'stripeSubscriptionStatus')) {
+        next.stripeSubscriptionStatus = data.stripeSubscriptionStatus || undefined;
+    }
     if (Object.prototype.hasOwnProperty.call(data, 'stripeCancelAtPeriodEnd')) {
         next.stripeCancelAtPeriodEnd = Boolean(data.stripeCancelAtPeriodEnd);
     }
@@ -214,7 +232,7 @@ export function addClient(data: { name?: string; email: string; language?: Langu
         id: generateId(),
         name: data.name?.trim() || email.split('@')[0],
         email,
-        active: true,
+        active: false,
         createdAt: now,
         updatedAt: now,
         language,
@@ -292,12 +310,16 @@ export function upgradeToSubscriber(
     email: string,
     stripeCustomerId: string,
     stripeSubscriptionId: string,
+    billingInterval?: BillingInterval,
 ): Client | null {
     const updated = updateClientByEmail(email, {
         plan: 'subscriber',
         active: true,
+        freeTrialUsed: true,
+        billingInterval,
         stripeCustomerId,
         stripeSubscriptionId,
+        stripeSubscriptionStatus: 'active',
         stripeCancelAtPeriodEnd: false,
         stripeCurrentPeriodEnd: undefined,
     });
@@ -314,7 +336,9 @@ export function cancelSubscription(stripeSubscriptionId: string): Client | null 
             ...client,
             plan: 'free',
             active: false,
+            billingInterval: undefined,
             stripeSubscriptionId: undefined,
+            stripeSubscriptionStatus: 'canceled',
             stripeCancelAtPeriodEnd: false,
             stripeCurrentPeriodEnd: undefined,
             updatedAt: new Date().toISOString(),

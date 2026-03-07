@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { getAllClients, addClient, updateClient, deleteClient, SUPPORTED_MARKETS } from '../store/client-store.js';
+import { getAllClients, addClient, getClientById, updateClient, deleteClient, SUPPORTED_MARKETS } from '../store/client-store.js';
 import { getDailyOutput, listOutputs } from '../store/output-store.js';
 import { runPipeline, isPipelineRunning } from '../orchestrator.js';
 import { config } from '../config/index.js';
@@ -63,7 +63,24 @@ router.put('/clients/:id', (req: Request, res: Response) => {
 
 router.delete('/clients/:id', (req: Request, res: Response) => {
     try {
-        deleteClient(String(req.params.id));
+        const clientId = String(req.params.id);
+        const client = getClientById(clientId);
+        if (!client) {
+            res.status(404).json({ success: false, error: 'Client not found' });
+            return;
+        }
+
+        const hasLiveStripeBilling = client.plan === 'subscriber'
+            || ['active', 'trialing', 'past_due'].includes(client.stripeSubscriptionStatus || '');
+        if (hasLiveStripeBilling) {
+            res.status(409).json({
+                success: false,
+                error: 'This account still has an active Stripe subscription. Cancel billing first, then delete the local record.',
+            });
+            return;
+        }
+
+        deleteClient(clientId);
         res.json({ success: true });
     } catch (error) {
         res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'Delete failed' });

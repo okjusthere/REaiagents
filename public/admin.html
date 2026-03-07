@@ -243,6 +243,13 @@
       box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
     }
 
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
     .btn-primary {
       background: var(--accent);
       color: white;
@@ -933,7 +940,7 @@
               <div class="stat-topline">Free Sample</div>
               <div class="stat-value" id="trialCount">0</div>
               <div>
-                <div class="stat-label">待体验客户</div>
+                <div class="stat-label">可领 Sample 线索</div>
                 <div class="stat-note" id="trialUsedNote">已体验 0</div>
               </div>
             </div>
@@ -960,7 +967,7 @@
           <div>
             <div class="panel-kicker">Fast Intake</div>
             <div class="card-title">快速录入与运营捷径</div>
-            <div class="card-subtitle">录入邮箱后先进入系统，再在下面一行直接调整市场、语言、受众、账单状态。</div>
+            <div class="card-subtitle">录入邮箱后会先保留为线索记录，不会自动进日更发送；你可以再决定是否设为 VIP 或等待用户自行付费。</div>
           </div>
           <div class="quick-add">
             <input type="email" id="quickEmail" placeholder="输入邮箱地址，回车或点右侧按钮即可创建客户..." onkeydown="if(event.key==='Enter')quickAdd()">
@@ -973,7 +980,7 @@
             </div>
             <div class="hint-tile">
               <div class="hint-label">发送机制</div>
-              <div class="hint-value">每日定时发送 + 顶部按钮立即触发</div>
+              <div class="hint-value">免费 sample 只即时发 1 次，正式发送仅面向订阅 / VIP</div>
             </div>
             <div class="hint-tile">
               <div class="hint-label">账单管理</div>
@@ -1116,8 +1123,8 @@
       if (res.status === 401) { logout(); return; }
       const { data } = await res.json();
       renderClients(data);
-      const activeCount = data.filter(c => c.active).length;
-      const pausedCount = data.length - activeCount;
+      const scheduledCount = data.filter(c => c.active && (c.plan === 'subscriber' || c.plan === 'vip')).length;
+      const unscheduledCount = data.length - scheduledCount;
       const subscriberCount = data.filter(c => c.plan === 'subscriber').length;
       const vipCount = data.filter(c => c.plan === 'vip').length;
       const trialCount = data.filter(c => c.plan === 'free' && !c.freeTrialUsed).length;
@@ -1127,7 +1134,7 @@
       document.getElementById('subscriberCount').textContent = subscriberCount;
       document.getElementById('vipCount').textContent = vipCount;
       document.getElementById('trialCount').textContent = trialCount;
-      document.getElementById('activeClientNote').textContent = `活跃 ${activeCount} · 暂停 ${pausedCount}`;
+      document.getElementById('activeClientNote').textContent = `发送中 ${scheduledCount} · 非发送 ${unscheduledCount}`;
       document.getElementById('endingClientNote').textContent = `期末取消 ${endingCount}`;
       document.getElementById('trialUsedNote').textContent = `已体验 ${trialUsedCount}`;
     }
@@ -1168,7 +1175,7 @@
       const subtitle = document.getElementById('clientSubtitle');
       const viewSummary = document.getElementById('currentViewSummary');
       subtitle.textContent = clientView === 'all'
-        ? `全部客户视图（${visibleClients.length}/${clients.length}）· 包含免费、暂停、已体验和付费客户`
+        ? `全部客户视图（${visibleClients.length}/${clients.length}）· 包含免费线索、已体验、已停用、订阅和 VIP`
         : `活跃付费 / VIP 视图（${visibleClients.length}/${clients.length}）· 聚焦今天真正会收到内容的客户`;
       if (viewSummary) {
         viewSummary.textContent = clientView === 'all' ? '全部客户' : '活跃付费 / VIP';
@@ -1206,14 +1213,32 @@
         if (!value) return '—';
         return value.length > 18 ? `${value.slice(0, 8)}...${value.slice(-4)}` : value;
       };
+      const hasLiveStripeBilling = (c) =>
+        c.plan === 'subscriber'
+        || ['active', 'trialing', 'past_due'].includes(c.stripeSubscriptionStatus || '')
+        || (c.plan === 'vip' && Boolean(c.stripeSubscriptionId));
+      const planCopy = (c) => {
+        if (c.plan === 'vip') return '手动白名单';
+        if (c.plan === 'subscriber') {
+          return c.billingInterval === 'year' ? '年付订阅' : c.billingInterval === 'month' ? '月付订阅' : '正式付费中';
+        }
+        if (c.stripeCustomerId || c.stripeSubscriptionStatus) return '历史付费账户';
+        return c.freeTrialUsed ? '已体验免费线索' : '可领一次 sample 的免费线索';
+      };
       const billingBadge = (c) => {
         if (c.plan === 'vip') return '<span class="billing-badge vip">VIP 手动托管</span>';
-        if (c.plan === 'subscriber' && c.active && c.stripeCancelAtPeriodEnd) {
+        if (hasLiveStripeBilling(c) && c.stripeCancelAtPeriodEnd) {
           const until = formatDate(c.stripeCurrentPeriodEnd);
-          return `<span class="billing-badge ending">期末取消${until ? `（至 ${until}）` : ''}</span>`;
+          const interval = c.billingInterval === 'year' ? '年付' : c.billingInterval === 'month' ? '月付' : '订阅';
+          return `<span class="billing-badge ending">${interval}期末取消${until ? `（至 ${until}）` : ''}</span>`;
         }
-        if (c.plan === 'subscriber' && c.active) return '<span class="billing-badge active">自动续费中</span>';
-        if (!c.active) return '<span class="billing-badge ended">已停用</span>';
+        if (hasLiveStripeBilling(c)) {
+          const interval = c.billingInterval === 'year' ? '年付有效期中' : c.billingInterval === 'month' ? '月付自动续费中' : '自动续费中';
+          return `<span class="billing-badge active">${interval}</span>`;
+        }
+        if (c.stripeCustomerId || c.stripeSubscriptionId || c.stripeSubscriptionStatus || c.plan === 'subscriber') {
+          return '<span class="billing-badge ended">账单已结束</span>';
+        }
         return '<span class="billing-badge free">未付费</span>';
       };
       const markets = ['new-york', 'los-angeles', 'san-francisco', 'chicago', 'miami', 'seattle', 'boston', 'houston'];
@@ -1237,12 +1262,34 @@
           `<span><strong>sub</strong> ${escapeHtml(shortId(c.stripeSubscriptionId))}</span>`,
         ].join('');
         const billingNote = c.plan === 'vip'
-          ? '手动托管，不走 Stripe 自动扣费'
+          ? (hasLiveStripeBilling(c) ? 'VIP 已覆盖发送资格；底层仍有 Stripe 账单关系' : '手动托管，不走 Stripe 自动扣费')
           : c.plan === 'subscriber' && c.stripeCancelAtPeriodEnd
             ? `服务保留到 ${formatDateTime(c.stripeCurrentPeriodEnd)}`
             : c.plan === 'subscriber'
-              ? 'Stripe 自动续费中'
-              : '未绑定正式账单';
+              ? (c.billingInterval === 'year' ? 'Stripe 年付有效期中' : c.billingInterval === 'month' ? 'Stripe 月付自动续费中' : 'Stripe 自动续费中')
+              : (c.stripeCustomerId || c.stripeSubscriptionStatus ? '历史 Stripe 账单已结束；当前仅保留记录' : '无活跃账单，仅保留记录');
+        const deliveryStatus = c.plan === 'free'
+          ? '● 不参与日更发送'
+          : c.active
+            ? '● 正在发送'
+            : '● 已暂停';
+        const deliveryHint = c.plan === 'free'
+          ? ((c.stripeCustomerId || c.stripeSubscriptionStatus)
+            ? '历史付费账户当前不发日更；如需恢复请重新开通订阅或手动设为 VIP'
+            : (c.freeTrialUsed ? 'sample 已发送完成；不会再自动进日跑' : '仅记录线索；只有现场领 sample 才会发送 1 次'))
+          : c.active
+            ? '会进入下一轮日更发送'
+            : '已从日更发送队列移出';
+        const canDelete = !hasLiveStripeBilling(c);
+        const toggleButton = c.plan === 'free'
+          ? ''
+          : `<button class="btn btn-ghost btn-sm" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '暂停' : '启用'}</button>`;
+        const vipButton = c.plan !== 'vip'
+          ? `<button class="btn btn-vip btn-sm" onclick="setVip('${c.id}')">设为 VIP</button>`
+          : `<button class="btn btn-ghost btn-sm" onclick="removeVip('${c.id}', '${hasLiveStripeBilling(c) ? 'subscriber' : 'free'}', ${hasLiveStripeBilling(c) ? c.active : false})">撤销 VIP</button>`;
+        const deleteButton = canDelete
+          ? `<button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', ${JSON.stringify(c.name)})">删除</button>`
+          : `<button class="btn btn-danger btn-sm" disabled title="该用户仍有 Stripe 活跃账单，请先取消订阅">先停 Stripe</button>`;
         return `<tr>
     <td>
       <div class="client-cell">
@@ -1268,7 +1315,7 @@
       <div class="plan-stack">
         ${planBadge(c)}
         <div class="client-meta">
-          <span>${c.plan === 'subscriber' ? '正式付费中' : c.plan === 'vip' ? '手动白名单' : '免费层级'}</span>
+          <span>${planCopy(c)}</span>
           ${c.plan === 'free' ? `<span>${c.freeTrialUsed ? '已体验过 sample' : '可领 1 次 sample'}</span>` : ''}
         </div>
       </div>
@@ -1278,8 +1325,8 @@
     <td>${audienceSelect(c)}</td>
     <td>
       <div class="status-stack">
-        <span class="status-inline ${c.active ? 'on' : 'off'}">${c.active ? '● 正在发送' : '● 已暂停'}</span>
-        <div class="subtle-line">${c.active ? '会进入下一轮日更发送' : '已从日更发送队列移出'}</div>
+        <span class="status-inline ${(c.plan !== 'free' && c.active) ? 'on' : 'off'}">${deliveryStatus}</span>
+        <div class="subtle-line">${deliveryHint}</div>
       </div>
     </td>
     <td>
@@ -1290,9 +1337,9 @@
     </td>
     <td>
       <div class="row-actions">
-        <button class="btn btn-ghost btn-sm" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '暂停' : '启用'}</button>
-        ${c.plan !== 'vip' ? `<button class="btn btn-vip btn-sm" onclick="setVip('${c.id}')">设为 VIP</button>` : `<button class="btn btn-ghost btn-sm" onclick="removeVip('${c.id}')">撤销 VIP</button>`}
-        <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', ${JSON.stringify(c.name)})">删除</button>
+        ${toggleButton}
+        ${vipButton}
+        ${deleteButton}
       </div>
     </td>
   </tr>`;
@@ -1317,7 +1364,7 @@
         if (res.status === 401) { logout(); return; }
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
-        showToast(`✅ ${email} 已添加`);
+        showToast(`✅ ${email} 已录入为免费线索`);
         input.value = '';
         loadClients();
       } catch (e) { showToast(e.message, 'error'); }
@@ -1346,7 +1393,7 @@
     }
 
     async function deleteClient(id, name) {
-      if (!confirm(`确定删除 "${name}" 吗？`)) return;
+      if (!confirm(`确定删除 "${name}" 的本地记录吗？如仍有 Stripe 活跃订阅，请先取消账单。`)) return;
       try {
         const res = await fetch(`${API}/clients/${id}`, { method: 'DELETE', headers: authHeaders() });
         if (res.status === 401) { logout(); return; }
@@ -1369,14 +1416,14 @@
       } catch (e) { showToast(e.message, 'error'); }
     }
 
-    async function removeVip(id) {
+    async function removeVip(id, nextPlan = 'free', nextActive = false) {
       if (!confirm('确定取消该用户的 VIP 身份吗？')) return;
       try {
-        const res = await fetch(`${API}/clients/${id}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ plan: 'free' }) });
+        const res = await fetch(`${API}/clients/${id}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ plan: nextPlan, active: nextActive }) });
         if (res.status === 401) { logout(); return; }
         const result = await res.json();
         if (!result.success) throw new Error(result.error);
-        showToast('已取消 VIP');
+        showToast(nextPlan === 'subscriber' ? '已取消 VIP，恢复为付费订阅' : '已取消 VIP');
         loadClients();
       } catch (e) { showToast(e.message, 'error'); }
     }
@@ -1385,9 +1432,9 @@
       try {
         const clients = window._cachedClients || [];
         if (!clients.length) { showToast('无数据可导出', 'error'); return; }
-        const header = 'Name,Email,Plan,Language,Market,Audience,Active,Created';
+        const header = 'Name,Email,Plan,BillingInterval,Language,Market,Audience,Active,Created';
         const rows = clients.map(c =>
-          [c.name, c.email, c.plan, c.language, c.market, c.audienceProfile || 'general', c.active, c.createdAt].map(v => `"${v}"`).join(',')
+          [c.name, c.email, c.plan, c.billingInterval || '', c.language, c.market, c.audienceProfile || 'general', c.active, c.createdAt].map(v => `"${v}"`).join(',')
         );
         const csv = [header, ...rows].join('\n');
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });

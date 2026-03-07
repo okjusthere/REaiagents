@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { config } from '../config/index.js';
 import {
     addClient,
+    type BillingInterval,
     cancelSubscription,
     findByEmail,
     findByStripeCustomerId,
@@ -53,6 +54,16 @@ function resolveAudienceProfile(input: { audienceProfile?: AudienceProfile; lang
         return input.audienceProfile;
     }
     return input.language === 'zh' ? 'chinese-community' : 'general';
+}
+
+function resolveBillingInterval(value: unknown): BillingInterval | undefined {
+    return value === 'month' || value === 'year'
+        ? value
+        : undefined;
+}
+
+function getSubscriptionInterval(subscription: Stripe.Subscription): BillingInterval | undefined {
+    return resolveBillingInterval(subscription.items.data[0]?.price?.recurring?.interval);
 }
 
 function upsertLead(input: { email: string; language: Language; market: MarketId; audienceProfile?: AudienceProfile }): Client {
@@ -210,6 +221,7 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
                 language: client.language,
                 market: client.market,
                 audienceProfile: client.audienceProfile,
+                billingInterval: 'month',
             },
             line_items: [{
                 price: config.STRIPE_PRICE_ID,
@@ -224,6 +236,7 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
                     language: client.language,
                     market: client.market,
                     audienceProfile: client.audienceProfile,
+                    billingInterval: 'month',
                 },
             },
         });
@@ -276,6 +289,7 @@ router.post('/subscribe/checkout-annual', async (req: Request, res: Response) =>
                 language: client.language,
                 market: client.market,
                 audienceProfile: client.audienceProfile,
+                billingInterval: 'year',
             },
             subscription_data: {
                 metadata: {
@@ -284,6 +298,7 @@ router.post('/subscribe/checkout-annual', async (req: Request, res: Response) =>
                     language: client.language,
                     market: client.market,
                     audienceProfile: client.audienceProfile,
+                    billingInterval: 'year',
                 },
             },
             line_items: [{
@@ -331,6 +346,7 @@ router.get('/subscribe/session/:sessionId', async (req: Request, res: Response) 
             success: true,
             data: {
                 plan: client.plan,
+                billingInterval: client.billingInterval,
                 active: client.active,
                 language: client.language,
                 audienceProfile: client.audienceProfile,
@@ -403,6 +419,7 @@ router.post('/stripe/webhook', async (req: Request, res: Response) => {
                 const audienceProfile = (session.metadata?.audienceProfile === 'chinese-community'
                     ? 'chinese-community'
                     : 'general') as AudienceProfile;
+                const billingInterval = resolveBillingInterval(session.metadata?.billingInterval);
 
                 if (email && customerId && subscriptionId) {
                     if (!findByEmail(email)) {
@@ -410,7 +427,7 @@ router.post('/stripe/webhook', async (req: Request, res: Response) => {
                     } else {
                         updateClientByEmail(email, { language, market, audienceProfile });
                     }
-                    upgradeToSubscriber(email, customerId, subscriptionId);
+                    upgradeToSubscriber(email, customerId, subscriptionId, billingInterval);
                     logger.info(`🎉 New subscriber via Stripe: ${email}`);
                 }
                 break;
@@ -423,14 +440,24 @@ router.post('/stripe/webhook', async (req: Request, res: Response) => {
                 if (client) {
                     const isActiveStatus = ['active', 'trialing', 'past_due'].includes(subscription.status);
                     const cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
+                    const billingInterval = getSubscriptionInterval(subscription);
                     const rawCurrentPeriodEnd = (subscription as any).current_period_end ?? subscription.cancel_at;
                     const currentPeriodEnd = typeof rawCurrentPeriodEnd === 'number'
                         ? new Date(rawCurrentPeriodEnd * 1000).toISOString()
                         : undefined;
+                    const nextPlan = client.plan === 'vip'
+                        ? 'vip'
+                        : (isActiveStatus ? 'subscriber' : 'free');
+                    const nextActive = client.plan === 'vip'
+                        ? client.active
+                        : (isActiveStatus ? client.active : false);
                     updateClient(client.id, {
-                        active: isActiveStatus,
-                        plan: isActiveStatus ? 'subscriber' : 'free',
+                        active: nextActive,
+                        plan: nextPlan,
+                        freeTrialUsed: isActiveStatus ? true : client.freeTrialUsed,
+                        billingInterval: isActiveStatus ? billingInterval : undefined,
                         stripeSubscriptionId: subscription.id,
+                        stripeSubscriptionStatus: subscription.status,
                         stripeCancelAtPeriodEnd: cancelAtPeriodEnd,
                         stripeCurrentPeriodEnd: cancelAtPeriodEnd ? currentPeriodEnd : undefined,
                     });
@@ -444,7 +471,7 @@ router.post('/stripe/webhook', async (req: Request, res: Response) => {
                 if (customerId) {
                     const client = findByStripeCustomerId(customerId);
                     if (client) {
-                        updateClient(client.id, { active: false });
+                        logger.warn(`⚠️ Stripe invoice payment failed for ${client.email}; waiting for subscription status webhook before changing delivery state.`);
                     }
                 }
                 break;
@@ -452,8 +479,20 @@ router.post('/stripe/webhook', async (req: Request, res: Response) => {
 
             case 'customer.subscription.deleted': {
                 const subscription = event.data.object as Stripe.Subscription;
-                cancelSubscription(subscription.id);
-                logger.info(`❌ Subscription cancelled via Stripe: ${subscription.id}`);
+                const client = findByStripeCustomerId(subscription.customer as string);
+                if (client?.plan === 'vip') {
+                    updateClient(client.id, {
+                        stripeSubscriptionId: undefined,
+                        stripeSubscriptionStatus: 'canceled',
+                        stripeCancelAtPeriodEnd: false,
+                        stripeCurrentPeriodEnd: undefined,
+                        billingInterval: undefined,
+                    });
+                    logger.info(`👑 VIP retained after Stripe subscription cancellation: ${client.email}`);
+                } else {
+                    cancelSubscription(subscription.id);
+                    logger.info(`❌ Subscription cancelled via Stripe: ${subscription.id}`);
+                }
                 break;
             }
 
