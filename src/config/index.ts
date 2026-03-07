@@ -35,6 +35,7 @@ const envSchema = z.object({
     STRIPE_SECRET_KEY: z.string().optional(),
     STRIPE_WEBHOOK_SECRET: z.string().optional(),
     STRIPE_PRICE_ID: z.string().optional(),
+    STRIPE_ANNUAL_PRICE_ID: z.string().optional(),
 
     // App
     BASE_URL: z.string().default('http://localhost:3000'),

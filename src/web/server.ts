@@ -79,8 +79,8 @@ export function startWebServer(port = 3000): void {
                 "img-src 'self' data:",
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "font-src 'self' https://fonts.gstatic.com",
-                "script-src 'self' 'unsafe-inline'",
-                "connect-src 'self'",
+                "script-src 'self' 'unsafe-inline' https://plausible.io",
+                "connect-src 'self' https://plausible.io",
                 "frame-ancestors 'none'",
                 "base-uri 'self'",
             ].join('; ')

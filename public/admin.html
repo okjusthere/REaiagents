@@ -11,6 +11,23 @@
   <link rel="apple-touch-icon" href="/favicon.svg">
   <title>RE AI Agents · 管理后台</title>
   <style>
+    :root {
+      --bg: #09142a;
+      --bg-panel: #111d33;
+      --bg-panel-strong: #16243d;
+      --bg-panel-soft: #0e1a2d;
+      --border: #2b3b57;
+      --border-strong: #3f567c;
+      --text: #e2e8f0;
+      --text-strong: #f8fafc;
+      --text-muted: #8ea2c4;
+      --text-faint: #60738f;
+      --accent: #3b82f6;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -19,12 +36,15 @@
 
     body {
       font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 24%),
+        radial-gradient(circle at top right, rgba(20, 184, 166, 0.09), transparent 22%),
+        linear-gradient(180deg, #081224 0%, #09142a 100%);
+      color: var(--text);
       min-height: 100vh;
+      letter-spacing: 0.01em;
     }
 
-    /* ── Login Gate ──────────────────────── */
     .login-gate {
       display: flex;
       align-items: center;
@@ -34,13 +54,14 @@
     }
 
     .login-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
+      background: rgba(17, 29, 51, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 18px;
       padding: 36px 32px;
       width: 400px;
       max-width: 100%;
       text-align: center;
+      box-shadow: 0 24px 80px rgba(2, 8, 23, 0.45);
     }
 
     .login-card h1 {
@@ -53,7 +74,7 @@
     }
 
     .login-card p {
-      color: #64748b;
+      color: var(--text-muted);
       font-size: 14px;
       margin-bottom: 24px;
     }
@@ -61,10 +82,10 @@
     .login-card input {
       width: 100%;
       padding: 12px 16px;
-      background: #0f172a;
-      border: 1px solid #334155;
+      background: var(--bg-panel-soft);
+      border: 1px solid var(--border);
       border-radius: 10px;
-      color: #e2e8f0;
+      color: var(--text);
       font-size: 15px;
       font-family: inherit;
       outline: none;
@@ -73,13 +94,13 @@
     }
 
     .login-card input:focus {
-      border-color: #3b82f6;
+      border-color: var(--accent);
     }
 
     .login-card .login-btn {
       width: 100%;
       padding: 12px;
-      background: #3b82f6;
+      background: var(--accent);
       border: none;
       border-radius: 10px;
       color: white;
@@ -95,30 +116,33 @@
     }
 
     .login-error {
-      color: #f87171;
+      color: var(--danger);
       font-size: 13px;
       margin-top: 12px;
       display: none;
     }
 
-    /* ── Admin Dashboard (hidden until auth) ── */
     .admin-content {
       display: none;
     }
 
     .header {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border-bottom: 1px solid #1e293b;
-      padding: 20px 32px;
+      background: linear-gradient(120deg, rgba(17, 29, 51, 0.95) 0%, rgba(9, 20, 42, 0.98) 100%);
+      border-bottom: 1px solid rgba(63, 86, 124, 0.4);
+      padding: 14px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px);
     }
 
     .header h1 {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
     }
 
@@ -130,25 +154,27 @@
       display: flex;
       gap: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .status-badge {
-      padding: 6px 14px;
+      padding: 7px 14px;
       border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
     }
 
     .status-badge.online {
-      background: #065f4620;
-      color: #34d399;
-      border: 1px solid #34d39940;
+      background: rgba(6, 95, 70, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.22);
     }
 
     .status-badge.running {
-      background: #f59e0b20;
-      color: #fbbf24;
-      border: 1px solid #fbbf2440;
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--warning);
+      border: 1px solid rgba(251, 191, 36, 0.22);
       animation: pulse 1.5s infinite;
     }
 
@@ -165,57 +191,60 @@
     }
 
     .container {
-      max-width: 960px;
+      width: min(96vw, 1720px);
       margin: 0 auto;
-      padding: 32px 24px;
+      padding: 20px 0 36px;
     }
 
     .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
+      background: linear-gradient(180deg, rgba(21, 35, 59, 0.96) 0%, rgba(15, 27, 47, 0.96) 100%);
+      border: 1px solid rgba(63, 86, 124, 0.5);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 18px 60px rgba(3, 10, 24, 0.24);
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
       gap: 12px;
     }
 
     .card-title {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 600;
-      color: #f1f5f9;
+      color: var(--text-strong);
     }
 
     .card-subtitle {
       font-size: 13px;
-      color: #94a3b8;
+      color: var(--text-muted);
       margin-top: 4px;
     }
 
     .btn {
-      padding: 8px 18px;
-      border-radius: 8px;
+      padding: 8px 14px;
+      border-radius: 10px;
       border: none;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       font-family: inherit;
+      white-space: nowrap;
     }
 
     .btn:hover {
       transform: translateY(-1px);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
     }
 
     .btn-primary {
-      background: #3b82f6;
+      background: var(--accent);
       color: white;
     }
 
@@ -224,13 +253,13 @@
     }
 
     .btn-danger {
-      background: #ef444420;
-      color: #f87171;
-      border: 1px solid #ef444440;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
     .btn-danger:hover {
-      background: #ef444430;
+      background: rgba(239, 68, 68, 0.18);
     }
 
     .btn-success {
@@ -244,56 +273,210 @@
 
     .btn-ghost {
       background: transparent;
-      color: #94a3b8;
-      border: 1px solid #334155;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
     }
 
     .btn-ghost:hover {
-      background: #334155;
-      color: #f1f5f9;
+      background: rgba(43, 59, 87, 0.5);
+      color: var(--text-strong);
     }
 
     .btn-sm {
-      padding: 5px 12px;
-      font-size: 13px;
+      padding: 6px 10px;
+      font-size: 12px;
     }
 
     .btn-logout {
       background: transparent;
-      color: #64748b;
-      border: 1px solid #334155;
+      color: var(--text-faint);
+      border: 1px solid var(--border);
       font-size: 12px;
       padding: 5px 12px;
     }
 
     .btn-logout:hover {
-      background: #334155;
-      color: #f87171;
+      background: rgba(43, 59, 87, 0.5);
+      color: var(--danger);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(340px, 0.95fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .panel-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(59, 130, 246, 0.18);
+      background: rgba(59, 130, 246, 0.08);
+      color: #bfdbfe;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .overview-card {
+      padding-bottom: 14px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: linear-gradient(180deg, rgba(20, 34, 58, 0.86) 0%, rgba(15, 26, 44, 0.94) 100%);
+      border: 1px solid rgba(63, 86, 124, 0.42);
+      border-radius: 14px;
+      padding: 14px 16px 12px;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .stat-topline {
+      font-size: 11px;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 38px;
+      line-height: 1;
+      font-weight: 800;
+      color: var(--text-strong);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+
+    .stat-note {
+      font-size: 11px;
+      color: var(--text-faint);
+      line-height: 1.45;
+    }
+
+    .action-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 100%;
+    }
+
+    .action-card .card-subtitle {
+      max-width: 40ch;
+    }
+
+    .quick-add {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+
+    .quick-add input {
+      min-width: 0;
+      padding: 12px 14px;
+      background: var(--bg-panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .quick-add input:focus {
+      border-color: var(--accent);
+    }
+
+    .quick-hints {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .hint-tile {
+      border: 1px solid rgba(63, 86, 124, 0.42);
+      border-radius: 14px;
+      background: rgba(9, 20, 42, 0.45);
+      padding: 12px 14px;
+    }
+
+    .hint-label {
+      font-size: 11px;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .hint-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-strong);
+      line-height: 1.45;
+    }
+
+    .list-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid rgba(63, 86, 124, 0.42);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(13, 24, 43, 0.9) 0%, rgba(11, 21, 38, 0.9) 100%);
     }
 
     .table {
       width: 100%;
+      min-width: 1540px;
       border-collapse: collapse;
     }
 
     .table th {
       text-align: left;
-      padding: 10px 12px;
-      font-size: 12px;
+      padding: 12px 14px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #64748b;
-      border-bottom: 1px solid #334155;
+      letter-spacing: 0.08em;
+      color: var(--text-faint);
+      border-bottom: 1px solid rgba(63, 86, 124, 0.42);
+      position: sticky;
+      top: 0;
+      background: rgba(17, 29, 51, 0.96);
+      z-index: 1;
     }
 
     .table td {
-      padding: 14px 12px;
-      border-bottom: 1px solid #1e293b;
-      font-size: 14px;
+      padding: 14px;
+      border-bottom: 1px solid rgba(43, 59, 87, 0.7);
+      font-size: 13px;
+      vertical-align: top;
     }
 
-    .table tr:hover td {
-      background: #1e293b80;
+    .table tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.018);
     }
 
     .active-dot {
@@ -301,15 +484,300 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      margin-right: 6px;
+      flex: 0 0 auto;
     }
 
     .active-dot.on {
-      background: #34d399;
+      background: var(--success);
+      box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
     }
 
     .active-dot.off {
       background: #64748b;
+    }
+
+    .client-cell,
+    .email-cell,
+    .status-stack,
+    .plan-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .client-primary {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .client-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-strong);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .client-email {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-strong);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .client-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px 10px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: var(--text-faint);
+      line-height: 1.45;
+    }
+
+    .client-meta strong {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .code-chip,
+    .micro-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(63, 86, 124, 0.36);
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .micro-badge.warm {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border-color: rgba(251, 191, 36, 0.22);
+    }
+
+    .micro-badge.cool {
+      background: rgba(59, 130, 246, 0.1);
+      color: #93c5fd;
+      border-color: rgba(59, 130, 246, 0.2);
+    }
+
+    .micro-badge.muted {
+      background: rgba(100, 116, 139, 0.1);
+      color: #94a3b8;
+      border-color: rgba(100, 116, 139, 0.18);
+    }
+
+    .plan-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      width: fit-content;
+      white-space: nowrap;
+    }
+
+    .plan-badge.subscriber {
+      background: rgba(99, 102, 241, 0.12);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.22);
+    }
+
+    .plan-badge.vip {
+      background: rgba(217, 119, 6, 0.12);
+      color: var(--warning);
+      border: 1px solid rgba(217, 119, 6, 0.24);
+    }
+
+    .plan-badge.free {
+      background: rgba(100, 116, 139, 0.1);
+      color: #94a3b8;
+      border: 1px solid rgba(100, 116, 139, 0.18);
+    }
+
+    .plan-badge.trial-used {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.22);
+    }
+
+    .btn-vip {
+      background: rgba(217, 119, 6, 0.12);
+      color: var(--warning);
+      border: 1px solid rgba(217, 119, 6, 0.24);
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    .btn-vip:hover {
+      background: rgba(217, 119, 6, 0.22);
+    }
+
+    .inline-select {
+      background: rgba(9, 20, 42, 0.95);
+      border: 1px solid rgba(63, 86, 124, 0.52);
+      border-radius: 9px;
+      color: var(--text);
+      font-size: 12px;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      width: 100%;
+      min-width: 110px;
+    }
+
+    .inline-select:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .view-switch {
+      display: inline-flex;
+      gap: 6px;
+      background: rgba(9, 20, 42, 0.78);
+      border: 1px solid rgba(63, 86, 124, 0.42);
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .view-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .view-btn.active {
+      background: rgba(20, 34, 58, 0.96);
+      color: var(--text);
+      border: 1px solid rgba(63, 86, 124, 0.52);
+    }
+
+    .billing-badge {
+      display: inline-flex;
+      width: fit-content;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .billing-badge.active {
+      background: rgba(6, 95, 70, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.22);
+    }
+
+    .billing-badge.ending {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--warning);
+      border: 1px solid rgba(251, 191, 36, 0.22);
+    }
+
+    .billing-badge.ended {
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .billing-badge.vip {
+      background: rgba(217, 119, 6, 0.12);
+      color: var(--warning);
+      border: 1px solid rgba(217, 119, 6, 0.24);
+    }
+
+    .billing-badge.free {
+      background: rgba(100, 116, 139, 0.1);
+      color: #94a3b8;
+      border: 1px solid rgba(100, 116, 139, 0.18);
+    }
+
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-width: 210px;
+    }
+
+    .status-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(63, 86, 124, 0.42);
+    }
+
+    .status-inline.on {
+      color: var(--success);
+    }
+
+    .status-inline.off {
+      color: #94a3b8;
+    }
+
+    .subtle-line {
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--text-faint);
+    }
+
+    .output-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .output-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(9, 20, 42, 0.52);
+      border-radius: 12px;
+      border: 1px solid rgba(63, 86, 124, 0.36);
+    }
+
+    .output-item a {
+      color: #93c5fd;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .output-item a:hover {
+      text-decoration: underline;
+    }
+
+    .output-date {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
     }
 
     .toast {
@@ -317,23 +785,24 @@
       bottom: 24px;
       right: 24px;
       padding: 12px 20px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 14px;
       z-index: 200;
       animation: slideIn 0.3s ease-out;
       display: none;
+      box-shadow: 0 18px 60px rgba(2, 8, 23, 0.35);
     }
 
     .toast.success {
       background: #065f46;
-      color: #34d399;
-      border: 1px solid #34d39940;
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.24);
     }
 
     .toast.error {
       background: #7f1d1d;
       color: #fca5a5;
-      border: 1px solid #ef444440;
+      border: 1px solid rgba(239, 68, 68, 0.24);
     }
 
     @keyframes slideIn {
@@ -351,7 +820,7 @@
     .empty-state {
       text-align: center;
       padding: 48px 24px;
-      color: #64748b;
+      color: var(--text-faint);
     }
 
     .empty-state .icon {
@@ -359,210 +828,43 @@
       margin-bottom: 16px;
     }
 
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+    @media (max-width: 1440px) {
+      .stats-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
 
-    .stat-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 16px 20px;
+    @media (max-width: 1180px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .stat-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: #f1f5f9;
-    }
+    @media (max-width: 820px) {
+      .header {
+        padding: 14px 16px;
+      }
 
-    .stat-label {
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+      .container {
+        width: calc(100vw - 20px);
+      }
 
-    .quick-add {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
+      .card {
+        padding: 16px;
+      }
 
-    .quick-add input {
-      flex: 1;
-      padding: 12px 16px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      color: #e2e8f0;
-      font-size: 14px;
-      outline: none;
-      font-family: inherit;
-    }
+      .stats-row,
+      .quick-hints {
+        grid-template-columns: 1fr;
+      }
 
-    .quick-add input:focus {
-      border-color: #3b82f6;
-    }
+      .quick-add {
+        grid-template-columns: 1fr;
+      }
 
-    .output-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .output-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      background: #0f172a;
-      border-radius: 8px;
-      border: 1px solid #334155;
-    }
-
-    .output-item a {
-      color: #60a5fa;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .output-item a:hover {
-      text-decoration: underline;
-    }
-
-    .output-date {
-      font-size: 14px;
-    }
-
-    .plan-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .plan-badge.subscriber {
-      background: #6366f120;
-      color: #a5b4fc;
-      border: 1px solid #6366f140;
-    }
-
-    .plan-badge.vip {
-      background: #d9770620;
-      color: #fbbf24;
-      border: 1px solid #d9770640;
-    }
-
-    .plan-badge.free {
-      background: #64748b20;
-      color: #94a3b8;
-      border: 1px solid #64748b40;
-    }
-
-    .plan-badge.trial-used {
-      background: #f59e0b20;
-      color: #fbbf24;
-      border: 1px solid #f59e0b40;
-    }
-
-    .btn-vip {
-      background: #d9770620;
-      color: #fbbf24;
-      border: 1px solid #d9770640;
-      font-size: 13px;
-      padding: 5px 12px;
-    }
-
-    .btn-vip:hover {
-      background: #d9770640;
-    }
-
-    .inline-select {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      color: #e2e8f0;
-      font-size: 12px;
-      padding: 4px 6px;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .inline-select:focus {
-      border-color: #3b82f6;
-      outline: none;
-    }
-
-    .view-switch {
-      display: inline-flex;
-      gap: 6px;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 4px;
-    }
-
-    .view-btn {
-      border: none;
-      background: transparent;
-      color: #94a3b8;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 12px;
-      cursor: pointer;
-      font-family: inherit;
-      white-space: nowrap;
-    }
-
-    .view-btn.active {
-      background: #1e293b;
-      color: #e2e8f0;
-      border: 1px solid #334155;
-    }
-
-    .billing-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .billing-badge.active {
-      background: #065f4620;
-      color: #34d399;
-      border: 1px solid #34d39940;
-    }
-
-    .billing-badge.ending {
-      background: #f59e0b20;
-      color: #fbbf24;
-      border: 1px solid #f59e0b40;
-    }
-
-    .billing-badge.ended {
-      background: #ef444420;
-      color: #fca5a5;
-      border: 1px solid #ef444440;
-    }
-
-    .billing-badge.vip {
-      background: #d9770620;
-      color: #fbbf24;
-      border: 1px solid #d9770640;
-    }
-
-    .billing-badge.free {
-      background: #64748b20;
-      color: #94a3b8;
-      border: 1px solid #64748b40;
+      .output-item {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -593,47 +895,103 @@
     </div>
 
     <div class="container">
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-value" id="totalClients">0</div>
-          <div class="stat-label">总客户数</div>
+      <div class="dashboard-grid">
+        <div class="card overview-card">
+          <div class="panel-kicker">Operations Overview</div>
+          <div class="card-header">
+            <div>
+              <div class="card-title">运营总览</div>
+              <div class="card-subtitle">把最常用的运营数字直接铺平，减少来回切页和上下滚动。</div>
+            </div>
+          </div>
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-topline">Clients</div>
+              <div class="stat-value" id="totalClients">0</div>
+              <div>
+                <div class="stat-label">总客户数</div>
+                <div class="stat-note" id="activeClientNote">活跃 0 · 暂停 0</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-topline">Subscribers</div>
+              <div class="stat-value" id="subscriberCount">0</div>
+              <div>
+                <div class="stat-label">付费订阅</div>
+                <div class="stat-note" id="endingClientNote">期末取消 0</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-topline">VIP</div>
+              <div class="stat-value" id="vipCount">0</div>
+              <div>
+                <div class="stat-label">手动托管用户</div>
+                <div class="stat-note">不走 Stripe 账单</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-topline">Free Sample</div>
+              <div class="stat-value" id="trialCount">0</div>
+              <div>
+                <div class="stat-label">待体验客户</div>
+                <div class="stat-note" id="trialUsedNote">已体验 0</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-topline">Schedule</div>
+              <div class="stat-value" id="scheduleTime">--</div>
+              <div>
+                <div class="stat-label">定时发送</div>
+                <div class="stat-note">America/New_York</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-topline">Model</div>
+              <div class="stat-value" id="modelName">--</div>
+              <div>
+                <div class="stat-label">AI 模型</div>
+                <div class="stat-note">当前生产环境默认模型</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value" id="subscriberCount">0</div>
-          <div class="stat-label">💳 付费订阅</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="vipCount">0</div>
-          <div class="stat-label">👑 VIP</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="trialCount">0</div>
-          <div class="stat-label">🎁 待体验</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="scheduleTime">--</div>
-          <div class="stat-label">定时发送</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="modelName">--</div>
-          <div class="stat-label">AI 模型</div>
+
+        <div class="card action-card">
+          <div>
+            <div class="panel-kicker">Fast Intake</div>
+            <div class="card-title">快速录入与运营捷径</div>
+            <div class="card-subtitle">录入邮箱后先进入系统，再在下面一行直接调整市场、语言、受众、账单状态。</div>
+          </div>
+          <div class="quick-add">
+            <input type="email" id="quickEmail" placeholder="输入邮箱地址，回车或点右侧按钮即可创建客户..." onkeydown="if(event.key==='Enter')quickAdd()">
+            <button class="btn btn-primary" onclick="quickAdd()">+ 添加客户</button>
+          </div>
+          <div class="quick-hints">
+            <div class="hint-tile">
+              <div class="hint-label">当前视图</div>
+              <div class="hint-value" id="currentViewSummary">活跃付费 / VIP</div>
+            </div>
+            <div class="hint-tile">
+              <div class="hint-label">发送机制</div>
+              <div class="hint-value">每日定时发送 + 顶部按钮立即触发</div>
+            </div>
+            <div class="hint-tile">
+              <div class="hint-label">账单管理</div>
+              <div class="hint-value">订阅走 Stripe，VIP 走手动托管</div>
+            </div>
+            <div class="hint-tile">
+              <div class="hint-label">导出能力</div>
+              <div class="hint-value">支持 CSV 全量导出，便于审计和迁移</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Quick add -->
-      <div class="card">
-        <div class="card-title" style="margin-bottom:12px">⚡ 快速添加订阅</div>
-        <div class="quick-add">
-          <input type="email" id="quickEmail" placeholder="输入邮箱地址即可订阅..." onkeydown="if(event.key==='Enter')quickAdd()">
-          <button class="btn btn-primary" onclick="quickAdd()">+ 添加</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="card list-card">
+        <div class="card-header list-toolbar">
           <div>
             <div class="card-title">📋 订阅客户</div>
-            <div class="card-subtitle" id="clientSubtitle">每日自动发送文案邮件（所有风格）</div>
+            <div class="card-subtitle" id="clientSubtitle">按客户密集展开，直接在一行完成审核、定位和状态调整。</div>
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <div class="view-switch">
@@ -758,10 +1116,20 @@
       if (res.status === 401) { logout(); return; }
       const { data } = await res.json();
       renderClients(data);
+      const activeCount = data.filter(c => c.active).length;
+      const pausedCount = data.length - activeCount;
+      const subscriberCount = data.filter(c => c.plan === 'subscriber').length;
+      const vipCount = data.filter(c => c.plan === 'vip').length;
+      const trialCount = data.filter(c => c.plan === 'free' && !c.freeTrialUsed).length;
+      const trialUsedCount = data.filter(c => c.plan === 'free' && c.freeTrialUsed).length;
+      const endingCount = data.filter(c => c.plan === 'subscriber' && c.active && c.stripeCancelAtPeriodEnd).length;
       document.getElementById('totalClients').textContent = data.length;
-      document.getElementById('subscriberCount').textContent = data.filter(c => c.plan === 'subscriber').length;
-      document.getElementById('vipCount').textContent = data.filter(c => c.plan === 'vip').length;
-      document.getElementById('trialCount').textContent = data.filter(c => c.plan === 'free' && !c.freeTrialUsed).length;
+      document.getElementById('subscriberCount').textContent = subscriberCount;
+      document.getElementById('vipCount').textContent = vipCount;
+      document.getElementById('trialCount').textContent = trialCount;
+      document.getElementById('activeClientNote').textContent = `活跃 ${activeCount} · 暂停 ${pausedCount}`;
+      document.getElementById('endingClientNote').textContent = `期末取消 ${endingCount}`;
+      document.getElementById('trialUsedNote').textContent = `已体验 ${trialUsedCount}`;
     }
 
     async function loadStatus() {
@@ -798,9 +1166,13 @@
         ? clients
         : clients.filter(c => c.active && (c.plan === 'subscriber' || c.plan === 'vip'));
       const subtitle = document.getElementById('clientSubtitle');
+      const viewSummary = document.getElementById('currentViewSummary');
       subtitle.textContent = clientView === 'all'
-        ? `全部客户视图（${visibleClients.length}/${clients.length}）`
-        : `活跃付费/VIP 视图（${visibleClients.length}/${clients.length}）`;
+        ? `全部客户视图（${visibleClients.length}/${clients.length}）· 包含免费、暂停、已体验和付费客户`
+        : `活跃付费 / VIP 视图（${visibleClients.length}/${clients.length}）· 聚焦今天真正会收到内容的客户`;
+      if (viewSummary) {
+        viewSummary.textContent = clientView === 'all' ? '全部客户' : '活跃付费 / VIP';
+      }
 
       const el = document.getElementById('clientList');
       if (visibleClients.length === 0) {
@@ -818,6 +1190,21 @@
         const d = new Date(iso);
         if (Number.isNaN(d.getTime())) return '';
         return d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
+      };
+      const formatDateTime = (iso) => {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return '—';
+        return d.toLocaleString('zh-CN', {
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      };
+      const shortId = (value) => {
+        if (!value) return '—';
+        return value.length > 18 ? `${value.slice(0, 8)}...${value.slice(-4)}` : value;
       };
       const billingBadge = (c) => {
         if (c.plan === 'vip') return '<span class="billing-badge vip">VIP 手动托管</span>';
@@ -841,22 +1228,76 @@
         <option value="general" ${c.audienceProfile === 'general' ? 'selected' : ''}>广义北美</option>
         <option value="chinese-community" ${c.audienceProfile === 'chinese-community' ? 'selected' : ''}>华语/搬迁</option>
       </select>`;
-      const rows = visibleClients.map(c => `<tr>
-    <td><span class="active-dot ${c.active ? 'on' : 'off'}"></span>${escapeHtml(c.name)}</td>
-    <td>${escapeHtml(c.email)}</td>
-    <td>${planBadge(c)}</td>
+      const rows = visibleClients.map(c => {
+        const sampleBadge = c.freeTrialUsed
+          ? '<span class="micro-badge warm">已领 sample</span>'
+          : '<span class="micro-badge muted">未领 sample</span>';
+        const stripeMeta = [
+          `<span><strong>cus</strong> ${escapeHtml(shortId(c.stripeCustomerId))}</span>`,
+          `<span><strong>sub</strong> ${escapeHtml(shortId(c.stripeSubscriptionId))}</span>`,
+        ].join('');
+        const billingNote = c.plan === 'vip'
+          ? '手动托管，不走 Stripe 自动扣费'
+          : c.plan === 'subscriber' && c.stripeCancelAtPeriodEnd
+            ? `服务保留到 ${formatDateTime(c.stripeCurrentPeriodEnd)}`
+            : c.plan === 'subscriber'
+              ? 'Stripe 自动续费中'
+              : '未绑定正式账单';
+        return `<tr>
+    <td>
+      <div class="client-cell">
+        <div class="client-primary">
+          <span class="active-dot ${c.active ? 'on' : 'off'}"></span>
+          <div class="client-name">${escapeHtml(c.name)}</div>
+          ${sampleBadge}
+        </div>
+        <div class="client-meta">
+          <span class="code-chip">${escapeHtml(shortId(c.id))}</span>
+          <span><strong>创建</strong> ${escapeHtml(formatDateTime(c.createdAt))}</span>
+          <span><strong>更新</strong> ${escapeHtml(formatDateTime(c.updatedAt))}</span>
+        </div>
+      </div>
+    </td>
+    <td>
+      <div class="email-cell">
+        <div class="client-email">${escapeHtml(c.email)}</div>
+        <div class="client-meta">${stripeMeta}</div>
+      </div>
+    </td>
+    <td>
+      <div class="plan-stack">
+        ${planBadge(c)}
+        <div class="client-meta">
+          <span>${c.plan === 'subscriber' ? '正式付费中' : c.plan === 'vip' ? '手动白名单' : '免费层级'}</span>
+          ${c.plan === 'free' ? `<span>${c.freeTrialUsed ? '已体验过 sample' : '可领 1 次 sample'}</span>` : ''}
+        </div>
+      </div>
+    </td>
     <td>${langSelect(c)}</td>
     <td>${mktSelect(c)}</td>
     <td>${audienceSelect(c)}</td>
-    <td>${c.active ? '✅' : '⏸'}</td>
-    <td>${billingBadge(c)}</td>
     <td>
-      <button class="btn btn-ghost btn-sm" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '暂停' : '启用'}</button>
-      ${c.plan !== 'vip' ? `<button class="btn btn-vip btn-sm" onclick="setVip('${c.id}')">👑 VIP</button>` : `<button class="btn btn-ghost btn-sm" onclick="removeVip('${c.id}')">取消VIP</button>`}
-      <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', ${JSON.stringify(c.name)})">删除</button>
+      <div class="status-stack">
+        <span class="status-inline ${c.active ? 'on' : 'off'}">${c.active ? '● 正在发送' : '● 已暂停'}</span>
+        <div class="subtle-line">${c.active ? '会进入下一轮日更发送' : '已从日更发送队列移出'}</div>
+      </div>
     </td>
-  </tr>`).join('');
-      el.innerHTML = `<table class="table"><thead><tr><th>名称</th><th>邮箱</th><th>套餐</th><th>语言</th><th>城市</th><th>受众</th><th>状态</th><th>账单状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
+    <td>
+      <div class="status-stack">
+        ${billingBadge(c)}
+        <div class="subtle-line">${escapeHtml(billingNote)}</div>
+      </div>
+    </td>
+    <td>
+      <div class="row-actions">
+        <button class="btn btn-ghost btn-sm" onclick="toggleActive('${c.id}', ${!c.active})">${c.active ? '暂停' : '启用'}</button>
+        ${c.plan !== 'vip' ? `<button class="btn btn-vip btn-sm" onclick="setVip('${c.id}')">设为 VIP</button>` : `<button class="btn btn-ghost btn-sm" onclick="removeVip('${c.id}')">撤销 VIP</button>`}
+        <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}', ${JSON.stringify(c.name)})">删除</button>
+      </div>
+    </td>
+  </tr>`;
+      }).join('');
+      el.innerHTML = `<div class="table-wrap"><table class="table"><thead><tr><th>客户</th><th>联系 / Stripe</th><th>套餐</th><th>语言</th><th>城市</th><th>受众</th><th>发送状态</th><th>账单状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     }
 
     function setClientView(mode) {

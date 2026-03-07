@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +12,9 @@
     <link rel="apple-touch-icon" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #ece8e1;
@@ -105,7 +108,7 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 40%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 40%);
             pointer-events: none;
         }
 
@@ -115,8 +118,8 @@
             gap: 10px;
             padding: 8px 13px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.16);
             font-size: 11px;
             letter-spacing: 0.12em;
             text-transform: uppercase;
@@ -150,7 +153,7 @@
             margin-top: 16px;
             font-size: 15px;
             line-height: 1.8;
-            color: rgba(255,255,255,0.84);
+            color: rgba(255, 255, 255, 0.84);
         }
 
         .hero-meta {
@@ -164,10 +167,10 @@
             display: inline-flex;
             padding: 9px 12px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.16);
             font-size: 12px;
-            color: rgba(255,255,255,0.92);
+            color: rgba(255, 255, 255, 0.92);
         }
 
         .stat-grid {
@@ -178,8 +181,8 @@
         .stat-card {
             padding: 18px 18px 16px;
             border-radius: 22px;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.16);
             backdrop-filter: blur(8px);
         }
 
@@ -194,7 +197,7 @@
             font-size: 11px;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .brief-grid {
@@ -310,7 +313,7 @@
             font-weight: 700;
         }
 
-        .article-section + .article-section {
+        .article-section+.article-section {
             margin-top: 16px;
         }
 
@@ -327,7 +330,7 @@
             grid-template-columns: 40px minmax(0, 1fr);
             gap: 14px;
             border-bottom: 1px solid var(--line);
-            background: linear-gradient(180deg, rgba(255,255,255,0.28), transparent);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent);
         }
 
         .article-num {
@@ -415,7 +418,7 @@
 
         .badge-platform,
         .badge-duration {
-            background: rgba(255,255,255,0.65);
+            background: rgba(255, 255, 255, 0.65);
             color: var(--muted);
             border-color: var(--line);
         }
@@ -490,7 +493,7 @@
         .tag {
             padding: 4px 8px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.72);
+            background: rgba(255, 255, 255, 0.72);
             border: 1px solid var(--line);
             color: var(--muted);
             font-size: 11px;
@@ -507,7 +510,7 @@
             padding: 0 14px;
             border-radius: 999px;
             border: 1px solid var(--line);
-            background: rgba(255,255,255,0.7);
+            background: rgba(255, 255, 255, 0.7);
             color: var(--ink);
             font-size: 12px;
             font-weight: 600;
@@ -539,7 +542,7 @@
             border-radius: 16px;
             background: #17342f;
             color: #ecfdf5;
-            box-shadow: 0 18px 40px rgba(15,23,42,0.20);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.20);
             display: none;
             z-index: 200;
         }
@@ -559,11 +562,82 @@
             margin-bottom: 12px;
         }
 
+        .upgrade-cta {
+            margin-top: 26px;
+            padding: 24px;
+            border-radius: 26px;
+            background: linear-gradient(135deg, #182530 0%, #274153 48%, #9b4a32 100%);
+            color: white;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upgrade-cta::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(155, 74, 50, 0.3), transparent 40%);
+            pointer-events: none;
+        }
+
+        .upgrade-inner {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .upgrade-text {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .upgrade-text strong {
+            display: block;
+            font-size: 1.15rem;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .upgrade-text span {
+            color: rgba(255, 255, 255, 0.82);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .upgrade-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 52px;
+            padding: 0 28px;
+            border-radius: 999px;
+            background: white;
+            color: #17212b;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .upgrade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+        }
+
         .hidden {
             display: none !important;
         }
 
         @media (max-width: 920px) {
+
             .hero-grid,
             .brief-grid {
                 grid-template-columns: 1fr;
@@ -602,6 +676,7 @@
         }
     </style>
 </head>
+
 <body data-theme="general">
     <main class="shell">
         <section class="hero">
@@ -609,7 +684,8 @@
             <div class="hero-grid">
                 <div class="hero-copy">
                     <h1 id="pageTitle">Your private content desk is loading.</h1>
-                    <p id="heroSubtitle">REscript is preparing your market-specific script package and applying the right audience lens before you review or copy anything.</p>
+                    <p id="heroSubtitle">REscript is preparing your market-specific script package and applying the
+                        right audience lens before you review or copy anything.</p>
                     <div class="hero-meta" id="heroMeta"></div>
                 </div>
                 <div class="stat-grid">
@@ -637,17 +713,20 @@
             <article class="brief-card">
                 <div class="brief-label" id="briefLabelOne">Audience lens</div>
                 <strong id="briefTitleOne">Loading profile</strong>
-                <p id="briefCopyOne">We are matching this viewer to the delivery language, market, and audience profile stored for this package.</p>
+                <p id="briefCopyOne">We are matching this viewer to the delivery language, market, and audience profile
+                    stored for this package.</p>
             </article>
             <article class="brief-card">
                 <div class="brief-label" id="briefLabelTwo">Best publishing use</div>
                 <strong id="briefTitleTwo">Loading workflow</strong>
-                <p id="briefCopyTwo">Once loaded, use the filter tabs to move between market commentary, evergreen modules, and the filming angle that best fits your brand.</p>
+                <p id="briefCopyTwo">Once loaded, use the filter tabs to move between market commentary, evergreen
+                    modules, and the filming angle that best fits your brand.</p>
             </article>
             <article class="brief-card">
                 <div class="brief-label" id="briefLabelThree">Review note</div>
                 <strong id="briefTitleThree">Always review before posting</strong>
-                <p id="briefCopyThree">These scripts are structured drafts. Agents and teams should still review regulated or market-sensitive claims before publishing.</p>
+                <p id="briefCopyThree">These scripts are structured drafts. Agents and teams should still review
+                    regulated or market-sensitive claims before publishing.</p>
             </article>
         </section>
 
@@ -663,6 +742,17 @@
         </section>
 
         <section class="content" id="content"></section>
+
+        <section class="upgrade-cta" id="upgradeCta" style="display:none;">
+            <div class="upgrade-inner">
+                <div class="upgrade-text">
+                    <strong id="upgradeTitle">Enjoyed this sample? Get daily scripts delivered every morning.</strong>
+                    <span id="upgradeCopy">Subscribe at US$9.90/mo and keep the same market, language, and audience
+                        settings flowing automatically.</span>
+                </div>
+                <a class="upgrade-btn" href="/#signup" id="upgradeBtn">Subscribe now</a>
+            </div>
+        </section>
     </main>
 
     <div class="toast" id="toast"></div>
@@ -794,6 +884,9 @@
                 allCategory: 'All sections',
                 loadFailed: (message) => `Unable to load viewer: ${message}`,
                 titleForDate: (date) => `REscript Viewer · ${date}`,
+                upgradeTitle: 'Enjoyed this sample? Get daily scripts delivered every morning.',
+                upgradeCopy: 'Subscribe at US$9.90/mo and keep the same market, language, and audience settings flowing automatically.',
+                upgradeBtn: 'Subscribe now',
             },
             zh: {
                 loadingTitle: '正在加载你的私有内容台。',
@@ -825,6 +918,9 @@
                 allCategory: '全部模块',
                 loadFailed: (message) => `加载失败：${message}`,
                 titleForDate: (date) => `REscript 查看页 · ${date}`,
+                upgradeTitle: '觉得不错？每天早上自动收到最新文案。',
+                upgradeCopy: '订阅 US$9.90/月，同一套市场、语言和受众配置自动持续交付。',
+                upgradeBtn: '立即订阅',
             },
         };
 
@@ -976,7 +1072,7 @@
             const script = article.scripts[scriptIndex];
             const text = buildText(article, script);
             if (navigator.share) {
-                navigator.share({ title: article.title, text }).catch(() => {});
+                navigator.share({ title: article.title, text }).catch(() => { });
                 return;
             }
             navigator.clipboard.writeText(text).then(() => showToast(ui().shareToast));
@@ -1126,6 +1222,15 @@
                     </section>
                 `).join('');
                 document.getElementById('content').innerHTML = html;
+
+                // Show upgrade CTA after content loads
+                const upgradeCta = document.getElementById('upgradeCta');
+                if (upgradeCta) {
+                    document.getElementById('upgradeTitle').textContent = ui().upgradeTitle;
+                    document.getElementById('upgradeCopy').textContent = ui().upgradeCopy;
+                    document.getElementById('upgradeBtn').textContent = ui().upgradeBtn;
+                    upgradeCta.style.display = '';
+                }
             } catch (error) {
                 document.getElementById('content').innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>${escapeHtml(ui().loadFailed(error.message || 'unknown error'))}</p></div>`;
             }
@@ -1149,4 +1254,5 @@
         loadData();
     </script>
 </body>
+
 </html>

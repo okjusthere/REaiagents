@@ -16,25 +16,28 @@
     <link rel="alternate" hreflang="x-default" href="https://rescript.kevv.ai/">
     <meta property="og:site_name" content="REscript">
     <meta property="og:type" content="website">
-    <meta property="og:title" id="ogTitle" content="REscript · Daily Real Estate Video Scripts for North American Agents">
+    <meta property="og:title" id="ogTitle"
+        content="REscript · Daily Real Estate Video Scripts for North American Agents">
     <meta property="og:description" id="ogDescription"
         content="Daily, market-ready scripts for real estate agents across New York, Los Angeles, San Francisco, Chicago, Miami, Seattle, Boston, and Houston.">
     <meta property="og:url" id="ogUrl" content="https://rescript.kevv.ai/">
-    <meta property="og:image" content="https://rescript.kevv.ai/og-cover.svg">
-    <meta property="og:image:type" content="image/svg+xml">
+    <meta property="og:image" content="https://rescript.kevv.ai/og-cover.png">
+    <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:locale" id="ogLocale" content="en_US">
     <meta property="og:locale:alternate" content="zh_CN">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" id="twitterTitle" content="REscript · Daily Real Estate Video Scripts for North American Agents">
+    <meta name="twitter:title" id="twitterTitle"
+        content="REscript · Daily Real Estate Video Scripts for North American Agents">
     <meta name="twitter:description" id="twitterDescription"
         content="Daily, market-specific scripts for real estate agents. One free sample. US$9.90/month.">
-    <meta name="twitter:image" content="https://rescript.kevv.ai/og-cover.svg">
+    <meta name="twitter:image" content="https://rescript.kevv.ai/og-cover.png">
     <meta name="theme-color" content="#203443">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/favicon.svg">
     <link rel="manifest" href="/site.webmanifest">
+    <script defer data-domain="rescript.kevv.ai" src="https://plausible.io/js/script.js"></script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -1035,7 +1038,8 @@
                         continues as the daily private delivery system for your local video workflow.
                     </p>
                     <div class="hero-actions">
-                        <a class="button button-primary" href="#signup" id="heroPrimary" onclick="return focusSignup(event)">Start live sample</a>
+                        <a class="button button-primary" href="#signup" id="heroPrimary"
+                            onclick="return focusSignup(event)">Start live sample</a>
                         <a class="button button-secondary" href="#preview" id="heroSecondary">See the viewer first</a>
                     </div>
                     <div class="hero-meta">
@@ -1103,17 +1107,25 @@
                         <div class="proof-panel">
                             <div class="proof-title" id="proofTitle">What opens in your live sample</div>
                             <div class="proof-list">
-                                <div class="proof-item" id="proofItem1">1 local market news topic with 4 filming angles.</div>
-                                <div class="proof-item" id="proofItem2">2 evergreen modules matched to your market and audience.</div>
-                                <div class="proof-item" id="proofItem3">A private viewer link you can review now and reopen later from email.</div>
+                                <div class="proof-item" id="proofItem1">1 local market news topic with 4 filming angles.
+                                </div>
+                                <div class="proof-item" id="proofItem2">2 evergreen modules matched to your market and
+                                    audience.</div>
+                                <div class="proof-item" id="proofItem3">A private viewer link you can review now and
+                                    reopen later from email.</div>
                             </div>
                             <div class="proof-timing" id="proofTiming">Usually ready in 45 to 90 seconds.</div>
                         </div>
                         <div class="signup-actions">
-                            <button class="signup-button trial-button" onclick="signupTrial()" id="sampleButton">Generate
+                            <button class="signup-button trial-button" onclick="signupTrial()"
+                                id="sampleButton">Generate
                                 now and open</button>
                             <button class="signup-button subscribe-button" onclick="startCheckout()"
                                 id="subscribeButton">Start paid delivery · US$9.90/mo</button>
+                            <button class="signup-button subscribe-button" onclick="startAnnualCheckout()"
+                                id="annualButton"
+                                style="background:linear-gradient(135deg,rgba(155,74,50,0.12),rgba(36,72,60,0.10));border-color:rgba(36,72,60,0.22);color:var(--green);">Annual
+                                plan · US$88/year (save 26%)</button>
                         </div>
                         <p class="microcopy" id="microcopy">
                             By continuing, you agree to the <a href="/privacy.html">Privacy Policy</a> and <a
@@ -1337,7 +1349,9 @@
             <div class="footer-bar">
                 <div id="footerCopy">© 2026 REscript · AI video scripts for North American real estate agents</div>
                 <div><a href="/privacy.html" id="footerPrivacy">Privacy</a> · <a href="/terms.html"
-                        id="footerTerms">Terms</a> · <a href="/markets.html" id="footerMarkets">Markets</a> · <a href="/share.html" id="footerShare">Share page</a> · <a href="/manage.html" id="footerManage">Manage subscription</a>
+                        id="footerTerms">Terms</a> · <a href="/markets.html" id="footerMarkets">Markets</a> · <a
+                        href="/share.html" id="footerShare">Share page</a> · <a href="/manage.html"
+                        id="footerManage">Manage subscription</a>
                 </div>
             </div>
         </footer>
@@ -1415,6 +1429,7 @@
                     proofTiming: 'Usually ready in 45 to 90 seconds.',
                     sampleButton: 'Generate now and open',
                     subscribeButton: 'Unlock daily delivery · US$9.90/mo',
+                    annualButton: 'Annual plan · US$88/year (save 26%)',
                     productKicker: 'Product',
                     productTitle: 'Morning brief, not a generic AI tool.',
                     productCopy: 'REscript handles the decisions that eat your first hour: topic, angle, localization, and filming format.',
@@ -1603,6 +1618,7 @@
                     proofTiming: '通常 45 到 90 秒内准备完成。',
                     sampleButton: '立即生成并打开',
                     subscribeButton: '开启每日交付 · US$9.90/月',
+                    annualButton: '年度方案 · US$88/年（省 26%）',
                     productKicker: '产品',
                     productTitle: '晨间 brief，不是通用工具。',
                     productCopy: '选题、角度、本地化、拍摄格式——一小时的决策，一封邮件搞定。',
@@ -1966,6 +1982,31 @@
             try {
                 showMsg('info', tMessage('redirectingCheckout'));
                 const res = await fetch('/api/subscribe/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, language, market, audienceProfile }),
+                });
+                const data = await res.json();
+                if (!data.success || !data.url) {
+                    throw new Error(data.error || tMessage('checkoutError'));
+                }
+
+                window.location.href = data.url;
+            } catch (error) {
+                showMsg('error', error.message || tMessage('networkError'));
+            }
+        }
+
+        async function startAnnualCheckout() {
+            const { email, language, market, audienceProfile } = getFormData();
+            if (!email) {
+                showMsg('error', tMessage('checkoutEmailRequired'));
+                return;
+            }
+
+            try {
+                showMsg('info', tMessage('redirectingCheckout'));
+                const res = await fetch('/api/subscribe/checkout-annual', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, language, market, audienceProfile }),

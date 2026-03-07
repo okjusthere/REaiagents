@@ -225,6 +225,64 @@ router.post('/subscribe/checkout', async (req: Request, res: Response) => {
     }
 });
 
+router.post('/subscribe/checkout-annual', async (req: Request, res: Response) => {
+    try {
+        const input = subscribeSchema.parse(req.body);
+
+        if (!config.STRIPE_ANNUAL_PRICE_ID) {
+            res.status(500).json({ success: false, error: 'Annual pricing is not configured' });
+            return;
+        }
+
+        const stripe = getStripe();
+        const client = upsertLead(input);
+
+        if (client.plan === 'subscriber' || client.plan === 'vip') {
+            const manageToken = createManageToken(client);
+            res.json({
+                success: true,
+                url: `${config.BASE_URL}/manage.html?token=${encodeURIComponent(manageToken)}`,
+                message: input.language === 'zh' ? '您已经是订阅者。' : 'You are already subscribed.',
+            });
+            return;
+        }
+
+        const baseUrl = getBaseAppUrl();
+        const checkoutLocale: Stripe.Checkout.SessionCreateParams.Locale = client.language === 'zh' ? 'zh' : 'en';
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'subscription',
+            locale: checkoutLocale,
+            customer_email: client.email,
+            metadata: {
+                email: client.email,
+                clientId: client.id,
+                language: client.language,
+                market: client.market,
+                audienceProfile: client.audienceProfile,
+            },
+            subscription_data: {
+                metadata: {
+                    email: client.email,
+                    clientId: client.id,
+                },
+            },
+            line_items: [{
+                price: config.STRIPE_ANNUAL_PRICE_ID,
+                quantity: 1,
+            }],
+            success_url: `${baseUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${baseUrl}/subscribe.html?cancelled=true`,
+        });
+
+        res.json({ success: true, url: session.url });
+    } catch (error) {
+        logger.error('Annual checkout creation error', { error: error instanceof Error ? error.message : String(error) });
+        res.status(400).json({ success: false, error: error instanceof Error ? error.message : 'Annual checkout failed' });
+    }
+});
+
 router.get('/subscribe/session/:sessionId', async (req: Request, res: Response) => {
     try {
         const sessionId = String(req.params.sessionId);
