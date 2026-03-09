@@ -196,6 +196,20 @@
             margin-bottom: 10px;
         }
 
+        .city-link {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--deep);
+        }
+
         .chip-row {
             display: flex;
             flex-wrap: wrap;
@@ -243,14 +257,14 @@
       "@type": "ItemList",
       "name": "REscript city coverage",
       "itemListElement": [
-        {"@type":"ListItem","position":1,"name":"New York","url":"https://rescript.kevv.ai/markets.html#new-york"},
-        {"@type":"ListItem","position":2,"name":"Los Angeles","url":"https://rescript.kevv.ai/markets.html#los-angeles"},
-        {"@type":"ListItem","position":3,"name":"San Francisco Bay Area","url":"https://rescript.kevv.ai/markets.html#san-francisco"},
-        {"@type":"ListItem","position":4,"name":"Chicago","url":"https://rescript.kevv.ai/markets.html#chicago"},
-        {"@type":"ListItem","position":5,"name":"Miami","url":"https://rescript.kevv.ai/markets.html#miami"},
-        {"@type":"ListItem","position":6,"name":"Seattle","url":"https://rescript.kevv.ai/markets.html#seattle"},
-        {"@type":"ListItem","position":7,"name":"Boston","url":"https://rescript.kevv.ai/markets.html#boston"},
-        {"@type":"ListItem","position":8,"name":"Houston","url":"https://rescript.kevv.ai/markets.html#houston"}
+        {"@type":"ListItem","position":1,"name":"New York","url":"https://rescript.kevv.ai/markets/new-york.html"},
+        {"@type":"ListItem","position":2,"name":"Los Angeles","url":"https://rescript.kevv.ai/markets/los-angeles.html"},
+        {"@type":"ListItem","position":3,"name":"San Francisco Bay Area","url":"https://rescript.kevv.ai/markets/san-francisco.html"},
+        {"@type":"ListItem","position":4,"name":"Chicago","url":"https://rescript.kevv.ai/markets/chicago.html"},
+        {"@type":"ListItem","position":5,"name":"Miami","url":"https://rescript.kevv.ai/markets/miami.html"},
+        {"@type":"ListItem","position":6,"name":"Seattle","url":"https://rescript.kevv.ai/markets/seattle.html"},
+        {"@type":"ListItem","position":7,"name":"Boston","url":"https://rescript.kevv.ai/markets/boston.html"},
+        {"@type":"ListItem","position":8,"name":"Houston","url":"https://rescript.kevv.ai/markets/houston.html"}
       ]
     }
     </script>
@@ -288,6 +302,7 @@
                         pricing dynamics.</p>
                     <div class="chip-row"><span class="chip">Manhattan</span><span class="chip">Brooklyn</span><span
                             class="chip">Queens</span><span class="chip">Jersey City</span></div>
+                    <a class="city-link" href="/markets/new-york.html">Open New York page</a>
                 </article>
                 <article class="city-card" id="los-angeles">
                     <h2>Los Angeles</h2>
@@ -296,6 +311,7 @@
                         narratives.</p>
                     <div class="chip-row"><span class="chip">Santa Monica</span><span class="chip">Pasadena</span><span
                             class="chip">Glendale</span><span class="chip">Irvine</span></div>
+                    <a class="city-link" href="/markets/los-angeles.html">Open Los Angeles page</a>
                 </article>
                 <article class="city-card" id="san-francisco">
                     <h2>San Francisco Bay Area</h2>
@@ -304,6 +320,7 @@
                         school-location tradeoffs.</p>
                     <div class="chip-row"><span class="chip">San Francisco</span><span class="chip">Palo
                             Alto</span><span class="chip">Fremont</span><span class="chip">Cupertino</span></div>
+                    <a class="city-link" href="/markets/san-francisco.html">Open Bay Area page</a>
                 </article>
                 <article class="city-card" id="chicago">
                     <h2>Chicago</h2>
@@ -312,6 +329,7 @@
                         multifamily angles.</p>
                     <div class="chip-row"><span class="chip">Lincoln Park</span><span class="chip">West Loop</span><span
                             class="chip">Naperville</span><span class="chip">Evanston</span></div>
+                    <a class="city-link" href="/markets/chicago.html">Open Chicago page</a>
                 </article>
                 <article class="city-card" id="miami">
                     <h2>Miami</h2>
@@ -320,6 +338,7 @@
                         decision frameworks.</p>
                     <div class="chip-row"><span class="chip">Brickell</span><span class="chip">Coral Gables</span><span
                             class="chip">Aventura</span><span class="chip">Miami Beach</span></div>
+                    <a class="city-link" href="/markets/miami.html">Open Miami page</a>
                 </article>
                 <article class="city-card" id="seattle">
                     <h2>Seattle</h2>
@@ -328,6 +347,7 @@
                         support.</p>
                     <div class="chip-row"><span class="chip">Bellevue</span><span class="chip">Kirkland</span><span
                             class="chip">Redmond</span><span class="chip">Sammamish</span></div>
+                    <a class="city-link" href="/markets/seattle.html">Open Seattle page</a>
                 </article>
                 <article class="city-card" id="boston">
                     <h2>Boston</h2>
@@ -336,6 +356,7 @@
                         tradeoffs.</p>
                     <div class="chip-row"><span class="chip">Back Bay</span><span class="chip">Cambridge</span><span
                             class="chip">Newton</span><span class="chip">Brookline</span></div>
+                    <a class="city-link" href="/markets/boston.html">Open Boston page</a>
                 </article>
                 <article class="city-card" id="houston">
                     <h2>Houston</h2>
@@ -344,6 +365,7 @@
                         family-space narratives.</p>
                     <div class="chip-row"><span class="chip">The Heights</span><span class="chip">Sugar Land</span><span
                             class="chip">Katy</span><span class="chip">The Woodlands</span></div>
+                    <a class="city-link" href="/markets/houston.html">Open Houston page</a>
                 </article>
             </section>
 
