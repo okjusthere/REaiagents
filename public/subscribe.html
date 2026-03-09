@@ -574,6 +574,17 @@
             line-height: 1.7;
         }
 
+        .trust-strip {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border: 1px solid rgba(36, 72, 60, 0.18);
+            background: rgba(36, 72, 60, 0.08);
+            border-radius: 16px;
+            color: var(--green);
+            line-height: 1.7;
+            font-size: 0.88rem;
+        }
+
         #formMsg {
             margin-top: 12px;
             min-height: 24px;
@@ -921,6 +932,12 @@
             flex-wrap: wrap;
         }
 
+        .footer-trust {
+            width: 100%;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
         @media (max-width: 1120px) {
 
             .hero-grid,
@@ -1015,6 +1032,7 @@
             <a href="#workflow" id="navWorkflow">Workflow</a>
             <a href="#audience" id="navAudience">Who it's for</a>
             <a href="/markets.html" id="navMarkets">Markets</a>
+            <a href="/contact.html" id="navContact">Contact</a>
             <a href="#pricing" id="navPricing">Pricing</a>
         </nav>
         <div style="display:flex;align-items:center;gap:10px;">
@@ -1132,6 +1150,10 @@
                             By continuing, you agree to the <a href="/privacy.html">Privacy Policy</a> and <a
                                 href="/terms.html">Terms</a>. Every email includes direct manage-subscription controls.
                             Content should be reviewed before publication.
+                        </p>
+                        <p class="trust-strip" id="signupTrust">
+                            REscript is a web-based service. No software download, browser extension, or device-access
+                            prompt is required. Questions or billing support: <a href="mailto:support@kevv.ai">support@kevv.ai</a>.
                         </p>
                         <div id="formMsg"></div>
                     </div>
@@ -1351,8 +1373,12 @@
                 <div id="footerCopy">© 2026 REscript · AI video scripts for North American real estate agents</div>
                 <div><a href="/privacy.html" id="footerPrivacy">Privacy</a> · <a href="/terms.html"
                         id="footerTerms">Terms</a> · <a href="/markets.html" id="footerMarkets">Markets</a> · <a
-                        href="/share.html" id="footerShare">Share page</a> · <a href="/manage.html"
+                        href="/contact.html" id="footerContact">Contact</a> · <a href="/manage.html"
                         id="footerManage">Manage subscription</a>
+                </div>
+                <div class="footer-trust" id="footerTrust">
+                    Questions, billing, or site-review issues: <a href="mailto:support@kevv.ai">support@kevv.ai</a>.
+                    REscript is delivered in the browser and does not require software downloads or browser extensions.
                 </div>
             </div>
         </footer>
@@ -1404,6 +1430,7 @@
                     navWorkflow: 'Workflow',
                     navAudience: "Who it's for",
                     navMarkets: 'Markets',
+                    navContact: 'Contact',
                     navPricing: 'Pricing',
                     navCta: 'Try it live',
                     heroEyebrow: 'For North American real estate agents',
@@ -1501,12 +1528,14 @@
                     footerPrivacy: 'Privacy',
                     footerTerms: 'Terms',
                     footerMarkets: 'Markets',
-                    footerShare: 'Share page',
+                    footerContact: 'Contact',
                     footerManage: 'Manage subscription',
                 },
                 html: {
                     heroTitle: 'Your daily <span class="headline-accent">video desk</span>. Not another blank calendar.',
                     microcopy: 'By continuing, you agree to the <a href="/privacy.html">Privacy Policy</a> and <a href="/terms.html">Terms</a>. Every email includes subscription controls. Review content before publishing.',
+                    signupTrust: 'REscript is a web-based service. No software download, browser extension, or device-access prompt is required. Questions or billing support: <a href="mailto:support@kevv.ai">support@kevv.ai</a>.',
+                    footerTrust: 'Questions, billing, or site-review issues: <a href="mailto:support@kevv.ai">support@kevv.ai</a>. REscript is delivered in the browser and does not require software downloads or browser extensions.',
                 },
                 messages: {
                     sampleEmailRequired: 'Enter your email to receive the private sample.',
@@ -1593,6 +1622,7 @@
                     navWorkflow: '工作流',
                     navAudience: '适合谁用',
                     navMarkets: '城市市场',
+                    navContact: '联系',
                     navPricing: '价格',
                     navCta: '立即体验',
                     heroEyebrow: '北美地产经纪人专属',
@@ -1690,12 +1720,14 @@
                     footerPrivacy: '隐私政策',
                     footerTerms: '服务条款',
                     footerMarkets: '城市市场',
-                    footerShare: '分享页',
+                    footerContact: '联系',
                     footerManage: '管理订阅',
                 },
                 html: {
                     heroTitle: '你的每日<span class="headline-accent">视频内容台</span>。不再从零开始。',
                     microcopy: '继续即同意 <a href="/privacy.html">隐私政策</a> 和 <a href="/terms.html">服务条款</a>。邮件内置订阅管理。发布前请人工审核。',
+                    signupTrust: 'REscript 是网页订阅服务，不需要下载软件、安装浏览器扩展或授予设备访问。问题或账单支持：<a href="mailto:support@kevv.ai">support@kevv.ai</a>。',
+                    footerTrust: '如有问题、账单或站点审核相关事项，请联系 <a href="mailto:support@kevv.ai">support@kevv.ai</a>。REscript 在浏览器内使用，不提供软件下载安装或浏览器扩展。',
                 },
                 messages: {
                     sampleEmailRequired: '请输入邮箱，我们会把私有 sample 发给你。',
