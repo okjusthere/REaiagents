@@ -14,6 +14,7 @@ export type BillingInterval = 'month' | 'year';
 
 export const SUPPORTED_MARKETS = [
     { id: 'new-york', label: 'New York / 纽约', queries: ['New York real estate', 'NYC housing market', 'Manhattan property market'] },
+    { id: 'long-island', label: 'Long Island / 纽约州长岛', queries: ['Long Island real estate', 'Nassau County housing market', 'Suffolk County property market'] },
     { id: 'los-angeles', label: 'Los Angeles / 洛杉矶', queries: ['Los Angeles real estate', 'LA housing market', 'Southern California property'] },
     { id: 'san-francisco', label: 'San Francisco / 旧金山', queries: ['San Francisco real estate', 'Bay Area housing market', 'Silicon Valley property'] },
     { id: 'chicago', label: 'Chicago / 芝加哥', queries: ['Chicago real estate', 'Chicago housing market', 'Illinois property market'] },

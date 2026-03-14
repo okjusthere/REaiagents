@@ -411,6 +411,14 @@ const modules: ModuleDefinition[] = [
                 markets: ['new-york'],
             },
             {
+                id: 'playbook-li',
+                title: { en: 'Why Long Island buyers need a school, tax, and commute framework before touring too much', zh: '长岛买家为什么要在大量看房前，先想清学区、房产税和通勤框架' },
+                angle: { en: 'Frame Long Island decisions around school district fit, annual property tax realism, LIRR or driving commute, and the difference between Nassau and Suffolk buyer expectations.', zh: '从学区匹配、年度房产税现实、LIRR 或开车通勤，以及 Nassau 和 Suffolk 不同买家预期来讲清长岛决策。' },
+                keywords: { en: ['Long Island real estate', 'school district move', 'property tax strategy'], zh: ['长岛地产', '学区搬迁', '房产税策略'] },
+                audiences: ['all'],
+                markets: ['long-island'],
+            },
+            {
                 id: 'playbook-la',
                 title: { en: 'How Los Angeles sellers should talk about renovation and ADU upside without overselling', zh: '洛杉矶卖家怎么讲翻新和 ADU 潜力，才不会说过头' },
                 angle: { en: 'Use lifestyle, lot potential, and realistic buyer appetite rather than hype about instant value.', zh: '围绕生活方式、地块潜力和真实买家偏好，而不是夸大“立刻增值”。' },

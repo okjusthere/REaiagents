@@ -54,6 +54,7 @@ export const scriptsSchema = z.array(scriptSchema).length(4);
 // ── Market display names ────────────────────────────────────
 const MARKET_DISPLAY: Record<string, { zh: string; en: string }> = {
     'new-york': { zh: '纽约', en: 'New York' },
+    'long-island': { zh: '纽约州长岛', en: 'Long Island' },
     'los-angeles': { zh: '洛杉矶', en: 'Los Angeles' },
     'san-francisco': { zh: '旧金山/湾区', en: 'San Francisco Bay Area' },
     'chicago': { zh: '芝加哥', en: 'Chicago' },

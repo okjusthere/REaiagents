@@ -468,6 +468,7 @@
                 },
                 market: {
                     'new-york': 'New York',
+                    'long-island': 'Long Island',
                     'los-angeles': 'Los Angeles',
                     'san-francisco': 'San Francisco Bay Area',
                     'chicago': 'Chicago',
@@ -542,6 +543,7 @@
                 },
                 market: {
                     'new-york': '纽约',
+                    'long-island': '纽约州长岛',
                     'los-angeles': '洛杉矶',
                     'san-francisco': '旧金山湾区',
                     'chicago': '芝加哥',
@@ -558,7 +560,7 @@
         let currentAudience = 'general';
         const params = new URLSearchParams(window.location.search);
         const token = params.get('token') || '';
-        const marketIds = ['new-york', 'los-angeles', 'san-francisco', 'chicago', 'miami', 'seattle', 'boston', 'houston'];
+        const marketIds = ['new-york', 'long-island', 'los-angeles', 'san-francisco', 'chicago', 'miami', 'seattle', 'boston', 'houston'];
         const audienceIds = ['general', 'chinese-community'];
         const languageIds = ['en', 'zh'];
 

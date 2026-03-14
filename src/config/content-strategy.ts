@@ -37,6 +37,23 @@ const MARKET_CONTEXTS: Record<MarketId, MarketContext> = {
             zh: '内容应强调社区层面的差异、co-op/condo 流程认知，以及换房和 downsizing 场景。',
         },
     },
+    'long-island': {
+        displayName: { en: 'Long Island', zh: '纽约州长岛' },
+        metroLabel: { en: 'Long Island / Nassau and Suffolk Counties', zh: '长岛（Nassau / Suffolk）' },
+        neighborhoods: ['Great Neck', 'Manhasset', 'Roslyn', 'Jericho', 'Syosset', 'Plainview', 'Huntington', 'Port Washington'],
+        housingMix: {
+            en: 'School-district-driven suburban single-family homes, village-center inventory, commuter-friendly co-ops and condos, waterfront listings, and move-up family housing.',
+            zh: '以学区驱动的郊区独栋、村镇核心区房源、通勤友好的 co-op/condo、临水住宅和改善型家庭住房为主。',
+        },
+        demandDrivers: {
+            en: 'School district decisions, LIRR commute patterns, property tax sensitivity, move-out demand from New York City, and inventory differences between Nassau and Suffolk.',
+            zh: '学区选择、LIRR 通勤模式、房产税敏感、纽约市外溢搬迁需求，以及 Nassau 与 Suffolk 之间明显的库存差异。',
+        },
+        agentAngles: {
+            en: 'Lean into town-by-town nuance, school and commute tradeoffs, tax realism, family move-up narratives, and village-versus-hamlet positioning.',
+            zh: '内容适合强调 town-by-town 的差异、学区与通勤权衡、房产税现实、家庭改善型迁移，以及 village 与 hamlet 的定位差别。',
+        },
+    },
     'los-angeles': {
         displayName: { en: 'Los Angeles', zh: '洛杉矶' },
         metroLabel: { en: 'Greater Los Angeles', zh: '大洛杉矶地区' },
